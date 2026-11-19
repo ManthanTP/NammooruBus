@@ -206,3 +206,26 @@ on conflict (reg_no) do update set
 insert into public.meta (key, value)
 values ('data_version', 1)
 on conflict (key) do nothing;
+
+-- 8. SAMPLE ALERTS ----------------------------------------------------
+insert into public.alerts (id, title, body, type, route_ids, starts_at, expires_at)
+values
+  (
+    '55555555-0000-0000-0000-000000000001',
+    'Road Works near Railway Station',
+    'Route 45A buses may experience 5-10 minute delays due to smart city infrastructure repairs near Station Road.',
+    'delay',
+    array['22222222-0000-0000-0000-000000000045'::uuid],
+    now() - interval '1 hour',
+    now() + interval '2 days'
+  ),
+  (
+    '55555555-0000-0000-0000-000000000002',
+    'Airport Shuttle Frequency Enhanced',
+    'Express Route 201 will operate additional morning peak services departing every 10 minutes between 08:00 and 11:00.',
+    'info',
+    array['22222222-0000-0000-0000-000000000201'::uuid],
+    now() - interval '3 hours',
+    now() + interval '5 days'
+  )
+on conflict (id) do nothing;

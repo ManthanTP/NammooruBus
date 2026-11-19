@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import ErrorBoundary from '@/components/ui/ErrorBoundary'
 
 // Layouts
@@ -18,6 +18,8 @@ import StopDetailPage from '@/features/passenger/pages/StopDetailPage'
 import SavedPage from '@/features/passenger/pages/SavedPage'
 import ProfilePage from '@/features/passenger/pages/ProfilePage'
 import HelpPage from '@/features/passenger/pages/HelpPage'
+import ComplaintsPage from '@/features/passenger/pages/ComplaintsPage'
+import AlertsPage from '@/features/passenger/pages/AlertsPage'
 
 // Auth pages
 import LoginPage from '@/features/passenger/pages/LoginPage'
@@ -38,9 +40,23 @@ const DriverStartPage = lazy(() => import('@/features/driver/pages/DriverStartPa
 const DriverTripPage = lazy(() => import('@/features/driver/pages/DriverTripPage'))
 const DriverHistoryPage = lazy(() => import('@/features/driver/pages/DriverHistoryPage'))
 
-// Lazy loaded admin pages
+// Lazy loaded admin layout & pages
+const AdminLayout = lazy(() => import('@/features/admin/layouts/AdminLayout'))
 const AdminLoginPage = lazy(() => import('@/features/admin/pages/AdminLoginPage'))
 const AdminDashboardPage = lazy(() => import('@/features/admin/pages/AdminDashboardPage'))
+const AdminStopsPage = lazy(() => import('@/features/admin/pages/AdminStopsPage'))
+const AdminRoutesPage = lazy(() => import('@/features/admin/pages/AdminRoutesPage'))
+const AdminRouteEditorPage = lazy(() => import('@/features/admin/pages/AdminRouteEditorPage'))
+const AdminSchedulesPage = lazy(() => import('@/features/admin/pages/AdminSchedulesPage'))
+const AdminFaresPage = lazy(() => import('@/features/admin/pages/AdminFaresPage'))
+const AdminFleetPage = lazy(() => import('@/features/admin/pages/AdminFleetPage'))
+const AdminUsersPage = lazy(() => import('@/features/admin/pages/AdminUsersPage'))
+const AdminLiveMonitorPage = lazy(() => import('@/features/admin/pages/AdminLiveMonitorPage'))
+const AdminComplaintsPage = lazy(() => import('@/features/admin/pages/AdminComplaintsPage'))
+const AdminAlertsPage = lazy(() => import('@/features/admin/pages/AdminAlertsPage'))
+const AdminReportsPage = lazy(() => import('@/features/admin/pages/AdminReportsPage'))
+const AdminImportPage = lazy(() => import('@/features/admin/pages/AdminImportPage'))
+const AdminAuditPage = lazy(() => import('@/features/admin/pages/AdminAuditPage'))
 const AdminSimulatorPage = lazy(() => import('@/features/admin/pages/AdminSimulatorPage'))
 
 const LoadingFallback = () => (
@@ -104,11 +120,11 @@ export const router = createBrowserRouter([
       },
       {
         path: '/complaints',
-        element: <PlaceholderPage title="Complaints & Feedback" path="/complaints" />,
+        element: <ComplaintsPage />,
       },
       {
         path: '/alerts',
-        element: <PlaceholderPage title="Service Alerts" path="/alerts" />,
+        element: <AlertsPage />,
       },
       {
         path: '/profile',
@@ -175,130 +191,90 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Admin Routes (Lazy loaded + AdminRoute)
+  // Admin Login (standalone outside layout)
   {
     path: '/12345678/admin/login',
     element: withBoundary(<AdminLoginPage />),
   },
+
+  // Admin Portal Layout (All protected admin routes)
   {
-    path: '/12345678/admin/dashboard',
+    path: '/12345678/admin',
     element: withBoundary(
       <AdminRoute>
-        <AdminDashboardPage />
+        <AdminLayout />
       </AdminRoute>
     ),
-  },
-  {
-    path: '/12345678/admin/stops',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Stops" path="/12345678/admin/stops" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/routes',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Routes" path="/12345678/admin/routes" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/routes/:id',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Route Edit" path="/12345678/admin/routes/:id" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/schedules',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Schedules" path="/12345678/admin/schedules" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/fares',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Fares" path="/12345678/admin/fares" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/fleet',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Fleet" path="/12345678/admin/fleet" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/users',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Users & Roles" path="/12345678/admin/users" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/live',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Live Monitor" path="/12345678/admin/live" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/complaints',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Complaints" path="/12345678/admin/complaints" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/alerts',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Alerts" path="/12345678/admin/alerts" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/reports',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Reports" path="/12345678/admin/reports" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/import',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: CSV Import" path="/12345678/admin/import" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/audit',
-    element: withBoundary(
-      <AdminRoute>
-        <PlaceholderPage title="Admin: Audit Logs" path="/12345678/admin/audit" role="admin" />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/12345678/admin/simulator',
-    element: withBoundary(
-      <AdminRoute>
-        <AdminSimulatorPage />
-      </AdminRoute>
-    ),
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/12345678/admin/dashboard" replace />,
+      },
+      {
+        path: 'dashboard',
+        element: <AdminDashboardPage />,
+      },
+      {
+        path: 'stops',
+        element: <AdminStopsPage />,
+      },
+      {
+        path: 'routes',
+        element: <AdminRoutesPage />,
+      },
+      {
+        path: 'routes/new',
+        element: <AdminRouteEditorPage />,
+      },
+      {
+        path: 'routes/:id',
+        element: <AdminRouteEditorPage />,
+      },
+      {
+        path: 'schedules',
+        element: <AdminSchedulesPage />,
+      },
+      {
+        path: 'fares',
+        element: <AdminFaresPage />,
+      },
+      {
+        path: 'fleet',
+        element: <AdminFleetPage />,
+      },
+      {
+        path: 'users',
+        element: <AdminUsersPage />,
+      },
+      {
+        path: 'live',
+        element: <AdminLiveMonitorPage />,
+      },
+      {
+        path: 'complaints',
+        element: <AdminComplaintsPage />,
+      },
+      {
+        path: 'alerts',
+        element: <AdminAlertsPage />,
+      },
+      {
+        path: 'reports',
+        element: <AdminReportsPage />,
+      },
+      {
+        path: 'import',
+        element: <AdminImportPage />,
+      },
+      {
+        path: 'audit',
+        element: <AdminAuditPage />,
+      },
+      {
+        path: 'simulator',
+        element: <AdminSimulatorPage />,
+      },
+    ],
   },
 
   // Fallback 404

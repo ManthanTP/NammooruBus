@@ -6,6 +6,7 @@ import { useDataStore } from '@/store/dataStore'
 import { useLiveStore } from '@/store/liveStore'
 import { localName } from '@/lib/formatters'
 import RouteBadge from '@/components/ui/RouteBadge'
+import AlertBanner from '@/features/passenger/components/AlertBanner'
 
 export default function HomePage() {
   const { t, i18n } = useTranslation()
@@ -43,27 +44,8 @@ export default function HomePage() {
 
   return (
     <div className="space-y-4 pt-1">
-      {/* 1. Dismissible Alert Banner */}
-      {showAlert && (
-        <div className="p-3 bg-warning/15 border border-warning/30 rounded-card flex items-start justify-between gap-2.5">
-          <div className="flex items-start gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
-            <div>
-              <p className="text-xs font-bold text-ink">Service Notice</p>
-              <p className="text-[11px] text-text-secondary leading-tight mt-0.5">
-                Route 201 operating on schedule. Peak frequency active.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowAlert(false)}
-            className="text-text-secondary hover:text-ink p-1"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
+      {/* 1. Live Dismissible Alert Banner */}
+      <AlertBanner />
 
       {/* 2. Main "Where to?" Search Trigger */}
       <Link

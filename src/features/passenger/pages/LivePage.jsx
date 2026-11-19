@@ -14,6 +14,7 @@ import RouteBadge from '@/components/ui/RouteBadge'
 import CrowdMeter from '@/components/ui/CrowdMeter'
 import Countdown from '@/components/ui/Countdown'
 import EmptyState from '@/components/ui/EmptyState'
+import SosButton from '@/components/ui/SosButton'
 
 export default function LivePage() {
   const { t, i18n } = useTranslation()
@@ -30,6 +31,23 @@ export default function LivePage() {
   const [showCrowdModal, setShowCrowdModal] = useState(false)
   const [crowdReporting, setCrowdReporting] = useState(false)
   const [crowdError, setCrowdError] = useState(null)
+
+  // Handle URL query ?trip=<id>
+  const tripParam = searchParams.get('trip')
+  useEffect(() => {
+    if (tripParam && trips.length > 0) {
+      const match = trips.find((t) => t.id === tripParam)
+      if (match) {
+        setSelectedTripId(match.id)
+        if (match.route?.code) {
+          setSelectedRouteCode(match.route.code)
+        }
+        if (match.position?.lat && match.position?.lng) {
+          setView([match.position.lat, match.position.lng], 16)
+        }
+      }
+    }
+  }, [tripParam, trips, setSelectedTripId, setView])
 
   // Filter trips by route code
   const filteredTrips = useMemo(() => {
@@ -254,14 +272,12 @@ export default function LivePage() {
                 <span>Report crowd</span>
               </button>
 
-              <button
-                type="button"
-                onClick={handleSos}
-                className="p-1.5 bg-danger/10 text-danger border border-danger/20 rounded-input hover:bg-danger hover:text-white transition"
-                title="SOS Share"
-              >
-                <ShieldAlert className="w-4 h-4" />
-              </button>
+              <SosButton
+                routeCode={selectedTrip.route?.code}
+                busRegNo={selectedTrip.bus?.reg_no}
+                tripId={selectedTrip.id}
+                variant="compact"
+              />
             </div>
           </div>
         </div>

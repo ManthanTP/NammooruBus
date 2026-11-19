@@ -13,6 +13,7 @@ import { localName } from '@/lib/formatters'
 import RouteBadge from '@/components/ui/RouteBadge'
 import CrowdMeter from '@/components/ui/CrowdMeter'
 import Countdown from '@/components/ui/Countdown'
+import SosButton from '@/components/ui/SosButton'
 
 export default function JourneyPage() {
   const { t, i18n } = useTranslation()
@@ -366,15 +367,12 @@ export default function JourneyPage() {
           <span>{t('passenger.track_live')}</span>
         </Link>
 
-        <button
-          type="button"
-          onClick={handleSos}
-          className="px-4 py-3 bg-danger/10 text-danger border border-danger/30 text-xs font-bold rounded-input hover:bg-danger hover:text-white transition flex items-center justify-center gap-1.5"
-          title="SOS Share"
-        >
-          <ShieldAlert className="w-4 h-4" />
-          <span>{t('passenger.sos')}</span>
-        </button>
+        <SosButton
+          routeCode={firstLeg?.route?.code}
+          busRegNo={liveTripForLeg?.bus?.reg_no}
+          tripId={liveTripForLeg?.id}
+          variant="compact"
+        />
       </div>
     </div>
   )
