@@ -1,17 +1,16 @@
-// Map configuration and fallback tile settings
-export const DEFAULT_CARTO_API_KEY = 'cb1_5ce8_1_212ae98d055bc2a63bdcc185'
+// Map configuration - OpenStreetMap Humanitarian (HOT) tiles
+// Free, fast raster tiles with no API key or token required, per PRD Section 16 line 477.
+export const OSM_HOT_TILE_URL = 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
 
 export function getTileUrl() {
   const envUrl = import.meta.env.VITE_TILE_URL
-  if (envUrl && (envUrl.includes('api_key=') || envUrl.includes('key='))) {
+  // If an explicit non-cartocdn URL is set in env, use it; otherwise default to OSM HOT
+  if (envUrl && !envUrl.includes('cartocdn')) {
     return envUrl
   }
-  const key = import.meta.env.VITE_CARTO_API_KEY || DEFAULT_CARTO_API_KEY
-  const base = envUrl || 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-  const sep = base.includes('?') ? '&' : '?'
-  return `${base}${sep}api_key=${key}`
+  return OSM_HOT_TILE_URL
 }
 
 export const TILE_ATTRIBUTION =
   import.meta.env.VITE_TILE_ATTRIBUTION ||
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank" rel="noreferrer">Humanitarian OpenStreetMap Team</a>'
