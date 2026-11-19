@@ -1,0 +1,51 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@theme {
+  --color-ink: var(--color-ink);
+  --color-cobalt: var(--color-cobalt);
+  --color-cobalt-tint: var(--color-cobalt-tint);
+  --color-page: var(--color-page);
+  --color-surface: var(--color-surface);
+  --color-line: var(--color-line);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-led-amber: var(--color-led-amber);
+  --color-led-bg: var(--color-led-bg);
+
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-led: var(--font-led);
+  --font-kannada: var(--font-kannada);
+
+  --radius-card: var(--radius-card);
+  --radius-sheet: var(--radius-sheet);
+  --radius-input: var(--radius-input);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-float: var(--shadow-float);
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background-color: var(--color-page);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+.font-led {
+  font-family: var(--font-led);
+}
+
+.font-kannada {
+  font-family: var(--font-kannada);
+}

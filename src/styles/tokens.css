@@ -1,0 +1,41 @@
+:root {
+  /* Brand and UI Colors */
+  --color-ink: #0E1433;
+  --color-cobalt: #3451F2;
+  --color-cobalt-tint: #E6EAFF;
+  --color-page: #F1F4FA;
+  --color-surface: #FFFFFF;
+  --color-line: #E1E6F2;
+  --color-text-secondary: #6B7494;
+  
+  /* Status Colors */
+  --color-success: #12A676;
+  --color-warning: #F59E0B;
+  --color-danger: #E5484D;
+  
+  /* LED Route Badges */
+  --color-led-amber: #FFC24A;
+  --color-led-bg: #0A0F24;
+  
+  /* Route default colors */
+  --route-cobalt: #3451F2;
+  --route-coral: #F0643C;
+  --route-green: #12A676;
+  --route-violet: #8B5CF6;
+  
+  /* Radii */
+  --radius-card: 22px;
+  --radius-sheet: 30px;
+  --radius-input: 16px;
+  --radius-pill: 9999px;
+  
+  /* Shadows */
+  --shadow-soft: 0 8px 30px rgba(14, 20, 51, 0.08);
+  --shadow-float: 0 12px 36px rgba(14, 20, 51, 0.12);
+  
+  /* Typography */
+  --font-heading: 'Bricolage Grotesque', 'Noto Sans Kannada', sans-serif;
+  --font-body: 'Figtree', 'Noto Sans Kannada', sans-serif;
+  --font-led: 'DotGothic16', monospace;
+  --font-kannada: 'Noto Sans Kannada', sans-serif;
+}
