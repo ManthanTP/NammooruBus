@@ -6,8 +6,9 @@ import { supabase } from '@/lib/supabase'
 import { useToastStore } from '@/components/ui/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import RouteBadge from '@/components/ui/RouteBadge'
+import { getTileUrl } from '@/lib/mapConfig'
 
-const TILE_URL = import.meta.env.VITE_TILE_URL || 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+const TILE_URL = getTileUrl()
 const DEFAULT_LAT = parseFloat(import.meta.env.VITE_DEFAULT_LAT || '15.3647')
 const DEFAULT_LNG = parseFloat(import.meta.env.VITE_DEFAULT_LNG || '75.1240')
 

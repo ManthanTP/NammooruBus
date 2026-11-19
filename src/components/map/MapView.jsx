@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Polyline, Marker, Circle, useMap } from 'react
 import L from 'leaflet'
 import { useMapStore } from '@/store/mapStore'
 import { useLiveStore } from '@/store/liveStore'
+import { getTileUrl, TILE_ATTRIBUTION } from '@/lib/mapConfig'
 import BusMarker from './BusMarker'
 
 // Helper to create clean custom HTML markers with SVG
@@ -78,8 +79,8 @@ export default function MapView() {
 
   const defaultLat = parseFloat(import.meta.env.VITE_DEFAULT_LAT || '15.3647')
   const defaultLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG || '75.1240')
-  const tileUrl = import.meta.env.VITE_TILE_URL || 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-  const attribution = import.meta.env.VITE_TILE_ATTRIBUTION || '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  const tileUrl = getTileUrl()
+  const attribution = TILE_ATTRIBUTION
 
   return (
     <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
