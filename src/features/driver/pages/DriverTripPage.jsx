@@ -1,0 +1,320 @@
+import { useState, useEffect, useRef } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Clock, Navigation, AlertTriangle, CheckCircle2, ShieldAlert, Power, WifiOff } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { useDataStore } from '@/store/dataStore'
+import { startTracking, stopTracking } from '@/lib/tracker'
+import { calculateBusEta } from '@/lib/eta'
+import RouteBadge from '@/components/ui/RouteBadge'
+
+export default function DriverTripPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { routes, routeStops, stops } = useDataStore()
+
+  const [trip, setTrip] = useState(location.state?.trip || null)
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [currentStatus, setCurrentStatus] = useState('active') // 'active' | 'delayed' | 'breakdown'
+  const [gpsData, setGpsData] = useState(null)
+  const [networkStatus, setNetworkStatus] = useState('online')
+  const [showEndConfirm, setShowEndConfirm] = useState(false)
+  const [isEnding, setIsEnding] = useState(false)
+  const [wakeLockWarning, setWakeLockWarning] = useState(false)
+
+  // Load trip from database if navigated directly
+  useEffect(() => {
+    if (!trip) {
+      const loadActive = async () => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          navigate('/login')
+          return
+        }
+        const { data: dRow } = await supabase
+          .from('drivers')
+          .select('id')
+          .eq('profile_id', user.id)
+          .maybeSingle()
+
+        if (dRow) {
+          const { data: tRow } = await supabase
+            .from('trips')
+            .select('*, route:routes(*), bus:buses(*)')
+            .eq('driver_id', dRow.id)
+            .neq('status', 'ended')
+            .order('started_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          if (tRow) {
+            setTrip(tRow)
+            setCurrentStatus(tRow.status)
+          } else {
+            navigate('/driver')
+          }
+        } else {
+          navigate('/driver')
+        }
+      }
+      loadActive()
+    }
+  }, [trip, navigate])
+
+  // Trip Elapsed Timer
+  useEffect(() => {
+    if (!trip?.started_at) return
+    const startMs = new Date(trip.started_at).getTime()
+    const updateTimer = () => {
+      setElapsedSeconds(Math.max(0, Math.floor((Date.now() - startMs) / 1000)))
+    }
+    updateTimer()
+    const interval = setInterval(updateTimer, 1000)
+    return () => clearInterval(interval)
+  }, [trip])
+
+  // Visibility Change / Wake lock listener
+  useEffect(() => {
+    const handleVisibility = () => {
+      setWakeLockWarning(document.visibilityState === 'hidden')
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [])
+
+  // Start GPS Tracker
+  useEffect(() => {
+    if (!trip?.id) return
+
+    startTracking({
+      tripId: trip.id,
+      onUpdate: (pos) => {
+        setGpsData({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          speed: pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0,
+        })
+      },
+      onError: (err) => {
+        console.warn('GPS Tracker error:', err)
+      },
+      onStatusChange: ({ status }) => {
+        setNetworkStatus(status)
+      },
+    })
+
+    return () => {
+      stopTracking()
+    }
+  }, [trip])
+
+  // Compute Next Stop and Remaining Distance
+  const tripMetrics = () => {
+    if (!trip || !gpsData) return { nextStop: null, remainingKm: 0 }
+    const rStops = routeStops
+      .filter((rs) => rs.route_id === trip.route_id)
+      .map((rs) => ({
+        ...rs,
+        stop: stops.find((s) => s.id === rs.stop_id) || { id: rs.stop_id, name_en: 'Stop' },
+      }))
+
+    return calculateBusEta({
+      busPosition: gpsData,
+      routeStops: rStops,
+      direction: trip.direction || 0,
+    })
+  }
+
+  const { nextStop, remainingKm } = tripMetrics()
+
+  const handleStatusChange = async (newStatus) => {
+    if (!trip) return
+    setCurrentStatus(newStatus)
+    try {
+      await supabase
+        .from('trips')
+        .update({ status: newStatus })
+        .eq('id', trip.id)
+    } catch (e) {
+      console.warn('Failed to update trip status:', e)
+    }
+  }
+
+  const handleEndTrip = async () => {
+    if (!trip) return
+    setIsEnding(true)
+    stopTracking()
+    try {
+      await supabase
+        .from('trips')
+        .update({
+          status: 'ended',
+          ended_at: new Date().toISOString(),
+        })
+        .eq('id', trip.id)
+
+      navigate('/driver/history')
+    } catch (e) {
+      console.warn('Failed ending trip:', e)
+      setIsEnding(false)
+    }
+  }
+
+  const formatTimer = (sec) => {
+    const h = Math.floor(sec / 3600)
+    const m = Math.floor((sec % 3600) / 60)
+    const s = sec % 60
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
+
+  if (!trip) return null
+
+  return (
+    <div className="flex-1 flex flex-col justify-between space-y-4">
+      {/* Wake Lock Tab Hidden Warning Banner */}
+      {wakeLockWarning && (
+        <div className="p-3 bg-danger text-white rounded-input text-xs font-bold flex items-center gap-2 animate-pulse">
+          <AlertTriangle className="w-5 h-5 shrink-0" />
+          <span>Keep this screen open! Background GPS broadcasting may be paused by your browser.</span>
+        </div>
+      )}
+
+      {/* Top Header Card */}
+      <div className="p-4 bg-[#121B3D] border border-white/10 rounded-card flex items-center justify-between shadow-soft">
+        <div className="flex items-center gap-3">
+          <RouteBadge code={trip.route?.code} color={trip.route?.color} size="lg" />
+          <div>
+            <h2 className="text-sm font-extrabold text-white font-heading">
+              {trip.route?.name_en}
+            </h2>
+            <span className="text-[11px] font-mono text-white/60">
+              Bus {trip.bus?.reg_no || 'KA-25-1001'} &bull; Dir: {trip.direction === 0 ? 'Forward' : 'Return'}
+            </span>
+          </div>
+        </div>
+
+        {/* Pulsing Green Live Indicator */}
+        <div className="flex items-center gap-1.5 px-3 py-1 bg-success/15 border border-success/30 rounded-pill">
+          <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
+          <span className="text-xs font-bold text-success">
+            {networkStatus === 'reconnecting' ? 'Reconnecting' : 'GPS Live'}
+          </span>
+        </div>
+      </div>
+
+      {/* Live Distance & Next Stop Metrics */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="p-4 bg-[#121B3D] border border-white/10 rounded-card flex flex-col justify-between">
+          <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider block">
+            Next Stop
+          </span>
+          <p className="text-base font-extrabold text-white font-heading truncate my-1">
+            {nextStop?.stop?.name_en || 'En route'}
+          </p>
+          <span className="text-xs font-mono font-bold text-cobalt">
+            {remainingKm} km away
+          </span>
+        </div>
+
+        <div className="p-4 bg-[#121B3D] border border-white/10 rounded-card flex flex-col justify-between">
+          <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider block">
+            Trip Duration
+          </span>
+          <p className="text-xl font-extrabold text-white font-mono my-1">
+            {formatTimer(elapsedSeconds)}
+          </p>
+          <span className="text-xs font-mono text-white/60">
+            Speed: {gpsData?.speed ?? 0} km/h
+          </span>
+        </div>
+      </div>
+
+      {/* Driver Status Buttons (64px Min Touch Targets) */}
+      <div className="space-y-2">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-white/50 block">
+          Update Transit Status
+        </span>
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => handleStatusChange('active')}
+            className={`min-h-[64px] h-16 rounded-input font-extrabold text-sm border flex flex-col items-center justify-center gap-1 active:scale-95 transition ${
+              currentStatus === 'active'
+                ? 'bg-success text-white border-success shadow-lg'
+                : 'bg-[#121B3D] text-white/60 border-white/10'
+            }`}
+          >
+            <CheckCircle2 className="w-5 h-5" />
+            <span>On Time</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleStatusChange('delayed')}
+            className={`min-h-[64px] h-16 rounded-input font-extrabold text-sm border flex flex-col items-center justify-center gap-1 active:scale-95 transition ${
+              currentStatus === 'delayed'
+                ? 'bg-warning text-ink border-warning shadow-lg'
+                : 'bg-[#121B3D] text-white/60 border-white/10'
+            }`}
+          >
+            <AlertTriangle className="w-5 h-5" />
+            <span>Delayed</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleStatusChange('breakdown')}
+            className={`min-h-[64px] h-16 rounded-input font-extrabold text-sm border flex flex-col items-center justify-center gap-1 active:scale-95 transition ${
+              currentStatus === 'breakdown'
+                ? 'bg-danger text-white border-danger shadow-lg'
+                : 'bg-[#121B3D] text-white/60 border-white/10'
+            }`}
+          >
+            <ShieldAlert className="w-5 h-5" />
+            <span>Breakdown</span>
+          </button>
+        </div>
+      </div>
+
+      {/* End Trip Button */}
+      <div className="pt-2">
+        <button
+          type="button"
+          onClick={() => setShowEndConfirm(true)}
+          className="w-full min-h-[64px] h-16 bg-danger/20 text-danger border border-danger/40 font-extrabold text-base rounded-input hover:bg-danger hover:text-white active:scale-95 transition flex items-center justify-center gap-2"
+        >
+          <Power className="w-6 h-6" />
+          <span>END TRIP</span>
+        </button>
+      </div>
+
+      {/* Confirm End Trip Dialog */}
+      {showEndConfirm && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-5">
+          <div className="w-full max-w-sm bg-[#121B3D] border border-white/20 rounded-card p-6 text-center space-y-4 shadow-2xl">
+            <h3 className="text-lg font-extrabold text-white font-heading">End Current Trip?</h3>
+            <p className="text-xs text-white/70 leading-relaxed">
+              This will stop GPS broadcasting and remove your bus from passenger live tracking.
+            </p>
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowEndConfirm(false)}
+                className="flex-1 py-3 bg-white/10 text-white font-bold text-xs rounded-input hover:bg-white/20 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isEnding}
+                onClick={handleEndTrip}
+                className="flex-1 py-3 bg-danger text-white font-bold text-xs rounded-input hover:opacity-90 transition"
+              >
+                {isEnding ? 'Ending...' : 'Yes, End Trip'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

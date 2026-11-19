@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { MapContainer, TileLayer, Polyline, Marker, Circle, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useMapStore } from '@/store/mapStore'
+import { useLiveStore } from '@/store/liveStore'
+import BusMarker from './BusMarker'
 
 // Helper to create clean custom HTML markers with SVG
 function createMarkerIcon(type, label = '') {
@@ -72,6 +74,7 @@ function MapController() {
 
 export default function MapView() {
   const { polyline, routeColor, markers, circle } = useMapStore()
+  const { trips, selectedTripId, setSelectedTripId } = useLiveStore()
 
   const defaultLat = parseFloat(import.meta.env.VITE_DEFAULT_LAT || '15.3647')
   const defaultLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG || '75.1240')
@@ -138,6 +141,16 @@ export default function MapView() {
             key={m.id || idx}
             position={[m.lat, m.lng]}
             icon={createMarkerIcon(m.type || 'stop', m.label)}
+          />
+        ))}
+
+        {/* Live Buses */}
+        {trips.map((trip) => (
+          <BusMarker
+            key={trip.id}
+            trip={trip}
+            isSelected={selectedTripId === trip.id}
+            onClick={() => setSelectedTripId(trip.id)}
           />
         ))}
       </MapContainer>

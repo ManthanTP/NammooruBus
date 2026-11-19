@@ -1,17 +1,27 @@
+import { useEffect } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Bus, Radio, User, LogIn } from 'lucide-react'
+import { Bus, Radio, User, LogIn, RefreshCw } from 'lucide-react'
 import MapView from '@/components/map/MapView'
 import BottomSheet from '@/components/ui/BottomSheet'
 import FloatingTabBar from '@/components/ui/FloatingTabBar'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import { ToastContainer } from '@/components/ui/Toast'
 import { useAuthStore } from '@/store/authStore'
+import { useLiveStore } from '@/store/liveStore'
 
 export default function PassengerLayout() {
   const { t } = useTranslation()
   const location = useLocation()
   const { user } = useAuthStore()
+  const { subscribe, unsubscribe, isReconnecting, trips, getActiveCount } = useLiveStore()
+
+  useEffect(() => {
+    subscribe()
+    return () => unsubscribe()
+  }, [subscribe, unsubscribe])
+
+  const liveCount = getActiveCount()
 
   // Full-screen overlay routes like /search take over the full screen
   const isSearchPage = location.pathname === '/search'
@@ -37,10 +47,25 @@ export default function PassengerLayout() {
           <div className="h-4 w-[1px] bg-line mx-0.5" />
           <Link
             to="/live"
-            className="flex items-center gap-1 text-[11px] font-bold text-success bg-success/10 px-2 py-0.5 rounded-pill"
+            className={`flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-pill transition-colors ${
+              isReconnecting
+                ? 'text-warning bg-warning/15'
+                : liveCount > 0
+                ? 'text-success bg-success/15'
+                : 'text-text-secondary bg-page'
+            }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-            <span>4 live</span>
+            {isReconnecting ? (
+              <>
+                <RefreshCw className="w-3 h-3 animate-spin text-warning" />
+                <span>Reconnecting</span>
+              </>
+            ) : (
+              <>
+                <span className={`w-1.5 h-1.5 rounded-full ${liveCount > 0 ? 'bg-success animate-pulse' : 'bg-text-secondary'}`} />
+                <span>{liveCount} live</span>
+              </>
+            )}
           </Link>
         </div>
 

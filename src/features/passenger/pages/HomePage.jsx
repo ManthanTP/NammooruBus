@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, Radio, MapPin, Clock, History, AlertTriangle, X, ArrowRight } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
+import { useLiveStore } from '@/store/liveStore'
 import { localName } from '@/lib/formatters'
 import RouteBadge from '@/components/ui/RouteBadge'
 
@@ -10,6 +11,9 @@ export default function HomePage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { stops, routes, routeStops, schedules, initData } = useDataStore()
+  const { getActiveCount, isReconnecting } = useLiveStore()
+
+  const liveCount = getActiveCount()
 
   const [showAlert, setShowAlert] = useState(true)
   const [recentSearches, setRecentSearches] = useState([])
@@ -93,7 +97,9 @@ export default function HomePage() {
           </div>
           <div>
             <h3 className="text-sm font-bold text-ink">{t('nav.live')}</h3>
-            <p className="text-[11px] text-text-secondary">4 active buses</p>
+            <p className="text-[11px] text-text-secondary">
+              {isReconnecting ? 'Reconnecting...' : `${liveCount} active buses`}
+            </p>
           </div>
         </Link>
 

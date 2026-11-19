@@ -5,11 +5,12 @@ import ErrorBoundary from '@/components/ui/ErrorBoundary'
 // Layouts
 import PassengerLayout from '@/features/passenger/layouts/PassengerLayout'
 
-// Eagerly loaded public and passenger pages
+// Eagerly loaded passenger pages
 import HomePage from '@/features/passenger/pages/HomePage'
 import SearchPage from '@/features/passenger/pages/SearchPage'
 import ResultsPage from '@/features/passenger/pages/ResultsPage'
 import JourneyPage from '@/features/passenger/pages/JourneyPage'
+import LivePage from '@/features/passenger/pages/LivePage'
 import NearbyPage from '@/features/passenger/pages/NearbyPage'
 import RoutesPage from '@/features/passenger/pages/RoutesPage'
 import RouteDetailPage from '@/features/passenger/pages/RouteDetailPage'
@@ -18,6 +19,7 @@ import SavedPage from '@/features/passenger/pages/SavedPage'
 import ProfilePage from '@/features/passenger/pages/ProfilePage'
 import HelpPage from '@/features/passenger/pages/HelpPage'
 
+// Auth pages
 import LoginPage from '@/features/passenger/pages/LoginPage'
 import RegisterPage from '@/features/passenger/pages/RegisterPage'
 import ForgotPasswordPage from '@/features/passenger/pages/ForgotPasswordPage'
@@ -30,9 +32,16 @@ import ProtectedRoute from '@/app/guards/ProtectedRoute'
 import DriverRoute from '@/app/guards/DriverRoute'
 import AdminRoute from '@/app/guards/AdminRoute'
 
-// Lazy loaded driver and admin pages to keep the main bundle small
+// Lazy loaded driver components & pages (Driver portal)
+const DriverLayout = lazy(() => import('@/features/driver/layouts/DriverLayout'))
+const DriverStartPage = lazy(() => import('@/features/driver/pages/DriverStartPage'))
+const DriverTripPage = lazy(() => import('@/features/driver/pages/DriverTripPage'))
+const DriverHistoryPage = lazy(() => import('@/features/driver/pages/DriverHistoryPage'))
+
+// Lazy loaded admin pages
 const AdminLoginPage = lazy(() => import('@/features/admin/pages/AdminLoginPage'))
 const AdminDashboardPage = lazy(() => import('@/features/admin/pages/AdminDashboardPage'))
+const AdminSimulatorPage = lazy(() => import('@/features/admin/pages/AdminSimulatorPage'))
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-[200px] bg-transparent">
@@ -71,7 +80,7 @@ export const router = createBrowserRouter([
       },
       {
         path: '/live',
-        element: <PlaceholderPage title="Live Bus Tracking" path="/live" />,
+        element: <LivePage />,
       },
       {
         path: '/nearby',
@@ -142,33 +151,31 @@ export const router = createBrowserRouter([
     element: withBoundary(<ResetPasswordPage />),
   },
 
-  // Driver Routes (Lazy loaded + DriverRoute guard)
+  // Driver Routes (Wrapped in DriverRoute & DriverLayout)
   {
     path: '/driver',
     element: withBoundary(
       <DriverRoute>
-        <PlaceholderPage title="Driver Portal" path="/driver" role="driver" />
+        <DriverLayout />
       </DriverRoute>
     ),
-  },
-  {
-    path: '/driver/trip',
-    element: withBoundary(
-      <DriverRoute>
-        <PlaceholderPage title="Driver Active Trip" path="/driver/trip" role="driver" />
-      </DriverRoute>
-    ),
-  },
-  {
-    path: '/driver/history',
-    element: withBoundary(
-      <DriverRoute>
-        <PlaceholderPage title="Driver Trip History" path="/driver/history" role="driver" />
-      </DriverRoute>
-    ),
+    children: [
+      {
+        index: true,
+        element: <DriverStartPage />,
+      },
+      {
+        path: 'trip',
+        element: <DriverTripPage />,
+      },
+      {
+        path: 'history',
+        element: <DriverHistoryPage />,
+      },
+    ],
   },
 
-  // Admin Routes (Lazy loaded)
+  // Admin Routes (Lazy loaded + AdminRoute)
   {
     path: '/12345678/admin/login',
     element: withBoundary(<AdminLoginPage />),
@@ -289,7 +296,7 @@ export const router = createBrowserRouter([
     path: '/12345678/admin/simulator',
     element: withBoundary(
       <AdminRoute>
-        <PlaceholderPage title="Admin: GPS Simulator" path="/12345678/admin/simulator" role="admin" />
+        <AdminSimulatorPage />
       </AdminRoute>
     ),
   },

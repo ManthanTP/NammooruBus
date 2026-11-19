@@ -6,7 +6,9 @@ import { useDataStore } from '@/store/dataStore'
 import { useMapStore } from '@/store/mapStore'
 import { useSavedStore } from '@/store/savedStore'
 import { useAuthStore } from '@/store/authStore'
+import { useLiveStore } from '@/store/liveStore'
 import { useToastStore } from '@/components/ui/Toast'
+import { calculateBusEta } from '@/lib/eta'
 import { localName } from '@/lib/formatters'
 import RouteBadge from '@/components/ui/RouteBadge'
 import CrowdMeter from '@/components/ui/CrowdMeter'
@@ -20,9 +22,38 @@ export default function JourneyPage() {
   const { stops, routes, routeStops } = useDataStore()
   const { setRoute, setMarkers, fitBounds, clearMap } = useMapStore()
   const { isSaved, saveTrip, removeTrip, initSaved } = useSavedStore()
+  const { trips, speedsByTrip } = useLiveStore()
   const { addToast } = useToastStore()
 
   const [journey, setJourney] = useState(null)
+
+  const firstLeg = journey?.legs?.[0]
+  const liveTripForLeg = useMemo(() => {
+    if (!firstLeg?.route?.id || !trips || trips.length === 0) return null
+    return trips.find((t) => t.route_id === firstLeg.route.id && t.direction === (firstLeg.direction || 0) && t.position)
+  }, [firstLeg, trips])
+
+  const liveEtaInfo = useMemo(() => {
+    if (!liveTripForLeg?.position || !firstLeg?.fromStop?.id) return null
+    const rStops = routeStops
+      .filter((rs) => rs.route_id === firstLeg.route.id)
+      .map((rs) => ({
+        ...rs,
+        stop: stops.find((s) => s.id === rs.stop_id) || { id: rs.stop_id, lat: 0, lng: 0 },
+      }))
+    const speedHist = speedsByTrip[liveTripForLeg.id] || []
+    const eta = calculateBusEta({
+      busPosition: liveTripForLeg.position,
+      routeStops: rStops,
+      direction: firstLeg.direction || 0,
+      targetStopId: firstLeg.fromStop.id,
+      speedHistory: speedHist,
+    })
+    if (!eta.hasPassed && eta.etaMinutes !== null) {
+      return { isLive: true, etaMin: eta.etaMinutes, trip: liveTripForLeg }
+    }
+    return null
+  }, [liveTripForLeg, firstLeg, routeStops, stops, speedsByTrip])
 
   useEffect(() => {
     initSaved(user)
@@ -215,11 +246,23 @@ export default function JourneyPage() {
         </div>
 
         <div className="p-3 bg-surface rounded-card border border-line shadow-soft text-center">
-          <span className="text-[10px] uppercase font-bold text-text-secondary block">
-            Next Bus
-          </span>
-          <span className="text-base font-extrabold text-cobalt font-heading">
-            {journey.nextBusMin} min
+          <div className="flex items-center justify-center gap-1 mb-0.5">
+            <span className="text-[10px] uppercase font-bold text-text-secondary">
+              Next Bus
+            </span>
+            {liveEtaInfo ? (
+              <span className="text-[9px] font-bold uppercase tracking-wider text-success bg-success/15 px-1.5 py-0.2 rounded-pill flex items-center gap-0.5">
+                <span className="w-1 h-1 rounded-full bg-success animate-pulse" />
+                Live
+              </span>
+            ) : (
+              <span className="text-[9px] font-bold uppercase tracking-wider text-text-secondary bg-page px-1 rounded-pill">
+                Sched
+              </span>
+            )}
+          </div>
+          <span className={`text-base font-extrabold font-heading ${liveEtaInfo ? 'text-success' : 'text-cobalt'}`}>
+            {liveEtaInfo ? liveEtaInfo.etaMin : journey.nextBusMin} min
           </span>
         </div>
       </div>
