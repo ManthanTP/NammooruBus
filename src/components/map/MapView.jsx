@@ -61,25 +61,53 @@ function MapController() {
   const { bounds, center, zoom } = useMapStore()
 
   useEffect(() => {
-    if (bounds && bounds.length >= 2) {
-      try {
-        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16, animate: true })
-      } catch (e) {
-        console.warn('Map fitBounds error:', e)
+    if (bounds && Array.isArray(bounds) && bounds.length >= 2) {
+      const valid = bounds.filter(
+        (b) =>
+          Array.isArray(b) &&
+          b.length === 2 &&
+          !Number.isNaN(Number(b[0])) &&
+          !Number.isNaN(Number(b[1])) &&
+          Number.isFinite(Number(b[0])) &&
+          Number.isFinite(Number(b[1]))
+      )
+      if (valid.length >= 2) {
+        try {
+          map.fitBounds(valid, { padding: [40, 40], maxZoom: 16, animate: true })
+        } catch (e) {
+          console.warn('Map fitBounds error:', e)
+        }
       }
     }
   }, [bounds, map])
 
   useEffect(() => {
-    if (center) {
-      map.flyTo(center, zoom || 14, { animate: true, duration: 0.8 })
+    if (center && Array.isArray(center) && center.length === 2) {
+      const lat = Number(center[0])
+      const lng = Number(center[1])
+      if (
+        !Number.isNaN(lat) &&
+        !Number.isNaN(lng) &&
+        Number.isFinite(lat) &&
+        Number.isFinite(lng)
+      ) {
+        try {
+          map.flyTo([lat, lng], zoom || 14, { animate: true, duration: 0.8 })
+        } catch (e) {
+          console.warn('Map flyTo error:', e)
+        }
+      }
     }
   }, [center, zoom, map])
 
   useEffect(() => {
     // Invalidate size on mount / updates
     const timer = setTimeout(() => {
-      map.invalidateSize()
+      try {
+        map.invalidateSize()
+      } catch (e) {
+        // Ignored
+      }
     }, 150)
     return () => clearTimeout(timer)
   }, [map])
@@ -92,8 +120,10 @@ export default function MapView({ showUserBusLink = true }) {
   const { trips, selectedTripId, setSelectedTripId } = useLiveStore()
   const { position: userPos, accuracy } = useLocationStore()
 
-  const defaultLat = parseFloat(import.meta.env.VITE_DEFAULT_LAT || '15.3647')
-  const defaultLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG || '75.1240')
+  const parsedLat = parseFloat(import.meta.env.VITE_DEFAULT_LAT)
+  const parsedLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG)
+  const defaultLat = !Number.isNaN(parsedLat) && Number.isFinite(parsedLat) ? parsedLat : 15.3647
+  const defaultLng = !Number.isNaN(parsedLng) && Number.isFinite(parsedLng) ? parsedLng : 75.1240
   const tileUrl = getTileUrl()
   const attribution = TILE_ATTRIBUTION
 

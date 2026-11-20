@@ -66,19 +66,27 @@ export default function LivePage() {
 
   // Center or fit bounds on selected bus + user
   useEffect(() => {
-    if (selectedTrip?.position?.lat && selectedTrip?.position?.lng) {
-      if (userPos?.lat && userPos?.lng) {
+    const busLat = Number(selectedTrip?.position?.lat)
+    const busLng = Number(selectedTrip?.position?.lng)
+    const hasBusPos = !Number.isNaN(busLat) && !Number.isNaN(busLng) && Number.isFinite(busLat) && Number.isFinite(busLng)
+
+    if (hasBusPos) {
+      const uLat = Number(userPos?.lat)
+      const uLng = Number(userPos?.lng)
+      const hasUserPos = !Number.isNaN(uLat) && !Number.isNaN(uLng) && Number.isFinite(uLat) && Number.isFinite(uLng)
+
+      if (hasUserPos) {
         const fit = fitBounds || setBounds
         if (typeof fit === 'function') {
           fit([
-            [userPos.lat, userPos.lng],
-            [selectedTrip.position.lat, selectedTrip.position.lng],
+            [uLat, uLng],
+            [busLat, busLng],
           ])
         }
       } else {
         const centerFn = setView || setCenter
         if (typeof centerFn === 'function') {
-          centerFn([selectedTrip.position.lat, selectedTrip.position.lng], 15)
+          centerFn([busLat, busLng], 15)
         }
       }
     }

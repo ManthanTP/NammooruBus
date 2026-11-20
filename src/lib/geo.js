@@ -13,13 +13,31 @@ const EARTH_RADIUS_KM = 6371
  * @returns {number} Distance in kilometers
  */
 export function haversine(lat1, lon1, lat2, lon2) {
-  if (lat1 === lat2 && lon1 === lon2) return 0
+  const nLat1 = Number(lat1)
+  const nLon1 = Number(lon1)
+  const nLat2 = Number(lat2)
+  const nLon2 = Number(lon2)
+
+  if (
+    Number.isNaN(nLat1) ||
+    Number.isNaN(nLon1) ||
+    Number.isNaN(nLat2) ||
+    Number.isNaN(nLon2) ||
+    !Number.isFinite(nLat1) ||
+    !Number.isFinite(nLon1) ||
+    !Number.isFinite(nLat2) ||
+    !Number.isFinite(nLon2)
+  ) {
+    return 0
+  }
+
+  if (nLat1 === nLat2 && nLon1 === nLon2) return 0
 
   const toRad = (x) => (x * Math.PI) / 180
-  const dLat = toRad(lat2 - lat1)
-  const dLon = toRad(lon2 - lon1)
-  const rLat1 = toRad(lat1)
-  const rLat2 = toRad(lat2)
+  const dLat = toRad(nLat2 - nLat1)
+  const dLon = toRad(nLon2 - nLon1)
+  const rLat1 = toRad(nLat1)
+  const rLat2 = toRad(nLat2)
 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +

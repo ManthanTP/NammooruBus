@@ -11,10 +11,12 @@ export default function MapCard({ height = 220, isSticky = false, className = ''
 
   const handleLocateMe = (e) => {
     e.stopPropagation()
-    if (position) {
+    const pLat = Number(position?.lat)
+    const pLng = Number(position?.lng)
+    if (!Number.isNaN(pLat) && !Number.isNaN(pLng) && Number.isFinite(pLat) && Number.isFinite(pLng)) {
       const centerFn = setView || setCenter
       if (typeof centerFn === 'function') {
-        centerFn([position.lat, position.lng], 15)
+        centerFn([pLat, pLng], 15)
       }
     } else {
       start()

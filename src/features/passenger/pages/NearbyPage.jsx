@@ -18,15 +18,26 @@ export default function NearbyPage() {
   const { setCircle, setMarkers, setView, setCenter } = useMapStore()
   const { position: userPos } = useLocationStore()
 
-  const defaultLat = parseFloat(import.meta.env.VITE_DEFAULT_LAT || '15.3647')
-  const defaultLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG || '75.1240')
+  const parsedLat = parseFloat(import.meta.env.VITE_DEFAULT_LAT)
+  const parsedLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG)
+  const defaultLat = !Number.isNaN(parsedLat) && Number.isFinite(parsedLat) ? parsedLat : 15.3647
+  const defaultLng = !Number.isNaN(parsedLng) && Number.isFinite(parsedLng) ? parsedLng : 75.1240
+
+  const hasValidUserPos =
+    userPos?.lat !== undefined &&
+    userPos?.lng !== undefined &&
+    !Number.isNaN(Number(userPos.lat)) &&
+    !Number.isNaN(Number(userPos.lng))
+
+  const uLat = hasValidUserPos ? Number(userPos.lat) : defaultLat
+  const uLng = hasValidUserPos ? Number(userPos.lng) : defaultLng
 
   // If user GPS is outside Hubballi (>35 km), fall back to Hubballi center so stops are visible
-  const distFromCity = userPos?.lat ? haversine(userPos.lat, userPos.lng, defaultLat, defaultLng) : 0
+  const distFromCity = hasValidUserPos ? haversine(uLat, uLng, defaultLat, defaultLng) : 0
   const isOutsideCity = distFromCity > 35
 
-  const centerLat = (!isOutsideCity && userPos?.lat) ? userPos.lat : defaultLat
-  const centerLng = (!isOutsideCity && userPos?.lng) ? userPos.lng : defaultLng
+  const centerLat = (!isOutsideCity && hasValidUserPos) ? uLat : defaultLat
+  const centerLng = (!isOutsideCity && hasValidUserPos) ? uLng : defaultLng
 
   const [radiusM, setRadiusM] = useState(1000) // Default 1000m (1 km)
 

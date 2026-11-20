@@ -25,17 +25,69 @@ export const useMapStore = create((set) => ({
   },
 
   fitBounds: (bounds) => {
-    set({ bounds })
+    if (Array.isArray(bounds) && bounds.length >= 2) {
+      const valid = bounds.filter(
+        (b) =>
+          Array.isArray(b) &&
+          b.length === 2 &&
+          !Number.isNaN(Number(b[0])) &&
+          !Number.isNaN(Number(b[1])) &&
+          Number.isFinite(Number(b[0])) &&
+          Number.isFinite(Number(b[1]))
+      )
+      if (valid.length >= 2) {
+        set({ bounds: valid })
+        return
+      }
+    }
+    set({ bounds: null })
   },
   setBounds: (bounds) => {
-    set({ bounds })
+    if (Array.isArray(bounds) && bounds.length >= 2) {
+      const valid = bounds.filter(
+        (b) =>
+          Array.isArray(b) &&
+          b.length === 2 &&
+          !Number.isNaN(Number(b[0])) &&
+          !Number.isNaN(Number(b[1])) &&
+          Number.isFinite(Number(b[0])) &&
+          Number.isFinite(Number(b[1]))
+      )
+      if (valid.length >= 2) {
+        set({ bounds: valid })
+        return
+      }
+    }
+    set({ bounds: null })
   },
 
   setView: (center, zoom = 14) => {
-    set({ center, zoom })
+    if (Array.isArray(center) && center.length === 2) {
+      const lat = Number(center[0])
+      const lng = Number(center[1])
+      if (
+        !Number.isNaN(lat) &&
+        !Number.isNaN(lng) &&
+        Number.isFinite(lat) &&
+        Number.isFinite(lng)
+      ) {
+        set({ center: [lat, lng], zoom })
+      }
+    }
   },
   setCenter: (center, zoom = 14) => {
-    set({ center, zoom })
+    if (Array.isArray(center) && center.length === 2) {
+      const lat = Number(center[0])
+      const lng = Number(center[1])
+      if (
+        !Number.isNaN(lat) &&
+        !Number.isNaN(lng) &&
+        Number.isFinite(lat) &&
+        Number.isFinite(lng)
+      ) {
+        set({ center: [lat, lng], zoom })
+      }
+    }
   },
 
   clearMap: () => {
