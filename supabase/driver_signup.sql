@@ -1,6 +1,6 @@
 -- ====================================================================
 -- NAMMOORU BUS: Driver Sign-Up & Key Verification (Phase 5.5)
--- Run this script once in your Supabase SQL Editor.
+-- Run this script in your Supabase SQL Editor.
 -- ====================================================================
 
 -- 1. Create table for holding the driver registration secret key (RLS secured)
@@ -36,17 +36,17 @@ AS $$
 DECLARE
   v_user_id uuid;
   v_active_key text;
-  v_attempts_record record;
+  v_locked_until timestamptz;
+  v_failed_attempts int := 0;
   v_now timestamptz := now();
-  v_user_name text;
 BEGIN
-  -- Verify authenticated session
+  -- 1. Verify authenticated session
   v_user_id := auth.uid();
   IF v_user_id IS NULL THEN
     RETURN 'login_required';
   END IF;
 
-  -- Check if driver registration key is configured in the system
+  -- 2. Check if driver registration key is configured in the system
   SELECT driver_key INTO v_active_key
   FROM public.driver_signup_config
   WHERE is_active = true
@@ -57,16 +57,17 @@ BEGIN
     RETURN 'not_configured';
   END IF;
 
-  -- Check for existing lockout on user
-  SELECT * INTO v_attempts_record
+  -- 3. Check for existing lockout on user
+  SELECT locked_until, failed_attempts
+  INTO v_locked_until, v_failed_attempts
   FROM public.driver_key_attempts
   WHERE user_id = v_user_id;
 
-  IF v_attempts_record.locked_until IS NOT NULL AND v_attempts_record.locked_until > v_now THEN
+  IF v_locked_until IS NOT NULL AND v_locked_until > v_now THEN
     RETURN 'locked';
   END IF;
 
-  -- Validate key (trim whitespace)
+  -- 4. Validate key (trim whitespace)
   IF trim(p_key) = trim(v_active_key) THEN
     -- Success! Reset lockout counters
     DELETE FROM public.driver_key_attempts WHERE user_id = v_user_id;
@@ -77,41 +78,32 @@ BEGIN
         updated_at = v_now
     WHERE id = v_user_id;
 
-    -- Fetch user name or default
-    SELECT coalesce(full_name, split_part(email, '@', 1), 'Driver')
-    INTO v_user_name
-    FROM public.profiles
-    WHERE id = v_user_id;
-
     -- Ensure corresponding row in drivers table exists
-    INSERT INTO public.drivers (id, name, is_active)
-    VALUES (v_user_id, coalesce(v_user_name, 'Driver'), true)
-    ON CONFLICT (id) DO UPDATE
-    SET is_active = true;
+    INSERT INTO public.drivers (profile_id)
+    VALUES (v_user_id)
+    ON CONFLICT (profile_id) DO NOTHING;
 
     RETURN 'ok';
   ELSE
     -- Failed attempt: track attempts and apply 15 min lock if >= 5 failed attempts
-    IF v_attempts_record.user_id IS NULL THEN
-      INSERT INTO public.driver_key_attempts (user_id, failed_attempts, last_attempt_at)
-      VALUES (v_user_id, 1, v_now);
-    ELSE
-      IF v_attempts_record.failed_attempts + 1 >= 5 THEN
-        UPDATE public.driver_key_attempts
-        SET failed_attempts = v_attempts_record.failed_attempts + 1,
-            locked_until = v_now + interval '15 minutes',
-            last_attempt_at = v_now
-        WHERE user_id = v_user_id;
-        RETURN 'locked';
-      ELSE
-        UPDATE public.driver_key_attempts
-        SET failed_attempts = failed_attempts + 1,
-            last_attempt_at = v_now
-        WHERE user_id = v_user_id;
-      END IF;
-    END IF;
+    v_failed_attempts := coalesce(v_failed_attempts, 0) + 1;
 
-    RETURN 'invalid';
+    IF v_failed_attempts >= 5 THEN
+      INSERT INTO public.driver_key_attempts (user_id, failed_attempts, locked_until, last_attempt_at)
+      VALUES (v_user_id, v_failed_attempts, v_now + interval '15 minutes', v_now)
+      ON CONFLICT (user_id) DO UPDATE
+      SET failed_attempts = v_failed_attempts,
+          locked_until = v_now + interval '15 minutes',
+          last_attempt_at = v_now;
+      RETURN 'locked';
+    ELSE
+      INSERT INTO public.driver_key_attempts (user_id, failed_attempts, last_attempt_at)
+      VALUES (v_user_id, v_failed_attempts, v_now)
+      ON CONFLICT (user_id) DO UPDATE
+      SET failed_attempts = v_failed_attempts,
+          last_attempt_at = v_now;
+      RETURN 'invalid';
+    END IF;
   END IF;
 END;
 $$;
