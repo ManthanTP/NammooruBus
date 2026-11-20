@@ -92,9 +92,9 @@ function MapController() {
         Number.isFinite(lng)
       ) {
         try {
-          map.flyTo([lat, lng], zoom || 14, { animate: true, duration: 0.8 })
+          map.setView([lat, lng], zoom || 14, { animate: true })
         } catch (e) {
-          console.warn('Map flyTo error:', e)
+          console.warn('Map setView error:', e)
         }
       }
     }
@@ -129,9 +129,23 @@ export default function MapView({ showUserBusLink = true }) {
 
   // Find selected bus if active
   const selectedTrip = trips.find((t) => t.id === selectedTripId)
-  const selectedBusPos = selectedTrip?.position?.lat && selectedTrip?.position?.lng
-    ? { lat: selectedTrip.position.lat, lng: selectedTrip.position.lng }
-    : null
+  const selectedBusPos =
+    selectedTrip?.position?.lat &&
+    selectedTrip?.position?.lng &&
+    !Number.isNaN(Number(selectedTrip.position.lat)) &&
+    !Number.isNaN(Number(selectedTrip.position.lng))
+      ? { lat: Number(selectedTrip.position.lat), lng: Number(selectedTrip.position.lng) }
+      : null
+
+  const isValidUserPos =
+    userPos &&
+    !Number.isNaN(Number(userPos.lat)) &&
+    !Number.isNaN(Number(userPos.lng)) &&
+    Number.isFinite(Number(userPos.lat)) &&
+    Number.isFinite(Number(userPos.lng))
+
+  const uLat = isValidUserPos ? Number(userPos.lat) : null
+  const uLng = isValidUserPos ? Number(userPos.lng) : null
 
   return (
     <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
@@ -173,26 +187,31 @@ export default function MapView({ showUserBusLink = true }) {
         )}
 
         {/* Radius Circle (e.g. for Nearby) */}
-        {circle && (
-          <Circle
-            center={[circle.lat, circle.lng]}
-            radius={circle.radiusM}
-            pathOptions={{
-              color: '#3451F2',
-              fillColor: '#3451F2',
-              fillOpacity: 0.12,
-              weight: 2,
-              dashArray: '4, 4',
-            }}
-          />
+        {circle &&
+          !Number.isNaN(Number(circle.lat)) &&
+          !Number.isNaN(Number(circle.lng)) &&
+          Number.isFinite(Number(circle.lat)) &&
+          Number.isFinite(Number(circle.lng)) &&
+          Number(circle.radiusM) > 0 && (
+            <Circle
+              center={[Number(circle.lat), Number(circle.lng)]}
+              radius={Number(circle.radiusM)}
+              pathOptions={{
+                color: '#3451F2',
+                fillColor: '#3451F2',
+                fillOpacity: 0.12,
+                weight: 2,
+                dashArray: '4, 4',
+              }}
+            />
         )}
 
         {/* User Location Pulsing Dot + Accuracy Circle (Rendered above polylines, below buses) */}
-        {userPos && (
+        {isValidUserPos && (
           <>
             <Circle
-              center={[userPos.lat, userPos.lng]}
-              radius={Math.min(accuracy || 30, 250)}
+              center={[uLat, uLng]}
+              radius={Math.min(Number(accuracy) || 30, 250)}
               pathOptions={{
                 color: '#3451F2',
                 fillColor: '#3451F2',
@@ -202,7 +221,7 @@ export default function MapView({ showUserBusLink = true }) {
               }}
             />
             <Marker
-              position={[userPos.lat, userPos.lng]}
+              position={[uLat, uLng]}
               icon={createMarkerIcon('user')}
               zIndexOffset={500}
             />
@@ -210,10 +229,10 @@ export default function MapView({ showUserBusLink = true }) {
         )}
 
         {/* Thin Dashed Line Between User and Selected Bus (Live Screen) */}
-        {showUserBusLink && userPos && selectedBusPos && (
+        {showUserBusLink && isValidUserPos && selectedBusPos && (
           <Polyline
             positions={[
-              [userPos.lat, userPos.lng],
+              [uLat, uLng],
               [selectedBusPos.lat, selectedBusPos.lng],
             ]}
             pathOptions={{
@@ -226,23 +245,41 @@ export default function MapView({ showUserBusLink = true }) {
         )}
 
         {/* Custom Stop Markers */}
-        {markers.map((m, idx) => (
-          <Marker
-            key={m.id || idx}
-            position={[m.lat, m.lng]}
-            icon={createMarkerIcon(m.type || 'stop', m.label)}
-            zIndexOffset={300}
-          />
+        {markers
+          .filter(
+            (m) =>
+              m &&
+              !Number.isNaN(Number(m.lat)) &&
+              !Number.isNaN(Number(m.lng)) &&
+              Number.isFinite(Number(m.lat)) &&
+              Number.isFinite(Number(m.lng))
+          )
+          .map((m, idx) => (
+            <Marker
+              key={m.id || idx}
+              position={[Number(m.lat), Number(m.lng)]}
+              icon={createMarkerIcon(m.type || 'stop', m.label)}
+              zIndexOffset={300}
+            />
         ))}
 
         {/* Live Buses (Rendered on top with highest z-index) */}
-        {trips.map((trip) => (
-          <BusMarker
-            key={trip.id}
-            trip={trip}
-            isSelected={selectedTripId === trip.id}
-            onClick={() => setSelectedTripId(trip.id)}
-          />
+        {trips
+          .filter(
+            (t) =>
+              t?.position &&
+              !Number.isNaN(Number(t.position.lat)) &&
+              !Number.isNaN(Number(t.position.lng)) &&
+              Number.isFinite(Number(t.position.lat)) &&
+              Number.isFinite(Number(t.position.lng))
+          )
+          .map((trip) => (
+            <BusMarker
+              key={trip.id}
+              trip={trip}
+              isSelected={selectedTripId === trip.id}
+              onClick={() => setSelectedTripId(trip.id)}
+            />
         ))}
       </MapContainer>
     </div>
