@@ -4,6 +4,7 @@ import { Route, Clock, ArrowRight } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
 import { localName } from '@/lib/formatters'
 import RouteBadge from '@/components/ui/RouteBadge'
+import MapCard from '@/components/map/MapCard'
 
 export default function RoutesPage() {
   const { t, i18n } = useTranslation()
@@ -16,17 +17,22 @@ export default function RoutesPage() {
   }, {})
 
   return (
-    <div className="space-y-3 pt-1 pb-4">
+    <div className="space-y-3.5 pt-1 pb-6">
+      {/* Header */}
       <div className="p-4 bg-surface rounded-card border border-line shadow-soft flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Route className="w-5 h-5 text-cobalt" />
-          <h2 className="text-sm font-extrabold text-ink font-heading">{t('passenger.all_routes')}</h2>
+          <h1 className="text-sm font-extrabold text-ink font-heading">{t('passenger.all_routes')}</h1>
         </div>
         <span className="text-xs font-bold text-text-secondary">
-          {routes.length} active
+          {routes.length} routes active
         </span>
       </div>
 
+      {/* Small Map Card (Height 220px per Part B) */}
+      <MapCard height={220} />
+
+      {/* Routes List */}
       <div className="space-y-2">
         {routes.map((r) => {
           const sched = schedulesByRoute[r.id]

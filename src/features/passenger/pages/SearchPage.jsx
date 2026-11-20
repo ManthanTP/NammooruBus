@@ -2,15 +2,18 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowUpDown, MapPin, Navigation, X, Check, Search, Bus } from 'lucide-react'
+import { ArrowLeft, ArrowUpDown, MapPin, Navigation, X, Check, Search, Bus, AlertCircle } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
+import { useLocationStore } from '@/store/locationStore'
 import { localName } from '@/lib/formatters'
+import { haversine } from '@/lib/geo'
 import RouteBadge from '@/components/ui/RouteBadge'
 
 export default function SearchPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { stops, routes, routeStops } = useDataStore()
+  const { position: userPos, start: startLocation } = useLocationStore()
 
   const [fromStop, setFromStop] = useState(null)
   const [toStop, setToStop] = useState(null)
@@ -74,9 +77,25 @@ export default function SearchPage() {
   }
 
   const handleUseLocation = () => {
-    // Pick closest stop (sample: first stop Old Bus Stand)
-    if (stops.length > 0) {
-      handleSelectStop(stops[0])
+    if (!userPos) {
+      startLocation()
+      return
+    }
+
+    let nearest = null
+    let minDist = Infinity
+    for (const s of stops) {
+      if (s.lat && s.lng) {
+        const d = haversine(userPos.lat, userPos.lng, s.lat, s.lng)
+        if (d < minDist) {
+          minDist = d
+          nearest = s
+        }
+      }
+    }
+
+    if (nearest) {
+      handleSelectStop(nearest)
     }
   }
 
@@ -109,13 +128,13 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-surface text-ink font-body p-4">
+    <div className="flex flex-col min-h-screen bg-surface text-ink font-body p-4 pt-2">
       {/* Top Header */}
       <header className="flex items-center justify-between pb-3 border-b border-line">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink transition"
+          className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink transition p-1"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>{t('common.back')}</span>
@@ -132,8 +151,8 @@ export default function SearchPage() {
             setActiveField('from')
             setSearchQuery('')
           }}
-          className={`flex items-center gap-2 p-2.5 rounded-input border transition cursor-pointer ${
-            activeField === 'from' ? 'bg-surface border-cobalt shadow-xs' : 'bg-surface/60 border-line'
+          className={`flex items-center gap-2.5 p-3 rounded-input border transition cursor-pointer ${
+            activeField === 'from' ? 'bg-surface border-cobalt shadow-xs' : 'bg-surface/70 border-line'
           }`}
         >
           <div className="w-3 h-3 rounded-full bg-success shrink-0" />
@@ -159,15 +178,15 @@ export default function SearchPage() {
           )}
         </div>
 
-        {/* Swap Button */}
+        {/* Swap Button (Floating) */}
         <div className="absolute right-6 top-1/2 -translate-y-1/2 z-10">
           <motion.button
             type="button"
-            animate={{ rotate: isSwapping ? 180 : 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             onClick={handleSwap}
-            className="w-8 h-8 rounded-full bg-surface border border-line shadow-soft flex items-center justify-center text-cobalt hover:border-cobalt transition"
-            aria-label="Swap stops"
+            animate={{ rotate: isSwapping ? 180 : 0 }}
+            transition={{ duration: 0.25 }}
+            className="w-8 h-8 rounded-full bg-surface border border-line shadow-soft text-ink flex items-center justify-center hover:text-cobalt active:scale-95 transition"
+            title="Swap stops"
           >
             <ArrowUpDown className="w-4 h-4" />
           </motion.button>
@@ -179,8 +198,8 @@ export default function SearchPage() {
             setActiveField('to')
             setSearchQuery('')
           }}
-          className={`flex items-center gap-2 p-2.5 rounded-input border transition cursor-pointer ${
-            activeField === 'to' ? 'bg-surface border-cobalt shadow-xs' : 'bg-surface/60 border-line'
+          className={`flex items-center gap-2.5 p-3 rounded-input border transition cursor-pointer ${
+            activeField === 'to' ? 'bg-surface border-cobalt shadow-xs' : 'bg-surface/70 border-line'
           }`}
         >
           <div className="w-3 h-3 rounded-full bg-danger shrink-0" />
@@ -207,88 +226,108 @@ export default function SearchPage() {
         </div>
       </div>
 
-      {/* Validation Error Banner */}
+      {/* Error message if validation fails */}
       {errorMessage && (
-        <div className="mb-2 p-2.5 bg-danger/10 border border-danger/20 rounded-input text-xs text-danger font-medium flex items-center gap-1.5">
+        <div className="mb-2 p-2.5 bg-danger/10 border border-danger/30 rounded-input flex items-center gap-2 text-xs font-semibold text-danger">
+          <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
-      {/* Type-Ahead Filter Field */}
-      <div className="relative mb-2">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+      {/* "Your location" Option (Part C.6) */}
+      <button
+        type="button"
+        onClick={handleUseLocation}
+        className="flex items-center gap-2 px-3 py-2.5 mb-2 bg-cobalt-tint/60 hover:bg-cobalt-tint border border-cobalt/20 rounded-input text-xs font-bold text-cobalt transition text-left"
+      >
+        <Navigation className="w-4 h-4 shrink-0" />
+        <span>{t('passenger.your_location')} (Pick nearest stop)</span>
+      </button>
+
+      {/* Search Filter Box */}
+      <div className="relative mb-3">
+        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={`Type to filter ${activeField === 'from' ? 'origin' : 'destination'}...`}
-          className="w-full pl-9 pr-4 py-2 bg-page border border-line rounded-input text-xs text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt"
+          placeholder={`Search ${activeField === 'from' ? 'starting' : 'destination'} stop...`}
+          className="w-full pl-9 pr-8 py-2.5 text-xs bg-page border border-line rounded-input focus:border-cobalt focus:bg-surface outline-none transition"
+          autoFocus
         />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => setSearchQuery('')}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary hover:text-ink p-1"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
-      {/* "Your location" Quick Option */}
-      {activeField === 'from' && !searchQuery && (
-        <button
-          type="button"
-          onClick={handleUseLocation}
-          className="flex items-center gap-2.5 p-2.5 mb-2 bg-cobalt-tint/50 border border-cobalt/20 rounded-input text-xs font-bold text-cobalt hover:bg-cobalt-tint transition text-left"
-        >
-          <Navigation className="w-4 h-4 shrink-0" />
-          <span>{t('passenger.your_location')}</span>
-        </button>
-      )}
+      {/* Stop List */}
+      <div className="flex-1 overflow-y-auto space-y-1.5 pb-20">
+        {filteredStops.length === 0 ? (
+          <div className="py-8 text-center text-xs text-text-secondary">
+            No stops match &quot;{searchQuery}&quot;
+          </div>
+        ) : (
+          filteredStops.map((stop) => {
+            const isSelectedFrom = fromStop?.id === stop.id
+            const isSelectedTo = toStop?.id === stop.id
+            const isSelected = isSelectedFrom || isSelectedTo
+            const badges = routesByStop[stop.id] || []
 
-      {/* Stops Selection List */}
-      <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
-        {filteredStops.map((stop) => {
-          const isSelected = (activeField === 'from' && fromStop?.id === stop.id) ||
-                            (activeField === 'to' && toStop?.id === stop.id)
-          const passCodes = routesByStop[stop.id] || []
-
-          return (
-            <div
-              key={stop.id}
-              onClick={() => handleSelectStop(stop)}
-              role="button"
-              tabIndex={0}
-              className={`p-2.5 rounded-input border transition flex items-center justify-between cursor-pointer ${
-                isSelected
-                  ? 'bg-cobalt-tint/60 border-cobalt text-cobalt font-bold'
-                  : 'bg-surface border-line hover:border-cobalt/50 text-ink'
-              }`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <MapPin className="w-4 h-4 text-text-secondary shrink-0" />
-                <div className="min-w-0">
-                  <span className="block text-xs font-semibold truncate">
-                    {localName(stop, i18n.language)}
-                  </span>
-                  <span className="block text-[10px] text-text-secondary truncate">
-                    {i18n.language === 'kn' ? stop.name_en : stop.name_kn || ''}
-                  </span>
+            return (
+              <div
+                key={stop.id}
+                onClick={() => handleSelectStop(stop)}
+                role="button"
+                tabIndex={0}
+                className={`p-3 rounded-input border transition flex items-center justify-between cursor-pointer ${
+                  isSelected
+                    ? 'bg-cobalt-tint border-cobalt text-cobalt'
+                    : 'bg-surface hover:bg-page border-line text-ink'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <MapPin className={`w-4 h-4 shrink-0 ${isSelected ? 'text-cobalt' : 'text-text-secondary'}`} />
+                  <div className="truncate">
+                    <p className="text-xs font-bold truncate">
+                      {localName(stop, i18n.language)}
+                    </p>
+                    {badges.length > 0 && (
+                      <div className="flex items-center gap-1 mt-1 flex-wrap">
+                        {badges.slice(0, 3).map((code) => (
+                          <RouteBadge key={code} code={code} size="xs" />
+                        ))}
+                        {badges.length > 3 && (
+                          <span className="text-[9px] text-text-secondary font-medium">
+                            +{badges.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-1 shrink-0">
-                {passCodes.slice(0, 3).map((c) => (
-                  <RouteBadge key={c} code={c} size="xs" />
-                ))}
-                {isSelected && <Check className="w-4 h-4 text-cobalt ml-1" />}
+                {isSelected && <Check className="w-4 h-4 text-cobalt shrink-0" />}
               </div>
-            </div>
-          )
-        })}
+            )
+          })
+        )}
       </div>
 
-      {/* Find Buses CTA */}
-      <div className="pt-3 border-t border-line mt-2">
+      {/* Sticky Bottom Action Button */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface/95 backdrop-blur-md border-t border-line z-30 flex justify-center">
         <button
           type="button"
           onClick={handleFindBuses}
           disabled={!fromStop || !toStop}
-          className="w-full py-3 bg-cobalt text-white text-sm font-bold rounded-input shadow-soft hover:opacity-95 active:scale-[0.99] disabled:opacity-40 transition flex items-center justify-center gap-2"
+          className="w-full max-w-md py-3 px-4 bg-cobalt disabled:bg-line disabled:text-text-secondary text-white font-extrabold text-sm rounded-pill shadow-soft transition flex items-center justify-center gap-2"
         >
-          <Bus className="w-4 h-4" />
+          <Search className="w-4 h-4" />
           <span>{t('passenger.find_buses')}</span>
         </button>
       </div>

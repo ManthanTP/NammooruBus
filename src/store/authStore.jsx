@@ -154,6 +154,36 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  refreshProfile: async () => {
+    const user = get().user
+    if (!user) return null
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle()
+    if (profile) {
+      set({ profile })
+    }
+    return profile
+  },
+
+  claimDriverRole: async (driverKey) => {
+    try {
+      const { data, error } = await supabase.rpc('claim_driver_role', {
+        p_key: driverKey,
+      })
+      if (error) throw error
+      if (data === 'ok') {
+        await get().refreshProfile()
+      }
+      return { status: data || 'invalid', error: null }
+    } catch (err) {
+      console.error('claimDriverRole error:', err)
+      return { status: 'error', error: err.message }
+    }
+  },
+
   resetPassword: async (email) => {
     const redirectUrl = `${window.location.origin}/reset-password`
     return await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl })

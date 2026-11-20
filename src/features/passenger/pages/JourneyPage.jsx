@@ -1,29 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Clock, IndianRupee, Bookmark, Share2, Radio, Footprints, Bus, AlertCircle, ShieldAlert } from 'lucide-react'
+import { ArrowLeft, Clock, IndianRupee, Bookmark, Share2, Radio, Footprints, Bus, AlertCircle } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
 import { useMapStore } from '@/store/mapStore'
 import { useSavedStore } from '@/store/savedStore'
 import { useAuthStore } from '@/store/authStore'
 import { useLiveStore } from '@/store/liveStore'
+import { useLocationStore } from '@/store/locationStore'
 import { useToastStore } from '@/components/ui/Toast'
 import { calculateBusEta } from '@/lib/eta'
 import { localName } from '@/lib/formatters'
 import RouteBadge from '@/components/ui/RouteBadge'
 import CrowdMeter from '@/components/ui/CrowdMeter'
-import Countdown from '@/components/ui/Countdown'
 import SosButton from '@/components/ui/SosButton'
+import MapCard from '@/components/map/MapCard'
+import UserBusComparison from '@/features/passenger/components/UserBusComparison'
 
 export default function JourneyPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { user } = useAuthStore()
-  const { stops, routes, routeStops } = useDataStore()
-  const { setRoute, setMarkers, fitBounds, clearMap } = useMapStore()
+  const { stops, routes, routeStops, schedules } = useDataStore()
+  const { setRoute, setMarkers, fitBounds } = useMapStore()
   const { isSaved, saveTrip, removeTrip, initSaved } = useSavedStore()
   const { trips, speedsByTrip } = useLiveStore()
+  const { position: userPos } = useLocationStore()
   const { addToast } = useToastStore()
 
   const [journey, setJourney] = useState(null)
@@ -31,7 +34,12 @@ export default function JourneyPage() {
   const firstLeg = journey?.legs?.[0]
   const liveTripForLeg = useMemo(() => {
     if (!firstLeg?.route?.id || !trips || trips.length === 0) return null
-    return trips.find((t) => t.route_id === firstLeg.route.id && t.direction === (firstLeg.direction || 0) && t.position)
+    return trips.find(
+      (t) =>
+        t.route_id === firstLeg.route.id &&
+        t.direction === (firstLeg.direction || 0) &&
+        t.position
+    )
   }, [firstLeg, trips])
 
   const liveEtaInfo = useMemo(() => {
@@ -75,136 +83,131 @@ export default function JourneyPage() {
     const markers = []
     const polyline = []
 
-    const firstLeg = journey.legs[0]
-    const lastLeg = journey.legs[journey.legs.length - 1]
+    const first = journey.legs[0]
+    const last = journey.legs[journey.legs.length - 1]
 
-    // Origin Pin A
-    if (firstLeg?.fromStop) {
+    if (first?.fromStop) {
       markers.push({
         id: 'pinA',
-        lat: firstLeg.fromStop.lat,
-        lng: firstLeg.fromStop.lng,
+        lat: first.fromStop.lat,
+        lng: first.fromStop.lng,
         type: 'pinA',
         label: 'A',
       })
-      polyline.push([firstLeg.fromStop.lat, firstLeg.fromStop.lng])
+      polyline.push([first.fromStop.lat, first.fromStop.lng])
     }
 
-    // Transfer Pin if transfer exists
-    if (journey.legs.length > 1 && firstLeg?.toStop) {
+    if (journey.legs.length > 1 && first?.toStop) {
       markers.push({
         id: 'transfer',
-        lat: firstLeg.toStop.lat,
-        lng: firstLeg.toStop.lng,
+        lat: first.toStop.lat,
+        lng: first.toStop.lng,
         type: 'transfer',
         label: '⇄',
       })
-      polyline.push([firstLeg.toStop.lat, firstLeg.toStop.lng])
+      polyline.push([first.toStop.lat, first.toStop.lng])
     }
 
-    // Destination Pin B
-    if (lastLeg?.toStop) {
+    if (last?.toStop) {
       markers.push({
         id: 'pinB',
-        lat: lastLeg.toStop.lat,
-        lng: lastLeg.toStop.lng,
+        lat: last.toStop.lat,
+        lng: last.toStop.lng,
         type: 'pinB',
         label: 'B',
       })
-      polyline.push([lastLeg.toStop.lat, lastLeg.toStop.lng])
+      polyline.push([last.toStop.lat, last.toStop.lng])
     }
 
     setMarkers(markers)
-    if (polyline.length >= 2) {
-      setRoute(polyline, firstLeg.route?.color || '#3451F2')
-      fitBounds(polyline)
-    }
 
-    return () => clearMap()
-  }, [journey, setMarkers, setRoute, fitBounds, clearMap])
+    if (first?.fromStop && last?.toStop) {
+      setRoute(polyline, first.route?.color || '#3451F2')
+      fitBounds([
+        [first.fromStop.lat, first.fromStop.lng],
+        [last.toStop.lat, last.toStop.lng],
+      ])
+    }
+  }, [journey, setMarkers, setRoute, fitBounds])
+
+  const fromStop = journey?.legs?.[0]?.fromStop
+  const toStop = journey?.legs?.[journey?.legs?.length - 1]?.toStop
+
+  const currentlySaved = journey ? isSaved(journey.id) : false
+
+  const handleToggleSave = () => {
+    if (!journey) return
+    if (currentlySaved) {
+      removeTrip(journey.id)
+      addToast('Removed from saved trips', 'info')
+    } else {
+      saveTrip({
+        id: journey.id,
+        fromStopId: fromStop?.id,
+        toStopId: toStop?.id,
+        fromName: localName(fromStop, i18n.language),
+        toName: localName(toStop, i18n.language),
+        totalFare: journey.totalFare,
+        totalMinutes: journey.totalMinutes,
+        transfers: journey.transfers,
+        legsSummary: journey.legs.map((l) => l.route?.code).join(' → '),
+        savedAt: new Date().toISOString(),
+      })
+      addToast('Saved to your trips', 'success')
+    }
+  }
+
+  const handleShare = async () => {
+    const text = `Bus journey: ${localName(fromStop, i18n.language)} to ${localName(toStop, i18n.language)} on Nammooru Bus. Fare: ₹${journey?.totalFare}, Time: ${journey?.totalMinutes} min.`
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Nammooru Bus Journey',
+          text,
+          url: window.location.href,
+        })
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          navigator.clipboard.writeText(`${text} ${window.location.href}`)
+          addToast('Journey copied to clipboard!', 'info')
+        }
+      }
+    } else {
+      navigator.clipboard.writeText(`${text} ${window.location.href}`)
+      addToast('Journey link copied to clipboard!', 'info')
+    }
+  }
 
   if (!journey) {
     return (
-      <div className="p-6 text-center">
-        <p className="text-xs text-text-secondary mb-3">No active journey selected</p>
+      <div className="p-8 text-center space-y-3">
+        <AlertCircle className="w-8 h-8 text-text-secondary mx-auto" />
+        <p className="text-xs text-text-secondary">No journey selected.</p>
         <button
           type="button"
           onClick={() => navigate('/search')}
-          className="px-4 py-2 bg-cobalt text-white text-xs font-bold rounded-input"
+          className="px-4 py-2 bg-cobalt text-white text-xs font-bold rounded-pill"
         >
-          {t('passenger.find_buses')}
+          Plan a journey
         </button>
       </div>
     )
   }
 
-  const fromStop = journey.legs[0]?.fromStop
-  const toStop = journey.legs[journey.legs.length - 1]?.toStop
-  const currentlySaved = fromStop && toStop ? isSaved(fromStop.id, toStop.id) : false
-
-  const handleToggleSave = async () => {
-    if (currentlySaved) {
-      const match = useSavedStore.getState().savedTrips.find(
-        (t) => t.from_stop === fromStop.id && t.to_stop === toStop.id
-      )
-      if (match) {
-        await removeTrip(match.id, user)
-        addToast({ message: 'Removed from saved trips', type: 'info' })
-      }
-    } else {
-      await saveTrip({
-        fromStop,
-        toStop,
-        summary: journey.summary,
-      }, user)
-      addToast({ message: 'Saved to trips', type: 'success' })
-    }
-  }
-
-  const handleShare = async () => {
-    const shareText = `Bus from ${fromStop ? localName(fromStop, i18n.language) : ''} to ${toStop ? localName(toStop, i18n.language) : ''} via Nammooru Bus.`
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Nammooru Bus Journey',
-          text: shareText,
-          url: window.location.href,
-        })
-      } catch (e) {
-        // user cancelled or failed
-      }
-    } else {
-      await navigator.clipboard.writeText(`${shareText} ${window.location.href}`)
-      addToast({ message: t('passenger.copied'), type: 'success' })
-    }
-  }
-
-  const handleSos = async () => {
-    const routeCode = journey.legs[0]?.route?.code || ''
-    const msg = `${t('passenger.sos_message')} Bus ${routeCode}. ${window.location.origin}/live?route=${routeCode}`
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Nammooru Bus SOS', text: msg })
-      } catch (e) {}
-    } else {
-      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
-    }
-  }
-
   return (
-    <div className="space-y-4 pt-1 pb-6">
-      {/* Top bar */}
+    <div className="space-y-3.5 pt-1 pb-16">
+      {/* Header */}
       <div className="flex items-center justify-between pb-2 border-b border-line">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink transition"
+          className="flex items-center gap-1.5 text-xs font-bold text-text-secondary hover:text-ink transition p-1"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{t('common.back')}</span>
         </button>
         <span className="font-extrabold text-xs font-heading">Journey Details</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={handleToggleSave}
@@ -226,7 +229,21 @@ export default function JourneyPage() {
         </div>
       </div>
 
-      {/* Summary Tiles */}
+      {/* Small Map Card (Height 240px per Part B) */}
+      <MapCard height={240} />
+
+      {/* Live Comparison Panel if Bus is Tracking (Part C.4) */}
+      {liveTripForLeg && (
+        <UserBusComparison
+          userPos={userPos}
+          selectedTrip={liveTripForLeg}
+          stops={stops}
+          routeStops={routeStops}
+          schedules={schedules}
+        />
+      )}
+
+      {/* Summary Tiles Row */}
       <div className="grid grid-cols-3 gap-2">
         <div className="p-3 bg-surface rounded-card border border-line shadow-soft text-center">
           <span className="text-[10px] uppercase font-bold text-text-secondary block">
@@ -268,7 +285,7 @@ export default function JourneyPage() {
         </div>
       </div>
 
-      {/* Vertical Stepper */}
+      {/* Vertical Stepper Cards */}
       <div className="p-4 bg-surface rounded-card border border-line shadow-soft space-y-4">
         {/* Step 1: Walk to Origin Stop */}
         <div className="flex gap-3 relative">
@@ -313,7 +330,7 @@ export default function JourneyPage() {
                 </div>
               )}
 
-              {/* Ride Leg */}
+              {/* Ride Leg Card */}
               <div className="flex gap-3 relative">
                 <div className="flex flex-col items-center">
                   <div
@@ -324,13 +341,13 @@ export default function JourneyPage() {
                   </div>
                   <div className="w-0.5 flex-1 bg-line my-1" />
                 </div>
-                <div className="pb-3 flex-1 min-w-0 bg-page/50 p-2.5 rounded-input border border-line">
-                  <div className="flex items-center justify-between mb-1">
+                <div className="pb-3 flex-1 min-w-0 bg-page/70 p-3 rounded-input border border-line space-y-1.5">
+                  <div className="flex items-center justify-between">
                     <RouteBadge code={leg.route?.code} color={leg.route?.color} size="sm" />
                     <CrowdMeter level="moderate" />
                   </div>
                   <p className="text-xs font-bold text-ink">
-                    Board Route {leg.route?.code}
+                    Board Route {leg.route?.code} ({localName(leg.route, i18n.language)})
                   </p>
                   <p className="text-[11px] text-text-secondary">
                     Ride {leg.stopsCount} stops &bull; {leg.durationMin} min &bull; ₹{leg.fare}
@@ -357,11 +374,11 @@ export default function JourneyPage() {
         </div>
       </div>
 
-      {/* Action Buttons: Track Live & SOS */}
-      <div className="flex items-center gap-2 pt-1">
+      {/* Sticky Bottom Action Bar (Save, Share, Track live, SOS) */}
+      <div className="fixed bottom-0 left-0 right-0 p-3 bg-surface/95 backdrop-blur-md border-t border-line z-30 flex items-center justify-center gap-2 max-w-lg mx-auto md:max-w-none">
         <Link
           to={`/live?route=${journey.legs[0]?.route?.code}`}
-          className="flex-1 py-3 bg-cobalt text-white text-xs font-bold rounded-input shadow-soft flex items-center justify-center gap-2 hover:opacity-95 transition"
+          className="flex-1 py-2.5 bg-cobalt text-white text-xs font-bold rounded-pill shadow-soft flex items-center justify-center gap-2 hover:opacity-95 transition"
         >
           <Radio className="w-4 h-4" />
           <span>{t('passenger.track_live')}</span>

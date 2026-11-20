@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Polyline, Marker, Circle, useMap } from 'react
 import L from 'leaflet'
 import { useMapStore } from '@/store/mapStore'
 import { useLiveStore } from '@/store/liveStore'
+import { useLocationStore } from '@/store/locationStore'
 import { getTileUrl, TILE_ATTRIBUTION } from '@/lib/mapConfig'
 import BusMarker from './BusMarker'
 
@@ -10,10 +11,15 @@ import BusMarker from './BusMarker'
 function createMarkerIcon(type, label = '') {
   const configs = {
     user: {
-      html: `<div style="width:18px;height:18px;border-radius:50%;background:#3451F2;border:3px solid #FFFFFF;box-shadow:0 0 10px rgba(52,81,242,0.6);"></div>`,
-      className: 'user-location-marker',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9],
+      html: `
+        <div style="position:relative;width:22px;height:22px;display:flex;align-items:center;justify-content:center;">
+          <span style="position:absolute;inset:0;border-radius:50%;background:#3451F2;opacity:0.4;animation:ping 1.8s cubic-bezier(0,0,0.2,1) infinite;"></span>
+          <div style="width:14px;height:14px;border-radius:50%;background:#3451F2;border:2.5px solid #FFFFFF;box-shadow:0 0 10px rgba(52,81,242,0.7);z-index:2;"></div>
+        </div>
+      `,
+      className: 'you-location-marker',
+      iconSize: [22, 22],
+      iconAnchor: [11, 11],
     },
     pinA: {
       html: `<div style="background:#12A676;color:white;font-weight:800;font-size:11px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">A</div>`,
@@ -57,7 +63,7 @@ function MapController() {
   useEffect(() => {
     if (bounds && bounds.length >= 2) {
       try {
-        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16, animate: true })
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16, animate: true })
       } catch (e) {
         console.warn('Map fitBounds error:', e)
       }
@@ -70,17 +76,32 @@ function MapController() {
     }
   }, [center, zoom, map])
 
+  useEffect(() => {
+    // Invalidate size on mount / updates
+    const timer = setTimeout(() => {
+      map.invalidateSize()
+    }, 150)
+    return () => clearTimeout(timer)
+  }, [map])
+
   return null
 }
 
-export default function MapView() {
+export default function MapView({ showUserBusLink = true }) {
   const { polyline, routeColor, markers, circle } = useMapStore()
   const { trips, selectedTripId, setSelectedTripId } = useLiveStore()
+  const { position: userPos, accuracy } = useLocationStore()
 
   const defaultLat = parseFloat(import.meta.env.VITE_DEFAULT_LAT || '15.3647')
   const defaultLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG || '75.1240')
   const tileUrl = getTileUrl()
   const attribution = TILE_ATTRIBUTION
+
+  // Find selected bus if active
+  const selectedTrip = trips.find((t) => t.id === selectedTripId)
+  const selectedBusPos = selectedTrip?.position?.lat && selectedTrip?.position?.lng
+    ? { lat: selectedTrip.position.lat, lng: selectedTrip.position.lng }
+    : null
 
   return (
     <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
@@ -121,7 +142,7 @@ export default function MapView() {
           </>
         )}
 
-        {/* Radius Circle (for Nearby) */}
+        {/* Radius Circle (e.g. for Nearby) */}
         {circle && (
           <Circle
             center={[circle.lat, circle.lng]}
@@ -136,16 +157,55 @@ export default function MapView() {
           />
         )}
 
-        {/* Custom Markers */}
+        {/* User Location Pulsing Dot + Accuracy Circle (Rendered above polylines, below buses) */}
+        {userPos && (
+          <>
+            <Circle
+              center={[userPos.lat, userPos.lng]}
+              radius={Math.min(accuracy || 30, 250)}
+              pathOptions={{
+                color: '#3451F2',
+                fillColor: '#3451F2',
+                fillOpacity: 0.12,
+                weight: 1.5,
+                dashArray: '3, 3',
+              }}
+            />
+            <Marker
+              position={[userPos.lat, userPos.lng]}
+              icon={createMarkerIcon('user')}
+              zIndexOffset={500}
+            />
+          </>
+        )}
+
+        {/* Thin Dashed Line Between User and Selected Bus (Live Screen) */}
+        {showUserBusLink && userPos && selectedBusPos && (
+          <Polyline
+            positions={[
+              [userPos.lat, userPos.lng],
+              [selectedBusPos.lat, selectedBusPos.lng],
+            ]}
+            pathOptions={{
+              color: '#3451F2',
+              weight: 2,
+              dashArray: '5, 5',
+              opacity: 0.75,
+            }}
+          />
+        )}
+
+        {/* Custom Stop Markers */}
         {markers.map((m, idx) => (
           <Marker
             key={m.id || idx}
             position={[m.lat, m.lng]}
             icon={createMarkerIcon(m.type || 'stop', m.label)}
+            zIndexOffset={300}
           />
         ))}
 
-        {/* Live Buses */}
+        {/* Live Buses (Rendered on top with highest z-index) */}
         {trips.map((trip) => (
           <BusMarker
             key={trip.id}

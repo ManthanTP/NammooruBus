@@ -1,40 +1,30 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Navigation, Sliders, Footprints, Bus, ArrowRight } from 'lucide-react'
+import { MapPin, Navigation, Footprints, Bus, ArrowRight } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
 import { useMapStore } from '@/store/mapStore'
+import { useLocationStore } from '@/store/locationStore'
 import { haversine } from '@/lib/geo'
 import { localName } from '@/lib/formatters'
 import RouteBadge from '@/components/ui/RouteBadge'
+import MapCard from '@/components/map/MapCard'
+import LocationBanner from '@/components/ui/LocationBanner'
 
 export default function NearbyPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { stops, routes, routeStops } = useDataStore()
-  const { setCircle, setMarkers, setView, clearMap } = useMapStore()
+  const { setCircle, setMarkers, setCenter } = useMapStore()
+  const { position: userPos } = useLocationStore()
 
-  // Default to Hubballi city coordinates
-  const [userLocation, setUserLocation] = useState({
-    lat: parseFloat(import.meta.env.VITE_DEFAULT_LAT || '15.3647'),
-    lng: parseFloat(import.meta.env.VITE_DEFAULT_LNG || '75.1240'),
-  })
+  const defaultLat = parseFloat(import.meta.env.VITE_DEFAULT_LAT || '15.3647')
+  const defaultLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG || '75.1240')
+
+  const centerLat = userPos?.lat || defaultLat
+  const centerLng = userPos?.lng || defaultLng
+
   const [radiusM, setRadiusM] = useState(1000) // Default 1000m (1 km)
-
-  // Try GPS
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-        },
-        (err) => {
-          console.warn('Geolocation denied, using default city center:', err.message)
-        },
-        { timeout: 5000 }
-      )
-    }
-  }, [])
 
   // Map route badges per stop
   const routesByStop = useMemo(() => {
@@ -57,125 +47,123 @@ export default function NearbyPage() {
     const list = []
 
     for (const stop of stops) {
-      const distKm = haversine(userLocation.lat, userLocation.lng, stop.lat, stop.lng)
+      if (!stop.lat || !stop.lng) continue
+      const distKm = haversine(centerLat, centerLng, stop.lat, stop.lng)
       if (distKm <= radiusKm) {
-        const distM = Math.round(distKm * 1000)
-        const walkMin = Math.max(1, Math.round(distM / 80))
         list.push({
           ...stop,
-          distM,
           distKm,
-          walkMin,
-          routesPassing: routesByStop[stop.id] || [],
+          walkMin: Math.max(1, Math.round((distKm * 1000) / 80)), // 80 m/min
+          distMeters: Math.round(distKm * 1000),
+          routes: routesByStop[stop.id] || [],
         })
       }
     }
 
-    return list.sort((a, b) => a.distM - b.distM)
-  }, [stops, userLocation, radiusM, routesByStop])
+    return list.sort((a, b) => a.distKm - b.distKm)
+  }, [stops, centerLat, centerLng, radiusM, routesByStop])
 
-  // Update circle and user marker on map
+  // Update map radius and stop markers
   useEffect(() => {
-    setCircle({ lat: userLocation.lat, lng: userLocation.lng, radiusM })
-    const markers = [
-      {
-        id: 'userLoc',
-        lat: userLocation.lat,
-        lng: userLocation.lng,
-        type: 'user',
-        label: 'You',
-      },
-      ...nearbyStops.map((s) => ({
-        id: s.id,
-        lat: s.lat,
-        lng: s.lng,
-        type: 'stop',
-        label: s.name_en,
-      })),
-    ]
-    setMarkers(markers)
-    setView([userLocation.lat, userLocation.lng], radiusM > 1500 ? 13 : 14)
+    setCircle({ lat: centerLat, lng: centerLng, radiusM })
 
-    return () => clearMap()
-  }, [userLocation, radiusM, nearbyStops, setCircle, setMarkers, setView, clearMap])
+    const markers = nearbyStops.map((stop) => ({
+      id: stop.id,
+      lat: stop.lat,
+      lng: stop.lng,
+      type: 'stop',
+      label: stop.name_en,
+    }))
+    setMarkers(markers)
+    setCenter([centerLat, centerLng], 14)
+  }, [centerLat, centerLng, radiusM, nearbyStops, setCircle, setMarkers, setCenter])
 
   return (
-    <div className="space-y-3 pt-1">
-      {/* Header and Radius Slider */}
-      <div className="p-4 bg-surface rounded-card border border-line shadow-soft space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-cobalt" />
-            <h2 className="text-sm font-extrabold text-ink font-heading">{t('nav.nearby')}</h2>
-          </div>
-          <span className="text-xs font-bold text-cobalt font-mono bg-cobalt-tint px-2 py-0.5 rounded-pill">
-            {radiusM >= 1000 ? `${(radiusM / 1000).toFixed(1)} km` : `${radiusM} m`}
-          </span>
-        </div>
-
-        {/* Radius slider (300 m to 3000 m, 100 m steps) */}
-        <div>
-          <div className="flex items-center justify-between text-[11px] text-text-secondary mb-1">
-            <span>300 m</span>
-            <span>{t('passenger.nearby_radius', { radius: radiusM })}</span>
-            <span>3 km</span>
-          </div>
-          <input
-            type="range"
-            min={300}
-            max={3000}
-            step={100}
-            value={radiusM}
-            onChange={(e) => setRadiusM(parseInt(e.target.value, 10))}
-            className="w-full accent-cobalt cursor-pointer"
-          />
-        </div>
+    <div className="space-y-3.5 pt-1 pb-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-lg font-extrabold text-ink font-heading flex items-center gap-2">
+          <MapPin className="w-5 h-5 text-cobalt" />
+          <span>{t('nav.nearby')}</span>
+        </h1>
+        <p className="text-xs text-text-secondary">
+          {nearbyStops.length} stops within {radiusM >= 1000 ? `${radiusM / 1000} km` : `${radiusM} m`}
+        </p>
       </div>
 
-      {/* Stop Cards List */}
-      <div className="space-y-2 pb-4">
-        {nearbyStops.length > 0 ? (
+      {/* Small Map Card (Height 260px on Nearby per Part B) */}
+      <MapCard height={260} />
+
+      {/* Location Banner if GPS is not active */}
+      <LocationBanner />
+
+      {/* Radius Filter Pills */}
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] font-bold text-text-secondary">Radius:</span>
+        {[500, 1000, 2000].map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setRadiusM(m)}
+            className={`px-3 py-1 rounded-pill text-xs font-bold transition ${
+              radiusM === m
+                ? 'bg-cobalt text-white shadow-xs'
+                : 'bg-surface text-text-secondary border border-line hover:text-ink'
+            }`}
+          >
+            {m >= 1000 ? `${m / 1000} km` : `${m} m`}
+          </button>
+        ))}
+      </div>
+
+      {/* Nearby Stops List */}
+      <div className="space-y-2 pt-1">
+        {nearbyStops.length === 0 ? (
+          <div className="p-8 bg-surface rounded-card border border-line text-center text-xs text-text-secondary">
+            No stops found within {radiusM}m. Try increasing the search radius above.
+          </div>
+        ) : (
           nearbyStops.map((stop) => (
             <div
               key={stop.id}
               onClick={() => navigate(`/stops/${stop.id}`)}
               role="button"
               tabIndex={0}
-              className="p-3.5 bg-surface rounded-card border border-line shadow-soft hover:border-cobalt transition cursor-pointer flex items-center justify-between group text-left"
+              className="p-3.5 bg-surface rounded-card border border-line shadow-soft hover:border-cobalt transition flex items-center justify-between cursor-pointer"
             >
-              <div className="min-w-0 flex-1 pr-3">
-                <h4 className="text-xs font-bold text-ink truncate mb-1">
-                  {localName(stop, i18n.language)}
-                </h4>
-                <div className="flex items-center gap-3 text-[11px] text-text-secondary mb-2">
-                  <span className="flex items-center gap-1 font-semibold text-ink">
-                    <Footprints className="w-3.5 h-3.5 text-cobalt" />
-                    {t('passenger.walking_time', { minutes: stop.walkMin })}
-                  </span>
-                  <span>&bull;</span>
-                  <span>{stop.distM} m away</span>
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-full bg-cobalt-tint text-cobalt flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4" />
                 </div>
+                <div className="truncate">
+                  <p className="text-xs font-bold text-ink truncate">
+                    {localName(stop, i18n.language)}
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[11px] text-text-secondary flex items-center gap-1">
+                      <Footprints className="w-3 h-3" />
+                      <span>{stop.walkMin} min walk ({stop.distMeters} m)</span>
+                    </span>
+                  </div>
 
-                {/* Passing routes badges */}
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {stop.routesPassing.map((code) => (
-                    <RouteBadge key={code} code={code} size="xs" />
-                  ))}
-                  {stop.routesPassing.length === 0 && (
-                    <span className="text-[10px] text-text-secondary">No active routes</span>
+                  {stop.routes.length > 0 && (
+                    <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+                      {stop.routes.slice(0, 4).map((code) => (
+                        <RouteBadge key={code} code={code} size="xs" />
+                      ))}
+                      {stop.routes.length > 4 && (
+                        <span className="text-[9px] text-text-secondary font-medium">
+                          +{stop.routes.length - 4}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
 
-              <div className="w-8 h-8 rounded-full bg-page flex items-center justify-center text-text-secondary group-hover:bg-cobalt group-hover:text-white transition shrink-0">
-                <ArrowRight className="w-4 h-4" />
-              </div>
+              <ArrowRight className="w-4 h-4 text-text-secondary shrink-0" />
             </div>
           ))
-        ) : (
-          <div className="p-6 bg-surface rounded-card border border-line text-center text-xs text-text-secondary">
-            No stops found within {radiusM} meters. Increase the slider to expand the search radius.
-          </div>
         )}
       </div>
     </div>

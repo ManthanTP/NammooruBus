@@ -1,29 +1,42 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Bus, AlertCircle } from 'lucide-react'
+import { Bus, AlertCircle, KeyRound, ShieldAlert, CheckCircle2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 
 export default function RegisterPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { signUp, loading } = useAuthStore()
+  const { signUp, claimDriverRole, loading } = useAuthStore()
 
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [preferredLang, setPreferredLang] = useState('en')
+  const [isDriver, setIsDriver] = useState(false)
+  const [driverKey, setDriverKey] = useState('')
   const [formError, setFormError] = useState(null)
+  const [noticeMessage, setNoticeMessage] = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setFormError(null)
+    setNoticeMessage(null)
 
     if (password.length < 8) {
       setFormError(t('auth.password_hint'))
       return
     }
+
+    if (isDriver && !driverKey.trim()) {
+      setFormError('Please enter your driver secret key')
+      return
+    }
+
+    const submittedKey = driverKey
+    // Clear key field from state immediately (Part D.2.c: Never log or display the key. Clear the field after submit.)
+    setDriverKey('')
 
     const { data, error } = await signUp(email, password, fullName, preferredLang)
 
@@ -32,12 +45,32 @@ export default function RegisterPage() {
       return
     }
 
-    if (data?.session) {
-      navigate('/')
-    } else {
-      // If auto-confirm is enabled or session created
-      navigate('/')
+    // If driver toggle was selected, claim driver role via RPC
+    if (isDriver) {
+      const { status } = await claimDriverRole(submittedKey)
+
+      if (status === 'ok') {
+        navigate('/driver')
+        return
+      } else if (status === 'invalid') {
+        setNoticeMessage({
+          type: 'warning',
+          text: 'That driver key is not correct. Your account was created as a passenger. You can try the key again anytime on your Profile page.',
+        })
+        return
+      } else if (status === 'locked') {
+        setFormError('Too many wrong keys. Try again in 15 minutes.')
+        return
+      } else if (status === 'not_configured') {
+        setFormError('Driver sign-up is not set up yet. Ask the admin.')
+        return
+      } else if (status === 'login_required') {
+        setFormError('Account created. Please log in and claim driver role on your profile.')
+        return
+      }
     }
+
+    navigate('/')
   }
 
   return (
@@ -64,6 +97,29 @@ export default function RegisterPage() {
             <div className="mb-4 p-3 bg-danger/10 border border-danger/20 rounded-input text-xs text-danger flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{formError}</span>
+            </div>
+          )}
+
+          {noticeMessage && (
+            <div className="mb-4 p-3 bg-warning/15 border border-warning/30 rounded-input text-xs text-ink space-y-2">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                <p className="font-medium text-[11px] leading-snug">{noticeMessage.text}</p>
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <Link
+                  to="/profile"
+                  className="px-3 py-1 bg-cobalt text-white font-bold rounded-pill text-[11px] inline-block shadow-xs"
+                >
+                  Go to Profile
+                </Link>
+                <Link
+                  to="/"
+                  className="px-3 py-1 bg-page border border-line text-text-secondary font-bold rounded-pill text-[11px] inline-block"
+                >
+                  Continue as passenger
+                </Link>
+              </div>
             </div>
           )}
 
@@ -126,12 +182,46 @@ export default function RegisterPage() {
               </select>
             </div>
 
+            {/* Driver Role Toggle (Part D.1) */}
+            <div className="pt-2 border-t border-line">
+              <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={isDriver}
+                  onChange={(e) => setIsDriver(e.target.checked)}
+                  className="w-4 h-4 rounded text-cobalt focus:ring-cobalt cursor-pointer"
+                />
+                <span className="text-xs font-bold text-ink">I am a driver</span>
+              </label>
+
+              {/* Driver Secret Key Input (Only visible when toggle is ON) */}
+              {isDriver && (
+                <div className="mt-3 p-3 bg-page rounded-input border border-line space-y-1.5 animate-fadeIn">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-ink">
+                    <KeyRound className="w-3.5 h-3.5 text-cobalt" />
+                    <span>Driver Secret Key</span>
+                  </div>
+                  <input
+                    type="password"
+                    value={driverKey}
+                    onChange={(e) => setDriverKey(e.target.value)}
+                    placeholder="Enter driver registration secret..."
+                    required={isDriver}
+                    className="w-full px-3 py-2 bg-surface border border-line rounded-input text-sm text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt font-mono"
+                  />
+                  <p className="text-[10px] text-text-secondary">
+                    Obtain this secret key from your depot manager or bus administrator.
+                  </p>
+                </div>
+              )}
+            </div>
+
             <button
               type="submit"
               disabled={loading}
               className="w-full py-3 bg-cobalt text-white text-sm font-semibold rounded-input shadow-soft hover:opacity-95 active:scale-[0.99] disabled:opacity-50 transition"
             >
-              {loading ? t('common.loading') : t('auth.register_action')}
+              {loading ? t('common.loading') : isDriver ? 'Register as Driver' : t('auth.register_action')}
             </button>
           </form>
 

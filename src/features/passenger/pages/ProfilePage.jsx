@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, Check } from 'lucide-react'
+import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useToastStore } from '@/components/ui/Toast'
 import LanguageToggle from '@/components/ui/LanguageToggle'
@@ -9,16 +9,46 @@ import LanguageToggle from '@/components/ui/LanguageToggle'
 export default function ProfilePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { user, profile, signOut, updateLang } = useAuthStore()
+  const { user, profile, signOut, claimDriverRole } = useAuthStore()
   const { addToast } = useToastStore()
 
-  const [fullName, setFullName] = useState(profile?.full_name || '')
+  const [driverKey, setDriverKey] = useState('')
+  const [claimLoading, setClaimLoading] = useState(false)
+  const [claimError, setClaimError] = useState(null)
 
   const handleLogout = async () => {
     await signOut()
-    addToast({ message: 'Logged out successfully', type: 'info' })
+    addToast('Logged out successfully', 'info')
     navigate('/')
   }
+
+  const handleClaimDriver = async (e) => {
+    e.preventDefault()
+    if (!driverKey.trim()) return
+
+    const submitted = driverKey
+    setDriverKey('')
+    setClaimLoading(true)
+    setClaimError(null)
+
+    const { status, error } = await claimDriverRole(submitted)
+    setClaimLoading(false)
+
+    if (status === 'ok') {
+      addToast('Driver role unlocked! Redirecting...', 'success')
+      navigate('/driver')
+    } else if (status === 'invalid') {
+      setClaimError('That driver key is not correct.')
+    } else if (status === 'locked') {
+      setClaimError('Too many wrong keys. Try again in 15 minutes.')
+    } else if (status === 'not_configured') {
+      setClaimError('Driver sign-up is not set up yet. Ask the admin.')
+    } else {
+      setClaimError(error || 'Failed to verify driver key.')
+    }
+  }
+
+  const isPassenger = !profile?.role || profile.role === 'passenger'
 
   return (
     <div className="space-y-4 pt-1 pb-6">
@@ -27,7 +57,7 @@ export default function ProfilePage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink transition"
+          className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink transition p-1"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{t('common.back')}</span>
@@ -38,7 +68,7 @@ export default function ProfilePage() {
 
       {/* User Info Card */}
       <div className="p-4 bg-surface rounded-card border border-line shadow-soft flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-cobalt-tint text-cobalt flex items-center justify-center font-bold text-lg">
+        <div className="w-12 h-12 rounded-full bg-cobalt-tint text-cobalt flex items-center justify-center font-bold text-lg shrink-0">
           <User className="w-6 h-6" />
         </div>
         <div className="min-w-0 flex-1">
@@ -46,7 +76,7 @@ export default function ProfilePage() {
             {profile?.full_name || user?.email?.split('@')[0] || 'Guest User'}
           </h3>
           <p className="text-xs text-text-secondary truncate">{user?.email || 'Not logged in'}</p>
-          <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-page border border-line rounded-pill">
+          <span className="inline-block mt-1 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-page border border-line rounded-pill">
             Role: {profile?.role || 'passenger'}
           </span>
         </div>
@@ -60,6 +90,44 @@ export default function ProfilePage() {
         </div>
         <LanguageToggle />
       </div>
+
+      {/* Become a Driver Section (Part D.3: Only for Passengers) */}
+      {isPassenger && user && (
+        <div className="p-4 bg-surface rounded-card border border-line shadow-soft space-y-3">
+          <div className="flex items-center gap-2">
+            <KeyRound className="w-4 h-4 text-cobalt" />
+            <h4 className="text-xs font-bold text-ink font-heading">Become a Driver</h4>
+          </div>
+          <p className="text-xs text-text-secondary">
+            If you are a transit driver, enter your depot secret key to unlock the Driver tracking portal.
+          </p>
+
+          {claimError && (
+            <div className="p-2.5 bg-danger/10 border border-danger/30 rounded-input text-xs text-danger flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{claimError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleClaimDriver} className="flex gap-2">
+            <input
+              type="password"
+              value={driverKey}
+              onChange={(e) => setDriverKey(e.target.value)}
+              placeholder="Driver secret key..."
+              required
+              className="flex-1 px-3 py-2 bg-page border border-line rounded-input text-xs text-ink focus:outline-none focus:border-cobalt font-mono"
+            />
+            <button
+              type="submit"
+              disabled={claimLoading}
+              className="px-3.5 py-2 bg-cobalt text-white text-xs font-bold rounded-pill shadow-xs hover:opacity-95 disabled:opacity-50"
+            >
+              {claimLoading ? 'Verifying...' : 'Unlock'}
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Quick Links */}
       <div className="p-3 bg-surface rounded-card border border-line shadow-soft divide-y divide-line text-xs font-semibold">
@@ -88,7 +156,7 @@ export default function ProfilePage() {
         {profile?.role === 'driver' && (
           <Link
             to="/driver"
-            className="py-2.5 flex items-center justify-between text-cobalt hover:underline transition"
+            className="py-2.5 flex items-center justify-between text-cobalt hover:underline transition font-bold"
           >
             <span className="flex items-center gap-2">
               <Shield className="w-4 h-4" />
@@ -99,26 +167,17 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Authentication Action */}
-      <div className="pt-2">
-        {user ? (
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="w-full py-2.5 bg-danger/10 text-danger border border-danger/20 font-bold text-xs rounded-input hover:bg-danger hover:text-white transition flex items-center justify-center gap-1.5"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>{t('common.logout')}</span>
-          </button>
-        ) : (
-          <Link
-            to="/login"
-            className="w-full py-2.5 bg-cobalt text-white font-bold text-xs rounded-input shadow-soft hover:opacity-95 transition flex items-center justify-center gap-1.5"
-          >
-            <span>{t('auth.login')}</span>
-          </Link>
-        )}
-      </div>
+      {/* Logout Button */}
+      {user && (
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full py-3 bg-surface hover:bg-danger/10 border border-line hover:border-danger/30 text-danger text-xs font-bold rounded-card shadow-soft transition flex items-center justify-center gap-2"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>{t('auth.logout')}</span>
+        </button>
+      )}
     </div>
   )
 }

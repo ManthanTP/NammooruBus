@@ -181,6 +181,9 @@ export default function AdminUsersPage() {
           <p className="text-xs text-text-secondary mt-0.5">
             Manage user accounts, assign driver privileges, and delegate administrator security roles.
           </p>
+          <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-cobalt-tint border border-cobalt/20 rounded-pill text-[11px] font-semibold text-cobalt">
+            <span>Note: Driver key is set in Supabase (see README)</span>
+          </div>
         </div>
 
         <button

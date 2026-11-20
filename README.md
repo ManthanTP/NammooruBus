@@ -50,6 +50,24 @@ where id = (select id from auth.users where email = 'admin@nammooru.in');
 ```
 3. Navigate to `/12345678/admin/login` and log in using your email, password, and `VITE_ADMIN_SECRET_KEY`.
 
+### Configuring & Rotating the Driver Registration Secret Key (Phase 5.5)
+1. Run `supabase/driver_signup.sql` once in your Supabase SQL Editor to install the `claim_driver_role` RPC and security tables.
+2. Insert or rotate your driver registration key directly in Supabase:
+```sql
+-- Set or rotate your active driver registration key:
+INSERT INTO public.driver_signup_config (driver_key, is_active)
+VALUES ('CHANGE-ME-driver-key', true);
+```
+3. To disable driver self-registration or rotate keys:
+```sql
+-- Deactivate all old keys:
+UPDATE public.driver_signup_config SET is_active = false;
+-- Insert new secret:
+INSERT INTO public.driver_signup_config (driver_key, is_active)
+VALUES ('your-new-secure-driver-key', true);
+```
+4. Drivers can now register using the "I am a driver" toggle at `/register`, or passengers can unlock driver status in their `/profile` page. Key verification runs strictly inside Postgres via `claim_driver_role(p_key)`. The key is never exposed to the frontend.
+
 ---
 
 ## 3. Running & Building the App

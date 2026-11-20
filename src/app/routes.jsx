@@ -74,65 +74,65 @@ const withBoundary = (element) => (
 )
 
 export const router = createBrowserRouter([
-  // Passenger Portal Layout (Single Persistent Leaflet Map)
+  // Passenger Portal Layout
   {
     element: withBoundary(<PassengerLayout />),
     children: [
       {
         path: '/',
-        element: <HomePage />,
+        element: withBoundary(<HomePage />),
       },
       {
         path: '/search',
-        element: <SearchPage />,
+        element: withBoundary(<SearchPage />),
       },
       {
         path: '/results',
-        element: <ResultsPage />,
+        element: withBoundary(<ResultsPage />),
       },
       {
         path: '/journey',
-        element: <JourneyPage />,
+        element: withBoundary(<JourneyPage />),
       },
       {
         path: '/live',
-        element: <LivePage />,
+        element: withBoundary(<LivePage />),
       },
       {
         path: '/nearby',
-        element: <NearbyPage />,
+        element: withBoundary(<NearbyPage />),
       },
       {
         path: '/routes',
-        element: <RoutesPage />,
+        element: withBoundary(<RoutesPage />),
       },
       {
         path: '/routes/:id',
-        element: <RouteDetailPage />,
+        element: withBoundary(<RouteDetailPage />),
       },
       {
         path: '/stops/:id',
-        element: <StopDetailPage />,
+        element: withBoundary(<StopDetailPage />),
       },
       {
         path: '/saved',
-        element: <SavedPage />,
+        element: withBoundary(<SavedPage />),
       },
       {
         path: '/complaints',
-        element: <ComplaintsPage />,
+        element: withBoundary(<ComplaintsPage />),
       },
       {
         path: '/alerts',
-        element: <AlertsPage />,
+        element: withBoundary(<AlertsPage />),
       },
       {
         path: '/profile',
-        element: <ProfilePage />,
+        element: withBoundary(<ProfilePage />),
       },
       {
         path: '/help',
-        element: <HelpPage />,
+        element: withBoundary(<HelpPage />),
       },
     ],
   },
