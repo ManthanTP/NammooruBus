@@ -2,20 +2,30 @@ import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Clock, Calendar, MapPin } from 'lucide-react'
+import { ArrowLeft, Clock, Calendar, MapPin, RefreshCw } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
 import { useMapStore } from '@/store/mapStore'
 import { localName } from '@/lib/formatters'
+import { fetchDrivingRoute } from '@/lib/roadRouting'
 import RouteBadge from '@/components/ui/RouteBadge'
+import MapCard from '@/components/map/MapCard'
+import Skeleton from '@/components/ui/Skeleton'
 
 export default function RouteDetailPage() {
   const { id } = useParams()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const { routes, routeStops, stops, schedules } = useDataStore()
+  const { routes, routeStops, stops, schedules, loading: storeLoading, initData } = useDataStore()
   const { setRoute, setMarkers, fitBounds, clearMap } = useMapStore()
 
   const [dayType, setDayType] = useState('weekday') // 'weekday' | 'weekend'
+
+  // Ensure data store is initialized on reload
+  useEffect(() => {
+    if (stops.length === 0 && !storeLoading) {
+      initData()
+    }
+  }, [stops.length, storeLoading, initData])
 
   const route = routes.find((r) => r.id === id)
 
@@ -41,11 +51,12 @@ export default function RouteDetailPage() {
 
   const schedule = schedules.find((s) => s.route_id === id && s.day_type === dayType)
 
-  // Draw route and markers on map
+  // Draw road-following route and markers on map
   useEffect(() => {
     if (orderedStops.length < 2) return
 
-    const polyline = orderedStops.map((item) => [item.stop.lat, item.stop.lng])
+    let cancelled = false
+    const straightLine = orderedStops.map((item) => [item.stop.lat, item.stop.lng])
     const markers = orderedStops.map((item, idx) => ({
       id: item.stop.id,
       lat: item.stop.lat,
@@ -54,12 +65,48 @@ export default function RouteDetailPage() {
       label: item.stop.name_en,
     }))
 
-    setRoute(polyline, route?.color || '#3451F2')
     setMarkers(markers)
-    fitBounds(polyline)
 
-    return () => clearMap()
+    // 1. If route has pre-computed road geometry from database, use it directly!
+    let precomputed = null
+    if (Array.isArray(route?.geometry) && route.geometry.length > 1) {
+      precomputed = route.geometry
+    } else if (route?.geometry?.coordinates && Array.isArray(route.geometry.coordinates)) {
+      precomputed = route.geometry.coordinates.map(([lng, lat]) => [lat, lng])
+    }
+
+    if (precomputed && precomputed.length > 1) {
+      setRoute(precomputed, route?.color || '#3451F2', false)
+      fitBounds(precomputed)
+    } else {
+      // 2. Otherwise draw straight line initially and fetch OSRM road geometry
+      setRoute(straightLine, route?.color || '#3451F2', true)
+      fitBounds(straightLine)
+
+      fetchDrivingRoute(straightLine).then((res) => {
+        if (!cancelled && res?.polyline && res.polyline.length > 1) {
+          setRoute(res.polyline, route?.color || '#3451F2', res.isApproximate)
+          fitBounds(res.polyline)
+        }
+      })
+    }
+
+    // Clean up map layers on leave per Problem 3.2
+    return () => {
+      cancelled = true
+      clearMap()
+    }
   }, [orderedStops, route, setRoute, setMarkers, fitBounds, clearMap])
+
+  if (!route && (storeLoading || stops.length === 0)) {
+    return (
+      <div className="space-y-4 pt-1 pb-6">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-[220px] w-full rounded-[24px]" />
+        <Skeleton className="h-24 w-full rounded-card" />
+      </div>
+    )
+  }
 
   if (!route) {
     return (
@@ -84,6 +131,9 @@ export default function RouteDetailPage() {
         <RouteBadge code={route.code} color={route.color} size="md" />
         <div className="w-10" />
       </div>
+
+      {/* Small Map Card on Mobile (Height 220px per Part B) */}
+      <MapCard height={220} />
 
       {/* Route Title */}
       <div>

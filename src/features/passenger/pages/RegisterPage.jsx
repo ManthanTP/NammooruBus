@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Bus, AlertCircle, KeyRound, ShieldAlert, CheckCircle2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
+import { useDataStore } from '@/store/dataStore'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 
 export default function RegisterPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { signUp, claimDriverRole, loading } = useAuthStore()
+  const { routes, initData } = useDataStore()
 
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -16,8 +18,20 @@ export default function RegisterPage() {
   const [preferredLang, setPreferredLang] = useState('en')
   const [isDriver, setIsDriver] = useState(false)
   const [driverKey, setDriverKey] = useState('')
+  const [busRegNo, setBusRegNo] = useState('')
+  const [selectedRouteId, setSelectedRouteId] = useState('')
   const [formError, setFormError] = useState(null)
   const [noticeMessage, setNoticeMessage] = useState(null)
+
+  useEffect(() => {
+    initData()
+  }, [initData])
+
+  useEffect(() => {
+    if (routes && routes.length > 0 && !selectedRouteId) {
+      setSelectedRouteId(routes[0].id)
+    }
+  }, [routes, selectedRouteId])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -29,13 +43,21 @@ export default function RegisterPage() {
       return
     }
 
-    if (isDriver && !driverKey.trim()) {
-      setFormError('Please enter your driver secret key')
-      return
+    if (isDriver) {
+      if (!driverKey.trim()) {
+        setFormError('Please enter your driver secret key')
+        return
+      }
+      if (!busRegNo.trim()) {
+        setFormError('Please enter your bus registration number (e.g. KA25 F 1234)')
+        return
+      }
     }
 
     const submittedKey = driverKey
-    // Clear key field from state immediately (Part D.2.c: Never log or display the key. Clear the field after submit.)
+    const submittedBus = busRegNo.trim().toUpperCase()
+    const submittedRoute = selectedRouteId
+    // Clear key field from state immediately
     setDriverKey('')
 
     const { data, error } = await signUp(email, password, fullName, preferredLang)
@@ -47,7 +69,7 @@ export default function RegisterPage() {
 
     // If driver toggle was selected, claim driver role via RPC
     if (isDriver) {
-      const { status } = await claimDriverRole(submittedKey)
+      const { status } = await claimDriverRole(submittedKey, submittedBus, submittedRoute)
 
       if (status === 'ok') {
         navigate('/driver')
@@ -63,6 +85,12 @@ export default function RegisterPage() {
         return
       } else if (status === 'not_configured') {
         setFormError('Driver sign-up is not set up yet. Ask the admin.')
+        return
+      } else if (status === 'bus_taken') {
+        setFormError('This bus is already assigned to another driver. Please contact admin.')
+        return
+      } else if (status === 'bus_required') {
+        setFormError('Please enter your bus registration number.')
         return
       } else if (status === 'login_required') {
         setFormError('Account created. Please log in and claim driver role on your profile.')
@@ -194,23 +222,57 @@ export default function RegisterPage() {
                 <span className="text-xs font-bold text-ink">I am a driver</span>
               </label>
 
-              {/* Driver Secret Key Input (Only visible when toggle is ON) */}
+              {/* Driver Details (Only visible when toggle is ON) */}
               {isDriver && (
-                <div className="mt-3 p-3 bg-page rounded-input border border-line space-y-1.5 animate-fadeIn">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-ink">
-                    <KeyRound className="w-3.5 h-3.5 text-cobalt" />
-                    <span>Driver Secret Key</span>
+                <div className="mt-3 p-3.5 bg-page rounded-input border border-line space-y-3 animate-fadeIn">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-ink">
+                      <KeyRound className="w-3.5 h-3.5 text-cobalt" />
+                      <span>Driver Secret Key <span className="text-danger">*</span></span>
+                    </div>
+                    <input
+                      type="password"
+                      value={driverKey}
+                      onChange={(e) => setDriverKey(e.target.value)}
+                      placeholder="Enter driver registration secret..."
+                      required={isDriver}
+                      className="w-full px-3 py-2 bg-surface border border-line rounded-input text-xs text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt font-mono"
+                    />
                   </div>
-                  <input
-                    type="password"
-                    value={driverKey}
-                    onChange={(e) => setDriverKey(e.target.value)}
-                    placeholder="Enter driver registration secret..."
-                    required={isDriver}
-                    className="w-full px-3 py-2 bg-surface border border-line rounded-input text-sm text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt font-mono"
-                  />
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-ink">
+                      Bus Registration Number <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={busRegNo}
+                      onChange={(e) => setBusRegNo(e.target.value.toUpperCase())}
+                      placeholder="e.g. KA25 F 1234"
+                      required={isDriver}
+                      className="w-full px-3 py-2 bg-surface border border-line rounded-input text-xs font-mono font-bold uppercase text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-ink">
+                      Assigned Route
+                    </label>
+                    <select
+                      value={selectedRouteId}
+                      onChange={(e) => setSelectedRouteId(e.target.value)}
+                      className="w-full px-3 py-2 bg-surface border border-line rounded-input text-xs font-bold text-ink focus:outline-none focus:border-cobalt"
+                    >
+                      {routes.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          Route {r.code} - {r.name_en}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   <p className="text-[10px] text-text-secondary">
-                    Obtain this secret key from your depot manager or bus administrator.
+                    Obtain the secret key and bus details from your depot manager or bus administrator.
                   </p>
                 </div>
               )}

@@ -9,6 +9,7 @@ import { useDataStore } from '@/store/dataStore'
 import { localName } from '@/lib/formatters'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import EmptyState from '@/components/ui/EmptyState'
+import RouteBadge from '@/components/ui/RouteBadge'
 
 export default function SavedPage() {
   const { t, i18n } = useTranslation()
@@ -22,7 +23,7 @@ export default function SavedPage() {
   }, [user, initSaved])
 
   const handleRunSearch = (trip) => {
-    navigate(`/results?from=${trip.from_stop}&to=${trip.to_stop}`)
+    navigate(`/journey?from=${trip.from_stop}&to=${trip.to_stop}&r=${encodeURIComponent(trip.route_key || '')}`)
   }
 
   const handleRemove = (e, tripId) => {
@@ -97,11 +98,19 @@ export default function SavedPage() {
                       <span className="text-text-secondary font-normal">&rarr;</span>
                       <span className="truncate">{toStopObj ? localName(toStopObj, i18n.language) : 'Stop B'}</span>
                     </div>
-                    {trip.routeSummary && (
-                      <p className="text-[11px] text-text-secondary mt-0.5 truncate">
-                        {trip.routeSummary}
-                      </p>
-                    )}
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                      {(trip.route_key || '')
+                        .split('+')
+                        .filter(Boolean)
+                        .map((code) => (
+                          <RouteBadge key={code} code={code} size="xs" />
+                        ))}
+                      {trip.routeSummary && (
+                        <span className="text-[10px] text-text-secondary truncate">
+                          &bull; {trip.routeSummary}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
@@ -113,9 +122,14 @@ export default function SavedPage() {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    <div className="w-7 h-7 rounded-full bg-page flex items-center justify-center text-text-secondary group-hover:bg-cobalt group-hover:text-white transition">
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRunSearch(trip)}
+                      className="px-2.5 py-1 bg-cobalt-tint text-cobalt hover:bg-cobalt hover:text-white rounded-pill text-xs font-bold transition flex items-center gap-1"
+                    >
+                      <span>Open</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
                   </div>
                 </motion.div>
               )

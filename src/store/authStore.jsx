@@ -168,10 +168,12 @@ export const useAuthStore = create((set, get) => ({
     return profile
   },
 
-  claimDriverRole: async (driverKey) => {
+  claimDriverRole: async (driverKey, busRegNo = null, routeId = null) => {
     try {
       const { data, error } = await supabase.rpc('claim_driver_role', {
         p_key: driverKey,
+        p_reg_no: busRegNo ? busRegNo.trim().toUpperCase() : null,
+        p_route_id: routeId || null,
       })
       if (error) throw error
       if (data === 'ok') {
@@ -180,6 +182,20 @@ export const useAuthStore = create((set, get) => ({
       return { status: data || 'invalid', error: null }
     } catch (err) {
       console.error('claimDriverRole error:', err)
+      return { status: 'error', error: err.message }
+    }
+  },
+
+  setMyBus: async (busRegNo, routeId = null) => {
+    try {
+      const { data, error } = await supabase.rpc('set_my_bus', {
+        p_reg_no: busRegNo ? busRegNo.trim().toUpperCase() : '',
+        p_route_id: routeId || null,
+      })
+      if (error) throw error
+      return { status: data, error: null }
+    } catch (err) {
+      console.error('setMyBus error:', err)
       return { status: 'error', error: err.message }
     }
   },

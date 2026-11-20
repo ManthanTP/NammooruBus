@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, AlertTriangle, ArrowRight, CheckCircle2, RotateCcw } from 'lucide-react'
+import { Play, AlertTriangle, ArrowRight, CheckCircle2, RotateCcw, Bus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
@@ -12,85 +12,118 @@ export default function DriverStartPage() {
   const { routes, stops, initData } = useDataStore()
 
   const [driverRecord, setDriverRecord] = useState(null)
-  const [buses, setBuses] = useState([])
   const [selectedRouteId, setSelectedRouteId] = useState('')
-  const [selectedBusId, setSelectedBusId] = useState('')
   const [direction, setDirection] = useState(0) // 0 or 1
   const [activeTrip, setActiveTrip] = useState(null)
   const [loading, setLoading] = useState(true)
   const [starting, setStarting] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
 
+  // For legacy drivers without assigned bus
+  const [newBusReg, setNewBusReg] = useState('')
+  const [newBusRoute, setNewBusRoute] = useState('')
+  const [assigningBus, setAssigningBus] = useState(false)
+
   useEffect(() => {
     initData()
   }, [initData])
 
-  // Fetch driver record, buses, and active trip
-  useEffect(() => {
+  const loadDriverData = async () => {
     if (!user) return
+    setLoading(true)
+    try {
+      // 1. Get or create driver entry with assigned bus
+      let { data: dRow } = await supabase
+        .from('drivers')
+        .select('*, bus:buses(*)')
+        .eq('profile_id', user.id)
+        .maybeSingle()
 
-    const loadDriverData = async () => {
-      setLoading(true)
-      try {
-        // 1. Get or create driver entry
-        let { data: dRow } = await supabase
+      if (!dRow) {
+        const { data: created } = await supabase
           .from('drivers')
+          .insert({ profile_id: user.id })
           .select('*, bus:buses(*)')
-          .eq('profile_id', user.id)
+          .single()
+        dRow = created
+      }
+      setDriverRecord(dRow)
+
+      // 2. Set default route
+      if (dRow?.bus?.route_id) {
+        setSelectedRouteId(dRow.bus.route_id)
+        setNewBusRoute(dRow.bus.route_id)
+      } else if (routes.length > 0) {
+        setSelectedRouteId(routes[0].id)
+        setNewBusRoute(routes[0].id)
+      }
+
+      // 3. Check for any non-ended active trip for this driver
+      if (dRow?.id) {
+        const { data: existingTrip } = await supabase
+          .from('trips')
+          .select('*, route:routes(*), bus:buses(*)')
+          .eq('driver_id', dRow.id)
+          .neq('status', 'ended')
+          .order('started_at', { ascending: false })
+          .limit(1)
           .maybeSingle()
 
-        if (!dRow) {
-          // If admin promoted profile to driver without inserting drivers row yet
-          const { data: created } = await supabase
-            .from('drivers')
-            .insert({ profile_id: user.id })
-            .select()
-            .single()
-          dRow = created
+        if (existingTrip) {
+          setActiveTrip(existingTrip)
         }
-        setDriverRecord(dRow)
-
-        // 2. Fetch buses
-        const { data: busList } = await supabase.from('buses').select('*').eq('active', true)
-        setBuses(busList || [])
-        if (busList && busList.length > 0) {
-          setSelectedBusId(dRow?.bus_id || busList[0].id)
-        }
-
-        // 3. Set default route
-        if (routes.length > 0) {
-          setSelectedRouteId(routes[0].id)
-        }
-
-        // 4. Check for any non-ended active trip for this driver
-        if (dRow?.id) {
-          const { data: existingTrip } = await supabase
-            .from('trips')
-            .select('*, route:routes(*), bus:buses(*)')
-            .eq('driver_id', dRow.id)
-            .neq('status', 'ended')
-            .order('started_at', { ascending: false })
-            .limit(1)
-            .maybeSingle()
-
-          if (existingTrip) {
-            setActiveTrip(existingTrip)
-          }
-        }
-      } catch (err) {
-        console.warn('Error loading driver start data:', err)
-        setErrorMsg(err.message)
-      } finally {
-        setLoading(false)
       }
+    } catch (err) {
+      console.warn('Error loading driver start data:', err)
+      setErrorMsg(err.message)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     loadDriverData()
   }, [user, routes])
 
+  const handleSetMyBus = async () => {
+    if (!newBusReg.trim()) {
+      setErrorMsg('Please enter a bus registration number (e.g. KA25 F 1234).')
+      return
+    }
+
+    setAssigningBus(true)
+    setErrorMsg(null)
+    try {
+      const { data, error } = await supabase.rpc('set_my_bus', {
+        p_reg_no: newBusReg.trim().toUpperCase(),
+        p_route_id: newBusRoute || null,
+      })
+      if (error) throw error
+
+      if (data === 'bus_taken') {
+        setErrorMsg('This bus is already assigned to another driver. Please contact admin.')
+      } else if (data === 'bus_required') {
+        setErrorMsg('Please enter a valid bus registration number.')
+      } else if (data === 'ok') {
+        setNewBusReg('')
+        await loadDriverData()
+      } else {
+        setErrorMsg(`Failed to assign bus: ${data}`)
+      }
+    } catch (err) {
+      setErrorMsg(err.message || 'Error assigning bus')
+    } finally {
+      setAssigningBus(false)
+    }
+  }
+
   const handleStartTrip = async () => {
+    if (!driverRecord?.bus_id) {
+      setErrorMsg('You must assign your bus before starting a trip.')
+      return
+    }
     if (!driverRecord?.id || !selectedRouteId) {
-      setErrorMsg('Please select a route and bus.')
+      setErrorMsg('Please select a route.')
       return
     }
 
@@ -103,7 +136,7 @@ export default function DriverStartPage() {
         .insert({
           driver_id: driverRecord.id,
           route_id: selectedRouteId,
-          bus_id: selectedBusId || null,
+          bus_id: driverRecord.bus_id,
           direction: Number(direction),
           status: 'active',
           started_at: new Date().toISOString(),
@@ -127,13 +160,12 @@ export default function DriverStartPage() {
         .from('trips')
         .update({ status: 'ended', ended_at: new Date().toISOString() })
         .eq('id', activeTrip.id)
+
       setActiveTrip(null)
-    } catch (e) {
-      setErrorMsg(e.message)
+    } catch (err) {
+      setErrorMsg('Failed to end previous trip.')
     }
   }
-
-  const selectedRouteObj = routes.find((r) => r.id === selectedRouteId)
 
   if (loading) {
     return (
@@ -143,20 +175,23 @@ export default function DriverStartPage() {
     )
   }
 
+  const assignedRoute = routes.find((r) => r.id === (driverRecord?.bus?.route_id || selectedRouteId))
+
   return (
-    <div className="flex-1 flex flex-col justify-between space-y-6">
-      {/* Existing Active Trip Notice */}
+    <div className="flex-1 flex flex-col justify-between space-y-6 pb-6 text-left">
+      {/* Active Trip Resume Card */}
       {activeTrip ? (
-        <div className="bg-[#121B3D] border border-warning/30 rounded-card p-5 space-y-4">
+        <div className="p-4 bg-warning/15 border border-warning/30 rounded-card space-y-4">
           <div className="flex items-center gap-2 text-warning">
             <AlertTriangle className="w-5 h-5 shrink-0" />
-            <h2 className="text-sm font-bold uppercase tracking-wider">Active Trip In Progress</h2>
+            <h3 className="text-sm font-extrabold font-heading">Active Trip in Progress</h3>
           </div>
-          <p className="text-xs text-white/70">
-            You already have an active trip on Route{' '}
-            <strong className="text-white">{activeTrip.route?.code}</strong> ({activeTrip.bus?.reg_no || 'BUS'}).
+          <p className="text-xs text-white/80 leading-relaxed">
+            You currently have an active trip broadcast on{' '}
+            <strong>Route {activeTrip.route?.code}</strong> ({activeTrip.bus?.reg_no || 'Bus'}).
           </p>
-          <div className="flex flex-col gap-2.5 pt-2">
+
+          <div className="space-y-2">
             <button
               type="button"
               onClick={() => navigate('/driver/trip', { state: { trip: activeTrip } })}
@@ -187,10 +222,72 @@ export default function DriverStartPage() {
             </div>
           )}
 
+          {/* Assigned Bus (Locked - Problem 5.3) */}
+          {driverRecord?.bus ? (
+            <div className="p-3.5 bg-[#121B3D] border border-white/10 rounded-input flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-cobalt/20 text-cobalt flex items-center justify-center shrink-0">
+                  <Bus className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-white/50 block">Your Assigned Bus</span>
+                  <span className="text-sm font-extrabold text-white font-mono">{driverRecord.bus.reg_no}</span>
+                  {assignedRoute && (
+                    <span className="text-[11px] text-white/70 block">
+                      Base: Route {assignedRoute.code} ({assignedRoute.name_en})
+                    </span>
+                  )}
+                </div>
+              </div>
+              <span className="text-[10px] font-bold text-success bg-success/20 px-2 py-0.5 rounded-pill border border-success/30">
+                Locked
+              </span>
+            </div>
+          ) : (
+            /* Add Your Bus Card (if driver has no bus set yet) */
+            <div className="p-4 bg-warning/15 border border-warning/30 rounded-card space-y-3">
+              <div className="flex items-center gap-2 text-warning">
+                <AlertTriangle className="w-4 h-4" />
+                <h3 className="text-xs font-extrabold font-heading">Add Your Bus</h3>
+              </div>
+              <p className="text-xs text-white/80 leading-relaxed">
+                You do not have a bus attached to your driver profile yet. Enter your bus registration number to link it.
+              </p>
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={newBusReg}
+                  onChange={(e) => setNewBusReg(e.target.value.toUpperCase())}
+                  placeholder="e.g. KA25 F 1234"
+                  className="w-full h-11 px-3 bg-[#121B3D] border border-white/10 rounded-input text-xs font-mono uppercase font-bold text-white focus:outline-none focus:border-cobalt"
+                />
+                <select
+                  value={newBusRoute}
+                  onChange={(e) => setNewBusRoute(e.target.value)}
+                  className="w-full h-11 px-3 bg-[#121B3D] border border-white/10 rounded-input text-xs font-bold text-white focus:outline-none focus:border-cobalt"
+                >
+                  {routes.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      Route {r.code} - {r.name_en}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={handleSetMyBus}
+                  disabled={assigningBus || !newBusReg.trim()}
+                  className="w-full py-2.5 bg-cobalt text-white text-xs font-bold rounded-pill shadow-soft hover:opacity-95 disabled:opacity-50 transition"
+                >
+                  {assigningBus ? 'Assigning Bus...' : 'Save & Attach Bus'}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Route Selector */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-white/60">
-              Select Route
+              Trip Route
             </label>
             <select
               value={selectedRouteId}
@@ -200,24 +297,6 @@ export default function DriverStartPage() {
               {routes.map((r) => (
                 <option key={r.id} value={r.id}>
                   Route {r.code} - {r.name_en}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Bus Selector */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-white/60">
-              Assigned Bus
-            </label>
-            <select
-              value={selectedBusId}
-              onChange={(e) => setSelectedBusId(e.target.value)}
-              className="w-full h-14 px-4 bg-[#121B3D] border border-white/10 rounded-input text-sm font-bold text-white focus:outline-none focus:border-cobalt font-mono"
-            >
-              {buses.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.reg_no}
                 </option>
               ))}
             </select>
@@ -259,19 +338,19 @@ export default function DriverStartPage() {
 
       {/* Start Button & Safety Disclaimer */}
       {!activeTrip && (
-        <div className="space-y-4 pt-4">
+        <div className="space-y-3 pt-2">
           <button
             type="button"
-            disabled={starting}
+            disabled={starting || !driverRecord?.bus_id}
             onClick={handleStartTrip}
-            className="w-full h-16 min-h-[64px] bg-success text-white font-extrabold text-lg tracking-wide rounded-input shadow-float hover:opacity-95 active:scale-95 disabled:opacity-50 transition flex items-center justify-center gap-3"
+            className="w-full h-16 bg-cobalt hover:bg-cobalt/90 disabled:opacity-50 text-white font-extrabold text-base rounded-input flex items-center justify-center gap-2 shadow-soft active:scale-98 transition"
           >
-            <Play className="w-7 h-7 fill-white" />
-            <span>{starting ? 'STARTING GPS...' : 'START TRIP'}</span>
+            <Play className="w-6 h-6 fill-white" />
+            <span>{starting ? 'Initializing GPS...' : 'Start Trip & Broadcast'}</span>
           </button>
 
-          <p className="text-center text-[11px] text-white/40 leading-relaxed font-semibold">
-            &bull; Safety Notice: Do not use the phone while driving &bull;
+          <p className="text-[11px] text-white/40 text-center leading-normal">
+            Keep your screen awake or device plugged in. Location will transmit automatically to commuters until you tap "End Trip".
           </p>
         </div>
       )}

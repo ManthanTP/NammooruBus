@@ -5,6 +5,9 @@ import { Search, Radio, MapPin, Route, Bookmark, Clock, ArrowRight, ArrowUpDown,
 import { useDataStore } from '@/store/dataStore'
 import { useLiveStore } from '@/store/liveStore'
 import { useLocationStore } from '@/store/locationStore'
+import { useMapStore } from '@/store/mapStore'
+import { useSavedStore } from '@/store/savedStore'
+import { useAuthStore } from '@/store/authStore'
 import { localName } from '@/lib/formatters'
 import RouteBadge from '@/components/ui/RouteBadge'
 import AlertBanner from '@/features/passenger/components/AlertBanner'
@@ -17,21 +20,33 @@ export default function HomePage() {
   const { stops, routes } = useDataStore()
   const { getActiveCount, isReconnecting } = useLiveStore()
   const { position: userPos } = useLocationStore()
+  const { clearMap } = useMapStore()
+  const { user } = useAuthStore()
+  const { savedTrips, initSaved } = useSavedStore()
 
   const liveCount = getActiveCount()
   const [fromStop, setFromStop] = useState(null)
   const [toStop, setToStop] = useState(null)
   const [recentSearches, setRecentSearches] = useState([])
-  const [savedCount, setSavedCount] = useState(0)
+
+  // Ensure map is completely clean of any leftover polylines when entering Explore (Problem 3.3)
+  useEffect(() => {
+    clearMap()
+  }, [clearMap])
+
+  // Sync saved count
+  useEffect(() => {
+    initSaved(user)
+  }, [user, initSaved])
+
+  const savedCount = savedTrips.length
 
   useEffect(() => {
     try {
       const recents = JSON.parse(localStorage.getItem('nb_recent') || '[]')
       setRecentSearches(recents.slice(0, 5))
-      const saved = JSON.parse(localStorage.getItem('nb_saved') || '[]')
-      setSavedCount(saved.length)
     } catch (e) {
-      console.warn('Error reading recent/saved searches:', e)
+      console.warn('Error reading recent searches:', e)
     }
   }, [])
 

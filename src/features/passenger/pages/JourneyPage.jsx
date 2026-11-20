@@ -1,7 +1,17 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useSearchParams, useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Clock, IndianRupee, Bookmark, Share2, Radio, Footprints, Bus, AlertCircle } from 'lucide-react'
+import {
+  ArrowLeft,
+  Bookmark,
+  Share2,
+  Radio,
+  Bus,
+  AlertCircle,
+  LogIn,
+  UserPlus,
+  X,
+} from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
 import { useMapStore } from '@/store/mapStore'
 import { useSavedStore } from '@/store/savedStore'
@@ -11,25 +21,119 @@ import { useLocationStore } from '@/store/locationStore'
 import { useToastStore } from '@/components/ui/Toast'
 import { calculateBusEta } from '@/lib/eta'
 import { localName } from '@/lib/formatters'
+import { findRoutes } from '@/lib/routeFinder'
+import { fetchDrivingRoute, fetchWalkingRoute } from '@/lib/roadRouting'
 import RouteBadge from '@/components/ui/RouteBadge'
 import CrowdMeter from '@/components/ui/CrowdMeter'
 import SosButton from '@/components/ui/SosButton'
 import MapCard from '@/components/map/MapCard'
+import Skeleton from '@/components/ui/Skeleton'
 import UserBusComparison from '@/features/passenger/components/UserBusComparison'
 
 export default function JourneyPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const { user } = useAuthStore()
-  const { stops, routes, routeStops, schedules } = useDataStore()
-  const { setRoute, setMarkers, fitBounds } = useMapStore()
+  const { stops, routes, routeStops, schedules, fareConfig, loading: storeLoading, initData } = useDataStore()
+  const { setJourneyLegs, setMarkers, fitBounds, setBounds, clearMap } = useMapStore()
   const { isSaved, saveTrip, removeTrip, initSaved } = useSavedStore()
   const { trips, speedsByTrip } = useLiveStore()
   const { position: userPos } = useLocationStore()
   const { addToast } = useToastStore()
 
   const [journey, setJourney] = useState(null)
+  const [computing, setComputing] = useState(true)
+  const [showGuestModal, setShowGuestModal] = useState(false)
+
+  const fromStopId = searchParams.get('from')
+  const toStopId = searchParams.get('to')
+  const rCodes = searchParams.get('r')
+
+  // Initialize data if not yet loaded
+  useEffect(() => {
+    if (stops.length === 0 && !storeLoading) {
+      initData()
+    }
+  }, [stops.length, storeLoading, initData])
+
+  useEffect(() => {
+    initSaved(user)
+  }, [user, initSaved])
+
+  // Restore or compute journey
+  useEffect(() => {
+    let resolved = null
+
+    // 1. Check sessionStorage
+    try {
+      const stored = sessionStorage.getItem('nb_current_journey')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        // If query parameters match stored journey endpoints
+        const storedFrom = parsed?.legs?.[0]?.fromStop?.id
+        const storedTo = parsed?.legs?.[parsed.legs.length - 1]?.toStop?.id
+        if (!fromStopId || (storedFrom === fromStopId && storedTo === toStopId)) {
+          resolved = parsed
+        }
+      }
+    } catch (e) {
+      console.warn('Error reading stored journey:', e)
+    }
+
+    if (resolved) {
+      setJourney(resolved)
+      setComputing(false)
+      return
+    }
+
+    // 2. Compute from URL params if master data ready
+    if (!fromStopId || !toStopId) {
+      setComputing(false)
+      return
+    }
+
+    if (stops.length === 0 || routes.length === 0) {
+      // Waiting for dataStore to finish loading
+      return
+    }
+
+    setComputing(true)
+    try {
+      const found = findRoutes({
+        fromStopId,
+        toStopId,
+        routes,
+        routeStops,
+        stops,
+        schedules,
+        fareConfig,
+        currentTime: new Date(),
+      })
+
+      if (found && found.length > 0) {
+        let matched = found[0]
+        if (rCodes) {
+          const expected = rCodes.toLowerCase()
+          const candidate = found.find((item) => {
+            const codeStr = (item.legs || []).map((l) => l.route?.code?.toLowerCase()).filter(Boolean).join('+')
+            return codeStr === expected || codeStr.includes(expected)
+          })
+          if (candidate) matched = candidate
+        }
+        setJourney(matched)
+        sessionStorage.setItem('nb_current_journey', JSON.stringify(matched))
+      } else {
+        setJourney(null)
+      }
+    } catch (err) {
+      console.error('Error calculating journey from URL:', err)
+      setJourney(null)
+    } finally {
+      setComputing(false)
+    }
+  }, [fromStopId, toStopId, rCodes, stops, routes, routeStops, schedules, fareConfig])
 
   const firstLeg = journey?.legs?.[0]
   const liveTripForLeg = useMemo(() => {
@@ -64,95 +168,211 @@ export default function JourneyPage() {
     return null
   }, [liveTripForLeg, firstLeg, routeStops, stops, speedsByTrip])
 
-  useEffect(() => {
-    initSaved(user)
-    try {
-      const stored = sessionStorage.getItem('nb_current_journey')
-      if (stored) {
-        setJourney(JSON.parse(stored))
-      }
-    } catch (e) {
-      console.warn('Error reading stored journey:', e)
-    }
-  }, [user, initSaved])
-
-  // Fit map and place pins for this journey
+  // Road Routing: compute multi-leg road geometries (walking + driving)
   useEffect(() => {
     if (!journey || !journey.legs || journey.legs.length === 0) return
 
-    const markers = []
-    const polyline = []
+    const ac = new AbortController()
 
-    const first = journey.legs[0]
-    const last = journey.legs[journey.legs.length - 1]
+    const calculateLegs = async () => {
+      try {
+        const calculatedLegs = []
+        const markers = []
+        const boundsCoords = []
 
-    if (first?.fromStop) {
-      markers.push({
-        id: 'pinA',
-        lat: first.fromStop.lat,
-        lng: first.fromStop.lng,
-        type: 'pinA',
-        label: 'A',
-      })
-      polyline.push([first.fromStop.lat, first.fromStop.lng])
+        const firstLeg = journey.legs[0]
+        const lastLeg = journey.legs[journey.legs.length - 1]
+
+        // Origin Marker (A)
+        if (firstLeg?.fromStop?.lat) {
+          markers.push({
+            id: 'pinA',
+            lat: Number(firstLeg.fromStop.lat),
+            lng: Number(firstLeg.fromStop.lng),
+            type: 'pinA',
+            label: 'A',
+          })
+          boundsCoords.push([Number(firstLeg.fromStop.lat), Number(firstLeg.fromStop.lng)])
+        }
+
+        // Optional Walk Leg from user location to boarding stop
+        if (
+          userPos?.lat &&
+          userPos?.lng &&
+          firstLeg?.fromStop?.lat &&
+          !Number.isNaN(Number(userPos.lat)) &&
+          !Number.isNaN(Number(userPos.lng))
+        ) {
+          const walkResult = await fetchWalkingRoute(
+            { lat: Number(userPos.lat), lng: Number(userPos.lng) },
+            { lat: Number(firstLeg.fromStop.lat), lng: Number(firstLeg.fromStop.lng) },
+            { signal: ac.signal }
+          )
+          if (walkResult?.polyline?.length >= 2) {
+            calculatedLegs.push({
+              type: 'walk',
+              polyline: walkResult.polyline,
+              distanceMeters: walkResult.distanceMeters,
+              walkMinutes: walkResult.walkMinutes,
+              midpoint: walkResult.midpoint,
+              isApproximate: walkResult.isApproximate,
+            })
+            walkResult.polyline.forEach(([lat, lng]) => boundsCoords.push([lat, lng]))
+          }
+        }
+
+        // Process each bus leg & transfer
+        for (let i = 0; i < journey.legs.length; i++) {
+          const leg = journey.legs[i]
+
+          // Transfer pin between legs
+          if (i > 0 && leg.fromStop?.lat) {
+            markers.push({
+              id: `transfer-${i}`,
+              lat: Number(leg.fromStop.lat),
+              lng: Number(leg.fromStop.lng),
+              type: 'transfer',
+              label: '⇄',
+            })
+            boundsCoords.push([Number(leg.fromStop.lat), Number(leg.fromStop.lng)])
+          }
+
+          // Transfer walking leg if transfer stops are distinct
+          if (i > 0) {
+            const prevLeg = journey.legs[i - 1]
+            if (
+              prevLeg.toStop &&
+              leg.fromStop &&
+              prevLeg.toStop.id !== leg.fromStop.id &&
+              prevLeg.toStop.lat &&
+              leg.fromStop.lat
+            ) {
+              const transferWalk = await fetchWalkingRoute(
+                { lat: Number(prevLeg.toStop.lat), lng: Number(prevLeg.toStop.lng) },
+                { lat: Number(leg.fromStop.lat), lng: Number(leg.fromStop.lng) },
+                { signal: ac.signal }
+              )
+              if (transferWalk?.polyline?.length >= 2) {
+                calculatedLegs.push({
+                  type: 'walk',
+                  polyline: transferWalk.polyline,
+                  distanceMeters: transferWalk.distanceMeters,
+                  walkMinutes: transferWalk.walkMinutes,
+                  midpoint: transferWalk.midpoint,
+                  isApproximate: transferWalk.isApproximate,
+                })
+                transferWalk.polyline.forEach(([lat, lng]) => boundsCoords.push([lat, lng]))
+              }
+            }
+          }
+
+          // Gather stops along this route leg in sequence
+          let legStops = []
+          if (leg.route?.id && routeStops.length > 0) {
+            const rStops = routeStops
+              .filter((rs) => rs.route_id === leg.route.id)
+              .sort((a, b) => a.seq - b.seq)
+            const fromIdx = rStops.findIndex((rs) => rs.stop_id === leg.fromStop?.id)
+            const toIdx = rStops.findIndex((rs) => rs.stop_id === leg.toStop?.id)
+
+            if (fromIdx !== -1 && toIdx !== -1) {
+              const slice =
+                fromIdx <= toIdx
+                  ? rStops.slice(fromIdx, toIdx + 1)
+                  : rStops.slice(toIdx, fromIdx + 1).reverse()
+              legStops = slice
+                .map((rs) => stops.find((s) => s.id === rs.stop_id))
+                .filter((s) => s && s.lat && s.lng)
+            }
+          }
+
+          if (legStops.length < 2 && leg.fromStop?.lat && leg.toStop?.lat) {
+            legStops = [leg.fromStop, leg.toStop]
+          }
+
+          // Check if route has pre-calculated geometry
+          let busPolyline = null
+          let isApprox = false
+
+          if (leg.route?.geometry?.coordinates && Array.isArray(leg.route.geometry.coordinates)) {
+            // GeoJSON LineString [lng, lat] -> [lat, lng]
+            busPolyline = leg.route.geometry.coordinates.map(([lng, lat]) => [lat, lng])
+          } else {
+            const waypoints = legStops.map((s) => ({
+              lat: Number(s.lat),
+              lng: Number(s.lng),
+            }))
+            const driving = await fetchDrivingRoute(waypoints, { signal: ac.signal })
+            busPolyline = driving.polyline
+            isApprox = driving.isApproximate
+          }
+
+          if (busPolyline && busPolyline.length >= 2) {
+            calculatedLegs.push({
+              type: 'bus',
+              polyline: busPolyline,
+              color: leg.route?.color || '#3451F2',
+              isApproximate: isApprox,
+            })
+            busPolyline.forEach(([lat, lng]) => boundsCoords.push([lat, lng]))
+          }
+        }
+
+        // Destination Marker (B)
+        if (lastLeg?.toStop?.lat) {
+          markers.push({
+            id: 'pinB',
+            lat: Number(lastLeg.toStop.lat),
+            lng: Number(lastLeg.toStop.lng),
+            type: 'pinB',
+            label: 'B',
+          })
+          boundsCoords.push([Number(lastLeg.toStop.lat), Number(lastLeg.toStop.lng)])
+        }
+
+        setMarkers(markers)
+        setJourneyLegs(calculatedLegs)
+
+        if (boundsCoords.length >= 2) {
+          const fit = fitBounds || setBounds
+          if (typeof fit === 'function') {
+            fit(boundsCoords)
+          }
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.warn('Error calculating journey road legs:', err)
+        }
+      }
     }
 
-    if (journey.legs.length > 1 && first?.toStop) {
-      markers.push({
-        id: 'transfer',
-        lat: first.toStop.lat,
-        lng: first.toStop.lng,
-        type: 'transfer',
-        label: '⇄',
-      })
-      polyline.push([first.toStop.lat, first.toStop.lng])
-    }
+    calculateLegs()
 
-    if (last?.toStop) {
-      markers.push({
-        id: 'pinB',
-        lat: last.toStop.lat,
-        lng: last.toStop.lng,
-        type: 'pinB',
-        label: 'B',
-      })
-      polyline.push([last.toStop.lat, last.toStop.lng])
+    return () => {
+      ac.abort()
+      clearMap()
     }
-
-    setMarkers(markers)
-
-    if (first?.fromStop && last?.toStop) {
-      setRoute(polyline, first.route?.color || '#3451F2')
-      fitBounds([
-        [first.fromStop.lat, first.fromStop.lng],
-        [last.toStop.lat, last.toStop.lng],
-      ])
-    }
-  }, [journey, setMarkers, setRoute, fitBounds])
+  }, [journey, routeStops, stops, userPos, setJourneyLegs, setMarkers, fitBounds, setBounds, clearMap])
 
   const fromStop = journey?.legs?.[0]?.fromStop
   const toStop = journey?.legs?.[journey?.legs?.length - 1]?.toStop
 
-  const currentlySaved = journey ? isSaved(journey.id) : false
+  const currentlySaved = fromStop?.id && toStop?.id ? isSaved(fromStop.id, toStop.id) : false
 
   const handleToggleSave = () => {
     if (!journey) return
+
+    // If guest, show login prompt sheet/modal
+    if (!user) {
+      setShowGuestModal(true)
+      return
+    }
+
     if (currentlySaved) {
-      removeTrip(journey.id)
+      removeTrip({ from_stop: fromStop.id, to_stop: toStop.id }, user)
       addToast('Removed from saved trips', 'info')
     } else {
-      saveTrip({
-        id: journey.id,
-        fromStopId: fromStop?.id,
-        toStopId: toStop?.id,
-        fromName: localName(fromStop, i18n.language),
-        toName: localName(toStop, i18n.language),
-        totalFare: journey.totalFare,
-        totalMinutes: journey.totalMinutes,
-        transfers: journey.transfers,
-        legsSummary: journey.legs.map((l) => l.route?.code).join(' → '),
-        savedAt: new Date().toISOString(),
-      })
+      saveTrip(journey, user)
       addToast('Saved to your trips', 'success')
     }
   }
@@ -178,11 +398,35 @@ export default function JourneyPage() {
     }
   }
 
+  // Skeleton loader during computation/fetch
+  if (computing || (storeLoading && !journey)) {
+    return (
+      <div className="space-y-4 pt-1 pb-16">
+        <div className="flex items-center justify-between pb-2 border-b border-line">
+          <Skeleton className="h-5 w-16 rounded-pill" />
+          <Skeleton className="h-5 w-28 rounded-pill" />
+          <Skeleton className="h-6 w-14 rounded-pill" />
+        </div>
+        <Skeleton className="h-[240px] w-full rounded-card" />
+        <div className="grid grid-cols-3 gap-2">
+          <Skeleton className="h-16 rounded-card" />
+          <Skeleton className="h-16 rounded-card" />
+          <Skeleton className="h-16 rounded-card" />
+        </div>
+        <div className="space-y-3 p-4 bg-surface rounded-card border border-line">
+          <Skeleton className="h-12 w-full rounded-input" />
+          <Skeleton className="h-16 w-full rounded-input" />
+          <Skeleton className="h-12 w-full rounded-input" />
+        </div>
+      </div>
+    )
+  }
+
   if (!journey) {
     return (
       <div className="p-8 text-center space-y-3">
         <AlertCircle className="w-8 h-8 text-text-secondary mx-auto" />
-        <p className="text-xs text-text-secondary">No journey selected.</p>
+        <p className="text-xs text-text-secondary">No journey found for this route.</p>
         <button
           type="button"
           onClick={() => navigate('/search')}
@@ -193,6 +437,8 @@ export default function JourneyPage() {
       </div>
     )
   }
+
+  const currentRedirect = encodeURIComponent(location.pathname + location.search)
 
   return (
     <div className="space-y-3.5 pt-1 pb-16">
@@ -211,11 +457,14 @@ export default function JourneyPage() {
           <button
             type="button"
             onClick={handleToggleSave}
-            className={`p-1.5 rounded-pill border transition ${currentlySaved ? 'bg-cobalt text-white border-cobalt' : 'bg-surface text-text-secondary border-line'
-              }`}
-            title="Save trip"
+            className={`p-1.5 rounded-pill border transition ${
+              currentlySaved
+                ? 'bg-cobalt text-white border-cobalt'
+                : 'bg-surface text-text-secondary border-line hover:text-ink'
+            }`}
+            title={currentlySaved ? 'Remove from saved' : 'Save trip'}
           >
-            <Bookmark className="w-3.5 h-3.5" />
+            <Bookmark className={`w-3.5 h-3.5 ${currentlySaved ? 'fill-current' : ''}`} />
           </button>
           <button
             type="button"
@@ -228,10 +477,10 @@ export default function JourneyPage() {
         </div>
       </div>
 
-      {/* Small Map Card (Height 240px per Part B) */}
+      {/* Small Map Card (Height 240px) */}
       <MapCard height={240} />
 
-      {/* Live Comparison Panel if Bus is Tracking (Part C.4) */}
+      {/* Live Comparison Panel if Bus is Tracking */}
       {liveTripForLeg && (
         <UserBusComparison
           userPos={userPos}
@@ -298,7 +547,7 @@ export default function JourneyPage() {
             <h4 className="text-xs font-bold text-ink">
               {fromStop ? localName(fromStop, i18n.language) : 'Origin Stop'}
             </h4>
-            <p className="text-[11px] text-text-secondary">Walk 3 min to stop</p>
+            <p className="text-[11px] text-text-secondary">Board first transit vehicle here</p>
           </div>
         </div>
 
@@ -373,7 +622,7 @@ export default function JourneyPage() {
         </div>
       </div>
 
-      {/* Sticky Bottom Action Bar (Save, Share, Track live, SOS) */}
+      {/* Sticky Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 p-3 bg-surface/95 backdrop-blur-md border-t border-line z-30 flex items-center justify-center gap-2 max-w-lg mx-auto md:max-w-none">
         <Link
           to={`/live?route=${journey.legs[0]?.route?.code}`}
@@ -390,6 +639,53 @@ export default function JourneyPage() {
           variant="compact"
         />
       </div>
+
+      {/* Guest Save Sheet / Modal (Problem 4.1) */}
+      {showGuestModal && (
+        <div className="fixed inset-0 z-50 bg-ink/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-surface rounded-card border border-line shadow-float p-5 space-y-4 animate-in fade-in slide-in-from-bottom duration-200">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-cobalt/15 text-cobalt flex items-center justify-center">
+                  <Bookmark className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-ink font-heading">Save this journey</h3>
+                  <p className="text-[11px] text-text-secondary">Keep your favorite routes handy</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGuestModal(false)}
+                className="text-text-secondary hover:text-ink p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-text-secondary leading-relaxed">
+              Create a free account or log in so your saved journeys are available on all your devices.
+            </p>
+
+            <div className="flex flex-col gap-2 pt-1">
+              <Link
+                to={`/login?redirect=${currentRedirect}`}
+                className="w-full py-2.5 bg-cobalt text-white text-xs font-bold rounded-pill flex items-center justify-center gap-2 shadow-soft hover:opacity-95 transition"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Log in</span>
+              </Link>
+              <Link
+                to={`/register?redirect=${currentRedirect}`}
+                className="w-full py-2.5 bg-page border border-line text-ink text-xs font-bold rounded-pill flex items-center justify-center gap-2 hover:bg-surface transition"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Create account</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

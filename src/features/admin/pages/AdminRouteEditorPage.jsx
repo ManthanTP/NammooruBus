@@ -17,6 +17,7 @@ import { MapContainer, TileLayer, Polyline, Marker, useMap } from 'react-leaflet
 import L from 'leaflet'
 import { supabase } from '@/lib/supabase'
 import { haversine } from '@/lib/geo'
+import { fetchDrivingRoute } from '@/lib/roadRouting'
 import { useToastStore } from '@/components/ui/Toast'
 import RouteBadge from '@/components/ui/RouteBadge'
 import { getTileUrl } from '@/lib/mapConfig'
@@ -75,6 +76,8 @@ export default function AdminRouteEditorPage() {
 
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
+  const [generatingPath, setGeneratingPath] = useState(false)
+  const [roadGeometry, setRoadGeometry] = useState(null)
   const [allStops, setAllStops] = useState([])
   const [selectedStopToAdd, setSelectedStopToAdd] = useState('')
   const [formError, setFormError] = useState('')
@@ -123,6 +126,9 @@ export default function AdminRouteEditorPage() {
               two_way: routeData.two_way ?? true,
               active: routeData.active ?? true,
             })
+            if (routeData.geometry) {
+              setRoadGeometry(routeData.geometry)
+            }
           }
 
           // Fetch route stops in order
@@ -269,6 +275,43 @@ export default function AdminRouteEditorPage() {
     addToast({ message: 'Recalculated distances and run times (1.3x road factor, 17 km/h)', type: 'info' })
   }
 
+  // Generate road path from OSRM (Problem 1.3)
+  const handleGenerateRoadPath = async () => {
+    const validWaypoints = routeStops
+      .filter((s) => s.stop && !isNaN(s.stop.lat) && !isNaN(s.stop.lng))
+      .map((s) => ({ lat: Number(s.stop.lat), lng: Number(s.stop.lng) }))
+
+    if (validWaypoints.length < 2) {
+      addToast({ message: 'Add at least 2 stops to generate road path', type: 'warning' })
+      return
+    }
+
+    setGeneratingPath(true)
+    try {
+      const res = await fetchDrivingRoute(validWaypoints)
+      if (res?.polyline && res.polyline.length >= 2) {
+        const geojson = {
+          type: 'LineString',
+          coordinates: res.polyline.map(([lat, lng]) => [lng, lat]),
+        }
+        setRoadGeometry(geojson)
+
+        if (!isNew && id) {
+          await supabase.from('routes').update({ geometry: geojson }).eq('id', id)
+          addToast({ message: 'Road path generated from OSRM and saved to route!', type: 'success' })
+        } else {
+          addToast({ message: 'Road path generated! Will be saved with the route.', type: 'success' })
+        }
+      } else {
+        addToast({ message: 'Could not generate road path', type: 'error' })
+      }
+    } catch (err) {
+      addToast({ message: `Path generation failed: ${err.message}`, type: 'error' })
+    } finally {
+      setGeneratingPath(false)
+    }
+  }
+
   // Save Route and Sequence
   const handleSave = async (e) => {
     e.preventDefault()
@@ -301,6 +344,7 @@ export default function AdminRouteEditorPage() {
             color: meta.color,
             two_way: meta.two_way,
             active: meta.active,
+            geometry: roadGeometry || null,
           })
           .select('id')
           .single()
@@ -317,6 +361,7 @@ export default function AdminRouteEditorPage() {
             color: meta.color,
             two_way: meta.two_way,
             active: meta.active,
+            geometry: roadGeometry || null,
           })
           .eq('id', routeId)
 
@@ -351,12 +396,18 @@ export default function AdminRouteEditorPage() {
     }
   }
 
-  // Coordinates for polyline
-  const polylineCoords = useMemo(() => {
+  // Coordinates for polyline (road path if present, otherwise straight lines)
+  const displayPolyline = useMemo(() => {
+    if (roadGeometry?.coordinates && Array.isArray(roadGeometry.coordinates)) {
+      return roadGeometry.coordinates.map(([lng, lat]) => [lat, lng])
+    }
+    if (Array.isArray(roadGeometry) && roadGeometry.length > 1) {
+      return roadGeometry
+    }
     return routeStops
       .filter((s) => s.stop && !isNaN(s.stop.lat) && !isNaN(s.stop.lng))
       .map((s) => [Number(s.stop.lat), Number(s.stop.lng)])
-  }, [routeStops])
+  }, [roadGeometry, routeStops])
 
   if (loading) {
     return (
@@ -684,11 +735,30 @@ export default function AdminRouteEditorPage() {
         {/* Right Column: Live Map Preview */}
         <div className="lg:col-span-5 bg-surface rounded-card border border-line p-4 shadow-soft space-y-3 sticky top-20">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-cobalt" />
-              Route Alignment Preview
-            </h3>
-            <RouteBadge code={meta.code || '---'} color={meta.color} size="sm" />
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-cobalt" />
+                Route Alignment Preview
+              </h3>
+              {roadGeometry && (
+                <span className="text-[10px] font-bold text-success bg-success/15 px-2 py-0.5 rounded-pill">
+                  Road
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleGenerateRoadPath}
+                disabled={generatingPath || routeStops.length < 2}
+                className="flex items-center gap-1 px-2.5 py-1 bg-page hover:bg-surface border border-line rounded-input text-[11px] font-bold text-cobalt transition disabled:opacity-50"
+                title="Generate road-following geometry using OSRM"
+              >
+                <Wand2 className={`w-3 h-3 ${generatingPath ? 'animate-spin' : ''}`} />
+                <span>{generatingPath ? 'Generating...' : 'Generate road path'}</span>
+              </button>
+              <RouteBadge code={meta.code || '---'} color={meta.color} size="sm" />
+            </div>
           </div>
 
           <div className="h-[480px] rounded-input overflow-hidden border border-line relative">
@@ -701,9 +771,9 @@ export default function AdminRouteEditorPage() {
               <TileLayer url={TILE_URL} />
               <MapAutoFitter stops={routeStops} />
 
-              {polylineCoords.length >= 2 && (
+              {displayPolyline.length >= 2 && (
                 <Polyline
-                  positions={polylineCoords}
+                  positions={displayPolyline}
                   pathOptions={{
                     color: meta.color,
                     weight: 5,

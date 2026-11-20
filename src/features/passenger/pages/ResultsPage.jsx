@@ -111,8 +111,13 @@ export default function ResultsPage() {
   }, [results, activeSort])
 
   const handleSelectTrip = (trip) => {
-    sessionStorage.setItem('nb_current_journey', JSON.stringify(trip))
-    navigate(`/journey?from=${fromStopId}&to=${toStopId}`)
+    try {
+      sessionStorage.setItem('nb_current_journey', JSON.stringify(trip))
+    } catch (e) {
+      console.warn('Error storing current journey:', e)
+    }
+    const rCodes = trip.legs?.map((l) => l.route?.code).filter(Boolean).join('+') || ''
+    navigate(`/journey?from=${fromStopId}&to=${toStopId}&r=${rCodes}`)
   }
 
   const sortTabs = [

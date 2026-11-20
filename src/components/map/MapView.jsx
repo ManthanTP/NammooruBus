@@ -45,6 +45,16 @@ function createMarkerIcon(type, label = '') {
       iconSize: [12, 12],
       iconAnchor: [6, 6],
     },
+    walkBadge: {
+      html: `
+        <div style="background:#0E1433;color:#FFFFFF;font-size:10px;font-weight:700;padding:2px 7px;border-radius:9999px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.3);border:1.5px solid #FFFFFF;display:inline-flex;align-items:center;gap:3px;pointer-events:none;">
+          <span>🚶 ${label}</span>
+        </div>
+      `,
+      className: 'walk-midpoint-badge',
+      iconSize: [70, 20],
+      iconAnchor: [35, 10],
+    },
   }
 
   const c = configs[type] || configs.stop
@@ -116,7 +126,7 @@ function MapController() {
 }
 
 export default function MapView({ showUserBusLink = true }) {
-  const { polyline, routeColor, markers, circle } = useMapStore()
+  const { polyline, routeColor, isApproximateRoute, journeyLegs, markers, circle } = useMapStore()
   const { trips, selectedTripId, setSelectedTripId } = useLiveStore()
   const { position: userPos, accuracy } = useLocationStore()
 
@@ -147,6 +157,8 @@ export default function MapView({ showUserBusLink = true }) {
   const uLat = isValidUserPos ? Number(userPos.lat) : null
   const uLng = isValidUserPos ? Number(userPos.lng) : null
 
+  const hasAnyApproximate = isApproximateRoute || (journeyLegs && journeyLegs.some((l) => l.isApproximate))
+
   return (
     <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
       <MapContainer
@@ -158,32 +170,114 @@ export default function MapView({ showUserBusLink = true }) {
         <TileLayer url={tileUrl} attribution={attribution} maxZoom={19} />
         <MapController />
 
-        {/* Selected Route Polyline */}
+        {/* 1. Single Route Polyline (e.g. Route detail) */}
         {polyline && polyline.length > 1 && (
-          <>
-            {/* Casing stroke */}
-            <Polyline
-              positions={polyline}
-              pathOptions={{
-                color: '#FFFFFF',
-                weight: 7,
-                opacity: 0.9,
-                lineCap: 'round',
-                lineJoin: 'round',
-              }}
-            />
-            {/* Core route stroke */}
+          isApproximateRoute ? (
             <Polyline
               positions={polyline}
               pathOptions={{
                 color: routeColor || '#3451F2',
-                weight: 5,
-                opacity: 1,
-                lineCap: 'round',
-                lineJoin: 'round',
+                weight: 4,
+                dashArray: '8, 8',
+                opacity: 0.9,
               }}
             />
-          </>
+          ) : (
+            <>
+              {/* 2px white casing */}
+              <Polyline
+                positions={polyline}
+                pathOptions={{
+                  color: '#FFFFFF',
+                  weight: 7,
+                  opacity: 0.95,
+                  lineCap: 'round',
+                  lineJoin: 'round',
+                }}
+              />
+              {/* Solid line in route colour */}
+              <Polyline
+                positions={polyline}
+                pathOptions={{
+                  color: routeColor || '#3451F2',
+                  weight: 5,
+                  opacity: 1,
+                  lineCap: 'round',
+                  lineJoin: 'round',
+                }}
+              />
+            </>
+          )
+        )}
+
+        {/* 2. Multi-leg Journey (Walking legs + Bus legs) */}
+        {journeyLegs && journeyLegs.length > 0 && (
+          journeyLegs.map((leg, lIdx) => {
+            if (!leg.polyline || leg.polyline.length < 2) return null
+
+            if (leg.type === 'walk') {
+              return (
+                <div key={`walk-${lIdx}`}>
+                  {/* Walking leg: DOTTED line (dashArray "2 8", round caps, ink colour, weight 4) */}
+                  <Polyline
+                    positions={leg.polyline}
+                    pathOptions={{
+                      color: '#0E1433',
+                      weight: 4,
+                      dashArray: '2, 8',
+                      lineCap: 'round',
+                      opacity: 0.85,
+                    }}
+                  />
+                  {/* Walk badge at midpoint */}
+                  {leg.midpoint && (
+                    <Marker
+                      position={leg.midpoint}
+                      icon={createMarkerIcon('walkBadge', `${leg.walkMinutes || 1} min (${leg.distanceMeters || 0}m)`)}
+                      zIndexOffset={400}
+                    />
+                  )}
+                </div>
+              )
+            }
+
+            // Bus leg: solid line in route color on top of 2px white casing
+            return leg.isApproximate ? (
+              <Polyline
+                key={`bus-${lIdx}`}
+                positions={leg.polyline}
+                pathOptions={{
+                  color: leg.color || '#3451F2',
+                  weight: 4,
+                  dashArray: '8, 8',
+                  opacity: 0.9,
+                }}
+              />
+            ) : (
+              <div key={`bus-${lIdx}`}>
+                <Polyline
+                  positions={leg.polyline}
+                  pathOptions={{
+                    color: '#FFFFFF',
+                    weight: 7,
+                    opacity: 0.95,
+                    lineCap: 'round',
+                    lineJoin: 'round',
+                  }}
+                />
+                <Polyline
+                  positions={leg.polyline}
+                  pathOptions={{
+                    color: leg.color || '#3451F2',
+                    weight: 5,
+                    opacity: 1,
+                    lineCap: 'round',
+                    lineJoin: 'round',
+                  }}
+                />
+              </div>
+            )
+          })
         )}
 
         {/* Radius Circle (e.g. for Nearby) */}
@@ -282,6 +376,14 @@ export default function MapView({ showUserBusLink = true }) {
             />
         ))}
       </MapContainer>
+
+      {/* Approximate Path Chip (Problem 1.4) */}
+      {hasAnyApproximate && (
+        <div className="absolute bottom-2 left-2 z-[400] bg-surface/90 backdrop-blur-md px-2.5 py-1 rounded-pill border border-line text-[10px] font-bold text-text-secondary shadow-xs pointer-events-none flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-warning"></span>
+          <span>Approximate path</span>
+        </div>
+      )}
     </div>
   )
 }

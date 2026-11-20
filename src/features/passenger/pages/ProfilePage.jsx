@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2, Bus } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
+import { useDataStore } from '@/store/dataStore'
 import { useToastStore } from '@/components/ui/Toast'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 
@@ -10,11 +11,24 @@ export default function ProfilePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { user, profile, signOut, claimDriverRole } = useAuthStore()
+  const { routes, initData } = useDataStore()
   const { addToast } = useToastStore()
 
   const [driverKey, setDriverKey] = useState('')
+  const [busRegNo, setBusRegNo] = useState('')
+  const [selectedRouteId, setSelectedRouteId] = useState('')
   const [claimLoading, setClaimLoading] = useState(false)
   const [claimError, setClaimError] = useState(null)
+
+  useEffect(() => {
+    initData()
+  }, [initData])
+
+  useEffect(() => {
+    if (routes && routes.length > 0 && !selectedRouteId) {
+      setSelectedRouteId(routes[0].id)
+    }
+  }, [routes, selectedRouteId])
 
   const handleLogout = async () => {
     await signOut()
@@ -24,25 +38,38 @@ export default function ProfilePage() {
 
   const handleClaimDriver = async (e) => {
     e.preventDefault()
-    if (!driverKey.trim()) return
+    if (!driverKey.trim()) {
+      setClaimError('Please enter driver secret key')
+      return
+    }
+    if (!busRegNo.trim()) {
+      setClaimError('Please enter bus registration number')
+      return
+    }
 
-    const submitted = driverKey
+    const submittedKey = driverKey
+    const submittedBus = busRegNo.trim().toUpperCase()
+    const submittedRoute = selectedRouteId
     setDriverKey('')
     setClaimLoading(true)
     setClaimError(null)
 
-    const { status, error } = await claimDriverRole(submitted)
+    const { status, error } = await claimDriverRole(submittedKey, submittedBus, submittedRoute)
     setClaimLoading(false)
 
     if (status === 'ok') {
       addToast('Driver role unlocked! Redirecting...', 'success')
       navigate('/driver')
     } else if (status === 'invalid') {
-      setClaimError('That driver key is not correct.')
+      setClaimError('Invalid driver key.')
     } else if (status === 'locked') {
       setClaimError('Too many wrong keys. Try again in 15 minutes.')
     } else if (status === 'not_configured') {
       setClaimError('Driver sign-up is not set up yet. Ask the admin.')
+    } else if (status === 'bus_taken') {
+      setClaimError('Bus is already assigned to another driver. Contact admin.')
+    } else if (status === 'bus_required') {
+      setClaimError('Please enter your bus registration number.')
     } else {
       setClaimError(error || 'Failed to verify driver key.')
     }
@@ -109,21 +136,58 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <form onSubmit={handleClaimDriver} className="flex gap-2">
-            <input
-              type="password"
-              value={driverKey}
-              onChange={(e) => setDriverKey(e.target.value)}
-              placeholder="Driver secret key..."
-              required
-              className="flex-1 px-3 py-2 bg-page border border-line rounded-input text-xs text-ink focus:outline-none focus:border-cobalt font-mono"
-            />
+          <form onSubmit={handleClaimDriver} className="space-y-3">
+            <div className="space-y-1">
+              <label className="block text-[11px] font-bold text-ink">
+                Driver Secret Key <span className="text-danger">*</span>
+              </label>
+              <input
+                type="password"
+                value={driverKey}
+                onChange={(e) => setDriverKey(e.target.value)}
+                placeholder="Driver secret key..."
+                required
+                className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs text-ink focus:outline-none focus:border-cobalt font-mono"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[11px] font-bold text-ink">
+                Bus Registration Number <span className="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                value={busRegNo}
+                onChange={(e) => setBusRegNo(e.target.value.toUpperCase())}
+                placeholder="e.g. KA25 F 1234"
+                required
+                className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs font-mono font-bold uppercase text-ink focus:outline-none focus:border-cobalt"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[11px] font-bold text-ink">
+                Assigned Route
+              </label>
+              <select
+                value={selectedRouteId}
+                onChange={(e) => setSelectedRouteId(e.target.value)}
+                className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs font-bold text-ink focus:outline-none focus:border-cobalt"
+              >
+                {routes.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    Route {r.code} - {r.name_en}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <button
               type="submit"
               disabled={claimLoading}
-              className="px-3.5 py-2 bg-cobalt text-white text-xs font-bold rounded-pill shadow-xs hover:opacity-95 disabled:opacity-50"
+              className="w-full py-2.5 bg-cobalt text-white text-xs font-bold rounded-pill shadow-xs hover:opacity-95 disabled:opacity-50 transition"
             >
-              {claimLoading ? 'Verifying...' : 'Unlock'}
+              {claimLoading ? 'Verifying & Linking Bus...' : 'Unlock Driver Portal'}
             </button>
           </form>
         </div>

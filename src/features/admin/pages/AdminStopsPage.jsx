@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { MapPin, Plus, Edit2, Trash2, AlertCircle, CheckCircle, RefreshCw, Layers } from 'lucide-react'
+import { MapPin, Plus, Edit2, Trash2, AlertCircle, CheckCircle, RefreshCw, Layers, Crosshair } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { supabase } from '@/lib/supabase'
 import { useToastStore } from '@/components/ui/Toast'
+import { snapToRoad } from '@/lib/roadRouting'
 import DataTable from '../components/DataTable'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { getTileUrl } from '@/lib/mapConfig'
@@ -54,9 +55,28 @@ export default function AdminStopsPage() {
     active: true,
   })
   const [saving, setSaving] = useState(false)
+  const [snapping, setSnapping] = useState(false)
   const [formError, setFormError] = useState('')
 
   const { addToast } = useToastStore()
+
+  const handleSnapToRoad = async () => {
+    if (!formData.lat || !formData.lng) return
+    setSnapping(true)
+    try {
+      const snapped = await snapToRoad(formData.lat, formData.lng)
+      setFormData((prev) => ({
+        ...prev,
+        lat: snapped.lat,
+        lng: snapped.lng,
+      }))
+      addToast({ message: 'Snapped stop coordinates to nearest road', type: 'success' })
+    } catch (err) {
+      addToast({ message: `Snap failed: ${err.message}`, type: 'error' })
+    } finally {
+      setSnapping(false)
+    }
+  }
 
   const fetchStops = async () => {
     setLoading(true)
@@ -385,37 +405,52 @@ export default function AdminStopsPage() {
               </div>
 
               {/* Coordinates */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-ink mb-1">
-                    Latitude <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.000001"
-                    required
-                    value={formData.lat}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lat: parseFloat(e.target.value) || 0 })
-                    }
-                    className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs font-mono text-ink focus:outline-none focus:border-cobalt"
-                  />
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-ink mb-1">
+                      Latitude <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.000001"
+                      required
+                      value={formData.lat}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lat: parseFloat(e.target.value) || 0 })
+                      }
+                      className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs font-mono text-ink focus:outline-none focus:border-cobalt"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-ink mb-1">
+                      Longitude <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.000001"
+                      required
+                      value={formData.lng}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lng: parseFloat(e.target.value) || 0 })
+                      }
+                      className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs font-mono text-ink focus:outline-none focus:border-cobalt"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-ink mb-1">
-                    Longitude <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.000001"
-                    required
-                    value={formData.lng}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lng: parseFloat(e.target.value) || 0 })
-                    }
-                    className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs font-mono text-ink focus:outline-none focus:border-cobalt"
-                  />
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleSnapToRoad}
+                    disabled={snapping}
+                    className="flex items-center gap-1.5 px-3 py-1 bg-page hover:bg-surface border border-line rounded-pill text-[11px] font-bold text-cobalt hover:border-cobalt transition disabled:opacity-50 shadow-xs"
+                    title="Snap stop coordinates to nearest drivable road via OSRM"
+                  >
+                    <Crosshair className={`w-3.5 h-3.5 ${snapping ? 'animate-spin' : ''}`} />
+                    <span>{snapping ? 'Snapping to road...' : 'Snap to road (OSRM)'}</span>
+                  </button>
                 </div>
               </div>
 

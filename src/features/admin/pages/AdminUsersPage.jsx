@@ -7,10 +7,12 @@ import DataTable from '../components/DataTable'
 
 export default function AdminUsersPage() {
   const [profiles, setProfiles] = useState([])
+  const [buses, setBuses] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
   const [selectedRole, setSelectedRole] = useState('passenger')
+  const [selectedBusId, setSelectedBusId] = useState('')
   const [saving, setSaving] = useState(false)
 
   const { user: currentUser } = useAuthStore()
@@ -19,13 +21,35 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
+      const { data: profs, error } = await supabase
         .from('profiles')
         .select('*')
         .order('role', { ascending: false })
 
       if (error) throw error
-      setProfiles(data || [])
+
+      const { data: driversData } = await supabase
+        .from('drivers')
+        .select('*, bus:buses(*)')
+
+      const { data: busList } = await supabase
+        .from('buses')
+        .select('*')
+        .order('reg_no')
+
+      setBuses(busList || [])
+
+      const driverMap = {}
+      ;(driversData || []).forEach((d) => {
+        driverMap[d.profile_id] = d
+      })
+
+      const joined = (profs || []).map((p) => ({
+        ...p,
+        driver: driverMap[p.id] || null,
+      }))
+
+      setProfiles(joined)
     } catch (err) {
       addToast({ message: `Failed to load users: ${err.message}`, type: 'error' })
     } finally {
@@ -40,6 +64,7 @@ export default function AdminUsersPage() {
   const handleOpenEdit = (user) => {
     setEditingUser(user)
     setSelectedRole(user.role || 'passenger')
+    setSelectedBusId(user.driver?.bus_id || '')
     setModalOpen(true)
   }
 
@@ -65,16 +90,23 @@ export default function AdminUsersPage() {
 
       if (profileErr) throw profileErr
 
-      // 2. If promoted to driver, ensure drivers row exists
+      // 2. If driver role, update or insert driver and assigned bus
       if (selectedRole === 'driver') {
-        const { error: driverErr } = await supabase
+        const { data: existingD } = await supabase
           .from('drivers')
-          .insert({ profile_id: editingUser.id })
-          .select()
+          .select('id')
+          .eq('profile_id', editingUser.id)
+          .maybeSingle()
 
-        // Ignore unique violation if already exists
-        if (driverErr && !driverErr.message?.includes('duplicate key')) {
-          console.warn('Driver record note:', driverErr.message)
+        if (existingD) {
+          await supabase
+            .from('drivers')
+            .update({ bus_id: selectedBusId || null })
+            .eq('id', existingD.id)
+        } else {
+          await supabase
+            .from('drivers')
+            .insert({ profile_id: editingUser.id, bus_id: selectedBusId || null })
         }
       }
 
@@ -141,6 +173,21 @@ export default function AdminUsersPage() {
       label: 'Role',
       sortable: true,
       render: (val) => getRoleBadge(val),
+    },
+    {
+      key: 'assigned_bus',
+      label: 'Assigned Bus',
+      sortable: false,
+      render: (_, row) =>
+        row.role === 'driver' ? (
+          <span className="font-mono text-xs font-bold text-ink">
+            {row.driver?.bus?.reg_no || (
+              <span className="text-text-secondary font-normal italic">Unassigned</span>
+            )}
+          </span>
+        ) : (
+          <span className="text-text-secondary">—</span>
+        ),
     },
     {
       key: 'lang',
@@ -305,6 +352,30 @@ export default function AdminUsersPage() {
                   </div>
                 </label>
               </div>
+
+              {/* Driver Bus Assignment (Problem 5.5) */}
+              {selectedRole === 'driver' && (
+                <div className="pt-2 border-t border-line space-y-1.5 animate-fadeIn">
+                  <label className="block text-xs font-bold text-ink">
+                    Assigned Vehicle (Bus):
+                  </label>
+                  <select
+                    value={selectedBusId}
+                    onChange={(e) => setSelectedBusId(e.target.value)}
+                    className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs font-mono font-bold text-ink focus:outline-none focus:border-cobalt"
+                  >
+                    <option value="">(No bus assigned / Clear)</option>
+                    {buses.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.reg_no}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-text-secondary">
+                    Binds this driver to the chosen bus for all shifts and live tracking.
+                  </p>
+                </div>
+              )}
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-line">
                 <button
