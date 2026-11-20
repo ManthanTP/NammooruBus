@@ -114,9 +114,9 @@ $$;
 GRANT EXECUTE ON FUNCTION public.claim_driver_role(text) TO authenticated;
 
 -- ====================================================================
--- INSTRUCTIONS TO SET OR ROTATE YOUR DRIVER KEY:
--- Run the following statement in Supabase SQL editor with your chosen secret:
+-- ACTIVE DRIVER REGISTRATION KEY:
+-- Run this statement in Supabase SQL editor to activate your key:
 --
 -- INSERT INTO public.driver_signup_config (driver_key, is_active)
--- VALUES ('CHANGE-ME-driver-key', true);
+-- VALUES ('nammooru-driver-secret-2026', true);
 -- ====================================================================
