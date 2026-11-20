@@ -87,7 +87,7 @@ export default function ResultsPage() {
         supabase.from('search_log').insert({
           from_stop: fromStopId,
           to_stop: toStopId,
-        }).then(() => {})
+        }).then(() => { })
       } catch (e) {
         // Silently catch offline/anonymous log failures
       }
@@ -174,9 +174,8 @@ export default function ResultsPage() {
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveSort(tab.key)}
-                className={`relative flex-1 py-1.5 px-2 text-xs font-bold rounded-pill transition-colors flex items-center justify-center gap-1 ${
-                  isCurrent ? 'text-white' : 'text-text-secondary hover:text-ink'
-                }`}
+                className={`relative flex-1 py-1.5 px-2 text-xs font-bold rounded-pill transition-colors flex items-center justify-center gap-1 ${isCurrent ? 'text-white' : 'text-text-secondary hover:text-ink'
+                  }`}
               >
                 {isCurrent && (
                   <motion.div

@@ -53,13 +53,12 @@ export default function PassengerLayout() {
           <div className="h-4 w-[1px] bg-line mx-1" />
           <Link
             to="/live"
-            className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-pill transition-colors ${
-              isReconnecting
-                ? 'text-warning bg-warning/15'
-                : liveCount > 0
+            className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-pill transition-colors ${isReconnecting
+              ? 'text-warning bg-warning/15'
+              : liveCount > 0
                 ? 'text-success bg-success/15'
                 : 'text-text-secondary bg-page'
-            }`}
+              }`}
           >
             {isReconnecting ? (
               <>
@@ -106,9 +105,8 @@ export default function PassengerLayout() {
       <div className="flex-1 w-full flex flex-col md:flex-row min-h-screen">
         {/* Left Column (Content) */}
         <main
-          className={`flex-1 md:w-[440px] md:max-w-[440px] md:flex-none min-h-screen pt-16 pb-24 px-4 overflow-y-auto md:border-r md:border-line md:bg-page transition-all ${
-            isSearchPage ? 'bg-surface' : ''
-          }`}
+          className={`flex-1 md:w-[440px] md:max-w-[440px] md:flex-none min-h-screen pt-16 pb-24 px-4 overflow-y-auto md:border-r md:border-line md:bg-page transition-all ${isSearchPage ? 'bg-surface' : ''
+            }`}
         >
           <div className="max-w-lg mx-auto md:max-w-none">
             <Outlet />

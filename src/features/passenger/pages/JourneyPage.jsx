@@ -211,9 +211,8 @@ export default function JourneyPage() {
           <button
             type="button"
             onClick={handleToggleSave}
-            className={`p-1.5 rounded-pill border transition ${
-              currentlySaved ? 'bg-cobalt text-white border-cobalt' : 'bg-surface text-text-secondary border-line'
-            }`}
+            className={`p-1.5 rounded-pill border transition ${currentlySaved ? 'bg-cobalt text-white border-cobalt' : 'bg-surface text-text-secondary border-line'
+              }`}
             title="Save trip"
           >
             <Bookmark className="w-3.5 h-3.5" />

@@ -151,9 +151,8 @@ export default function SearchPage() {
             setActiveField('from')
             setSearchQuery('')
           }}
-          className={`flex items-center gap-2.5 p-3 rounded-input border transition cursor-pointer ${
-            activeField === 'from' ? 'bg-surface border-cobalt shadow-xs' : 'bg-surface/70 border-line'
-          }`}
+          className={`flex items-center gap-2.5 p-3 rounded-input border transition cursor-pointer ${activeField === 'from' ? 'bg-surface border-cobalt shadow-xs' : 'bg-surface/70 border-line'
+            }`}
         >
           <div className="w-3 h-3 rounded-full bg-success shrink-0" />
           <div className="flex-1 min-w-0">
@@ -198,9 +197,8 @@ export default function SearchPage() {
             setActiveField('to')
             setSearchQuery('')
           }}
-          className={`flex items-center gap-2.5 p-3 rounded-input border transition cursor-pointer ${
-            activeField === 'to' ? 'bg-surface border-cobalt shadow-xs' : 'bg-surface/70 border-line'
-          }`}
+          className={`flex items-center gap-2.5 p-3 rounded-input border transition cursor-pointer ${activeField === 'to' ? 'bg-surface border-cobalt shadow-xs' : 'bg-surface/70 border-line'
+            }`}
         >
           <div className="w-3 h-3 rounded-full bg-danger shrink-0" />
           <div className="flex-1 min-w-0">
@@ -285,11 +283,10 @@ export default function SearchPage() {
                 onClick={() => handleSelectStop(stop)}
                 role="button"
                 tabIndex={0}
-                className={`p-3 rounded-input border transition flex items-center justify-between cursor-pointer ${
-                  isSelected
-                    ? 'bg-cobalt-tint border-cobalt text-cobalt'
-                    : 'bg-surface hover:bg-page border-line text-ink'
-                }`}
+                className={`p-3 rounded-input border transition flex items-center justify-between cursor-pointer ${isSelected
+                  ? 'bg-cobalt-tint border-cobalt text-cobalt'
+                  : 'bg-surface hover:bg-page border-line text-ink'
+                  }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <MapPin className={`w-4 h-4 shrink-0 ${isSelected ? 'text-cobalt' : 'text-text-secondary'}`} />
