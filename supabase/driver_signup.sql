@@ -76,8 +76,7 @@ BEGIN
 
     -- Update user profile role to driver
     UPDATE public.profiles
-    SET role = 'driver',
-        updated_at = v_now
+    SET role = 'driver'
     WHERE id = v_user_id;
 
     -- Ensure corresponding row in drivers table exists
