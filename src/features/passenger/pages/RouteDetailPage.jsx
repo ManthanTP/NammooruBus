@@ -155,9 +155,8 @@ export default function RouteDetailPage() {
               key={dt}
               type="button"
               onClick={() => setDayType(dt)}
-              className={`relative flex-1 py-1 text-xs font-bold rounded-pill capitalize transition-colors flex items-center justify-center gap-1 ${
-                isSelected ? 'text-white' : 'text-text-secondary hover:text-ink'
-              }`}
+              className={`relative flex-1 py-1 text-xs font-bold rounded-pill capitalize transition-colors flex items-center justify-center gap-1 ${isSelected ? 'text-white' : 'text-text-secondary hover:text-ink'
+                }`}
             >
               {isSelected && (
                 <motion.div
@@ -216,13 +215,12 @@ export default function RouteDetailPage() {
               <div key={item.id} className="flex gap-3">
                 <div className="flex flex-col items-center">
                   <div
-                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                      isFirst
-                        ? 'bg-success text-white'
-                        : isLast
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${isFirst
+                      ? 'bg-success text-white'
+                      : isLast
                         ? 'bg-danger text-white'
                         : 'bg-page border-2 border-line text-ink'
-                    }`}
+                      }`}
                   >
                     {idx + 1}
                   </div>
