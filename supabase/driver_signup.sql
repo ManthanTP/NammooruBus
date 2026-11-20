@@ -14,10 +14,12 @@ CREATE TABLE IF NOT EXISTS public.driver_signup_config (
 
 -- Secure the config table so clients cannot query it directly
 ALTER TABLE public.driver_signup_config ENABLE ROW LEVEL SECURITY;
--- No public SELECT policy; only accessible via SECURITY DEFINER functions or service role
 
--- 2. Create table for tracking failed driver key attempts (rate limiting & lockout)
-CREATE TABLE IF NOT EXISTS public.driver_key_attempts (
+-- 2. Drop and recreate driver_key_attempts with full schema
+-- (Ensures failed_attempts, locked_until, and last_attempt_at columns are created)
+DROP TABLE IF EXISTS public.driver_key_attempts CASCADE;
+
+CREATE TABLE public.driver_key_attempts (
   user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   failed_attempts int NOT NULL DEFAULT 0,
   locked_until timestamptz,
