@@ -7,12 +7,15 @@ import { useMapStore } from '@/store/mapStore'
 export default function MapCard({ height = 220, isSticky = false, className = '' }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const { position, status, accuracy, start } = useLocationStore()
-  const { setCenter } = useMapStore()
+  const { setCenter, setView } = useMapStore()
 
   const handleLocateMe = (e) => {
     e.stopPropagation()
     if (position) {
-      setCenter([position.lat, position.lng], 15)
+      const centerFn = setView || setCenter
+      if (typeof centerFn === 'function') {
+        centerFn([position.lat, position.lng], 15)
+      }
     } else {
       start()
     }

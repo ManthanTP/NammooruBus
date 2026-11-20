@@ -22,7 +22,7 @@ export default function ResultsPage() {
   const toStopId = searchParams.get('to')
 
   const { stops, routes, routeStops, schedules, fareConfig, loading: storeLoading, initData } = useDataStore()
-  const { setBounds, setPolyline } = useMapStore()
+  const { fitBounds, setBounds } = useMapStore()
 
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -76,10 +76,13 @@ export default function ResultsPage() {
 
       // Fit map to origin and destination
       if (fromStop?.lat && toStop?.lat) {
-        setBounds([
-          [fromStop.lat, fromStop.lng],
-          [toStop.lat, toStop.lng],
-        ])
+        const fit = fitBounds || setBounds
+        if (typeof fit === 'function') {
+          fit([
+            [fromStop.lat, fromStop.lng],
+            [toStop.lat, toStop.lng],
+          ])
+        }
       }
 
       // Anonymous log to search_log

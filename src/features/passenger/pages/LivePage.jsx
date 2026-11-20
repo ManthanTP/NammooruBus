@@ -29,7 +29,7 @@ export default function LivePage() {
   const { user } = useAuthStore()
   const { routes, routeStops, stops, schedules } = useDataStore()
   const { trips, selectedTripId, setSelectedTripId, isReconnecting, reportCrowd, speedsByTrip } = useLiveStore()
-  const { setBounds, setCenter } = useMapStore()
+  const { setBounds, fitBounds, setCenter, setView } = useMapStore()
   const { position: userPos } = useLocationStore()
   const { addToast } = useToastStore()
 
@@ -68,15 +68,21 @@ export default function LivePage() {
   useEffect(() => {
     if (selectedTrip?.position?.lat && selectedTrip?.position?.lng) {
       if (userPos?.lat && userPos?.lng) {
-        setBounds([
-          [userPos.lat, userPos.lng],
-          [selectedTrip.position.lat, selectedTrip.position.lng],
-        ])
+        const fit = fitBounds || setBounds
+        if (typeof fit === 'function') {
+          fit([
+            [userPos.lat, userPos.lng],
+            [selectedTrip.position.lat, selectedTrip.position.lng],
+          ])
+        }
       } else {
-        setCenter([selectedTrip.position.lat, selectedTrip.position.lng], 15)
+        const centerFn = setView || setCenter
+        if (typeof centerFn === 'function') {
+          centerFn([selectedTrip.position.lat, selectedTrip.position.lng], 15)
+        }
       }
     }
-  }, [selectedTrip, userPos, setBounds, setCenter])
+  }, [selectedTrip, userPos, setBounds, fitBounds, setCenter, setView])
 
   // Compute ETA and Next Stop for selected trip
   const tripDetails = useMemo(() => {

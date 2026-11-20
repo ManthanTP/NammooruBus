@@ -12,6 +12,9 @@ export const useMapStore = create((set) => ({
   setRoute: (polyline, color = '#3451F2') => {
     set({ polyline, routeColor: color })
   },
+  setPolyline: (polyline, color = '#3451F2') => {
+    set({ polyline, routeColor: color })
+  },
 
   setMarkers: (markers = []) => {
     set({ markers })
@@ -24,8 +27,14 @@ export const useMapStore = create((set) => ({
   fitBounds: (bounds) => {
     set({ bounds })
   },
+  setBounds: (bounds) => {
+    set({ bounds })
+  },
 
   setView: (center, zoom = 14) => {
+    set({ center, zoom })
+  },
+  setCenter: (center, zoom = 14) => {
     set({ center, zoom })
   },
 

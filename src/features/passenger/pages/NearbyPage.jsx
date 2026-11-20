@@ -15,14 +15,18 @@ export default function NearbyPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { stops, routes, routeStops } = useDataStore()
-  const { setCircle, setMarkers, setCenter } = useMapStore()
+  const { setCircle, setMarkers, setView, setCenter } = useMapStore()
   const { position: userPos } = useLocationStore()
 
   const defaultLat = parseFloat(import.meta.env.VITE_DEFAULT_LAT || '15.3647')
   const defaultLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG || '75.1240')
 
-  const centerLat = userPos?.lat || defaultLat
-  const centerLng = userPos?.lng || defaultLng
+  // If user GPS is outside Hubballi (>35 km), fall back to Hubballi center so stops are visible
+  const distFromCity = userPos?.lat ? haversine(userPos.lat, userPos.lng, defaultLat, defaultLng) : 0
+  const isOutsideCity = distFromCity > 35
+
+  const centerLat = (!isOutsideCity && userPos?.lat) ? userPos.lat : defaultLat
+  const centerLng = (!isOutsideCity && userPos?.lng) ? userPos.lng : defaultLng
 
   const [radiusM, setRadiusM] = useState(1000) // Default 1000m (1 km)
 
@@ -65,7 +69,9 @@ export default function NearbyPage() {
 
   // Update map radius and stop markers
   useEffect(() => {
-    setCircle({ lat: centerLat, lng: centerLng, radiusM })
+    if (typeof setCircle === 'function') {
+      setCircle({ lat: centerLat, lng: centerLng, radiusM })
+    }
 
     const markers = nearbyStops.map((stop) => ({
       id: stop.id,
@@ -74,9 +80,15 @@ export default function NearbyPage() {
       type: 'stop',
       label: stop.name_en,
     }))
-    setMarkers(markers)
-    setCenter([centerLat, centerLng], 14)
-  }, [centerLat, centerLng, radiusM, nearbyStops, setCircle, setMarkers, setCenter])
+    if (typeof setMarkers === 'function') {
+      setMarkers(markers)
+    }
+
+    const setCoord = setView || setCenter
+    if (typeof setCoord === 'function') {
+      setCoord([centerLat, centerLng], 14)
+    }
+  }, [centerLat, centerLng, radiusM, nearbyStops, setCircle, setMarkers, setCenter, setView])
 
   return (
     <div className="space-y-3.5 pt-1 pb-6">
@@ -88,6 +100,7 @@ export default function NearbyPage() {
         </h1>
         <p className="text-xs text-text-secondary">
           {nearbyStops.length} stops within {radiusM >= 1000 ? `${radiusM / 1000} km` : `${radiusM} m`}
+          {isOutsideCity && ' • Showing Hubballi Center (Outside city)'}
         </p>
       </div>
 
