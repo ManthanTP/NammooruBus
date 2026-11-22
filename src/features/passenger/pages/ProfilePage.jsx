@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, LayoutGroup } from 'framer-motion'
 import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2, Bus, Sun, Moon, Laptop } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
 import { useThemeStore } from '@/store/themeStore'
@@ -13,6 +14,8 @@ import Button from '@/components/ui/Button'
 export default function ProfilePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
+  const isDriverRoute = location.pathname.startsWith('/driver')
   const { user, profile, signOut, claimDriverRole } = useAuthStore()
   const { routes, initData } = useDataStore()
   const { theme, setTheme } = useThemeStore()
@@ -23,10 +26,24 @@ export default function ProfilePage() {
   const [selectedRouteId, setSelectedRouteId] = useState('')
   const [claimLoading, setClaimLoading] = useState(false)
   const [claimError, setClaimError] = useState(null)
+  const [driverBus, setDriverBus] = useState(null)
 
   useEffect(() => {
     initData()
   }, [initData])
+
+  useEffect(() => {
+    if (user && profile?.role === 'driver') {
+      supabase
+        .from('drivers')
+        .select('*, bus:buses(*)')
+        .eq('profile_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.bus) setDriverBus(data.bus)
+        })
+    }
+  }, [user, profile])
 
   useEffect(() => {
     if (routes && routes.length > 0 && !selectedRouteId) {
@@ -37,7 +54,15 @@ export default function ProfilePage() {
   const handleLogout = async () => {
     await signOut()
     toast.info('toast.logged_out')
-    navigate('/')
+    navigate(isDriverRoute ? '/login' : '/')
+  }
+
+  const handleBack = () => {
+    if (isDriverRoute) {
+      navigate('/driver')
+    } else {
+      navigate(-1)
+    }
   }
 
   const handleClaimDriver = async (e) => {
@@ -91,7 +116,7 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between mb-4">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center transition active:scale-95 cursor-pointer"
             style={{ color: 'var(--on-brand)' }}
             title="Back"
@@ -99,7 +124,7 @@ export default function ProfilePage() {
             <ArrowLeft className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
           </button>
           <span className="font-heading font-extrabold text-xs uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
-            {t('nav.profile') || 'My Profile'}
+            {isDriverRoute ? 'Driver Profile' : (t('nav.profile') || 'My Profile')}
           </span>
           <div className="w-8" />
         </div>
@@ -109,11 +134,11 @@ export default function ProfilePage() {
             className="w-16 h-16 rounded-full border-4 border-white font-heading font-extrabold text-2xl flex items-center justify-center shadow-float shrink-0"
             style={{ backgroundColor: '#FFFFFF', color: '#0040FF' }}
           >
-            {profile?.full_name ? profile.full_name[0].toUpperCase() : 'U'}
+            {profile?.full_name ? profile.full_name[0].toUpperCase() : (profile?.role === 'driver' ? 'D' : 'U')}
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="font-heading font-extrabold text-lg truncate" style={{ color: 'var(--on-brand)' }}>
-              {profile?.full_name || 'Nammooru Passenger'}
+              {profile?.full_name || (profile?.role === 'driver' ? 'NWKRTC Driver' : 'Nammooru Passenger')}
             </h2>
             <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
               {user?.email || 'user@example.com'}
@@ -217,7 +242,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* 3. Driver Quick Switch if already a driver */}
+      {/* 3. Driver Vehicle & Shift Status if already a driver */}
       {profile?.role === 'driver' && (
         <div className="p-4 bg-surface rounded-[20px] border border-line shadow-soft flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -225,8 +250,12 @@ export default function ProfilePage() {
               <Bus className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <h3 className="font-heading font-bold text-sm text-ink-950">Driver Console</h3>
-              <p className="text-xs text-muted">Switch to your vehicle dashboard</p>
+              <h3 className="font-heading font-bold text-sm text-ink-950">
+                {driverBus ? `Assigned Bus: ${driverBus.reg_no}` : 'Driver Console'}
+              </h3>
+              <p className="text-xs text-muted">
+                {driverBus ? 'Vehicle registered for transit duty' : 'Switch to your vehicle dashboard'}
+              </p>
             </div>
           </div>
           <Button
@@ -234,13 +263,13 @@ export default function ProfilePage() {
             size="sm"
             onClick={() => navigate('/driver')}
           >
-            Open &rarr;
+            {isDriverRoute ? 'Trip' : 'Open'} &rarr;
           </Button>
         </div>
       )}
 
-      {/* 3. Become a Driver Card (for passengers) */}
-      {isPassenger && (
+      {/* 3. Become a Driver Card (for passengers only) */}
+      {isPassenger && !isDriverRoute && (
         <div className="p-5 bg-surface rounded-[20px] border border-line shadow-soft space-y-3">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-surface-2 text-cobalt-500 flex items-center justify-center">

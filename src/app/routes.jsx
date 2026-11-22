@@ -201,6 +201,10 @@ export const router = createBrowserRouter([
         path: 'bus',
         element: <DriverBusPage />,
       },
+      {
+        path: 'profile',
+        element: <ProfilePage />,
+      },
     ],
   },
 

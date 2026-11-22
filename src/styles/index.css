@@ -117,6 +117,22 @@ h6 {
   stroke: currentColor;
 }
 
+/* Phase 5.13: Scoped Landing Smooth Scroll */
+html.landing-smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.landing-smooth-scroll {
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes shine-sweep {
+  0% { transform: translateX(-100%); }
+  20%, 100% { transform: translateX(300%); }
+}
+
 /* Placeholders & Disabled Styling */
 input::placeholder,
 textarea::placeholder {

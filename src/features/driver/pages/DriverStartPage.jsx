@@ -146,9 +146,9 @@ export default function DriverStartPage() {
           bus_id: driverRecord.bus_id,
           driver_id: driverRecord.id,
           route_id: selectedRouteId,
-          direction,
-          status: 'on_time',
-          crowd_level: 1,
+          direction: Number(direction) || 0,
+          status: 'active',
+          crowd_level: 'empty',
           started_at: new Date().toISOString(),
         })
         .select()

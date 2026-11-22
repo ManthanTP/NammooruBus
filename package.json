@@ -11,7 +11,8 @@
     "lint": "eslint src",
     "i18n:check": "node ./scripts/check_i18n.js",
     "icons": "node ./scripts/generate_icons.js",
-    "test:themes": "node ./scripts/test_themes.js"
+    "test:themes": "node ./scripts/test_themes.js",
+    "test:landing": "node ./scripts/test_landing_scroll.js"
   },
   "dependencies": {
     "@fontsource/dotgothic16": "^5.0.0",

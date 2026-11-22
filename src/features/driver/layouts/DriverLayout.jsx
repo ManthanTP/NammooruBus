@@ -95,7 +95,7 @@ export default function DriverLayout() {
     { key: 'live', label: 'Live', path: '/driver/trip', icon: Radio },
     { key: 'reports', label: 'Reports', path: '/driver/history', icon: FileText },
     { key: 'bus', label: 'Bus', path: '/driver/bus', icon: Bus },
-    { key: 'profile', label: 'Profile', path: '/profile', icon: User },
+    { key: 'profile', label: 'Profile', path: '/driver/profile', icon: User },
   ]
 
   const userInitials = (profile?.full_name || user?.email || 'D')[0].toUpperCase()
@@ -174,7 +174,7 @@ export default function DriverLayout() {
 
                 {/* Profile Link */}
                 <Link
-                  to="/profile"
+                  to="/driver/profile"
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-ink-950 hover:bg-sky-50 dark:hover:bg-surface-2 transition"
                 >
