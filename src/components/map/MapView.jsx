@@ -7,53 +7,100 @@ import { useLocationStore } from '@/store/locationStore'
 import { getTileUrl, TILE_ATTRIBUTION } from '@/lib/mapConfig'
 import BusMarker from './BusMarker'
 
-// Helper to create clean custom HTML markers with SVG
+// Helper to create clean custom HTML markers with SVG per Section 5 Design Language
 function createMarkerIcon(type, label = '') {
   const configs = {
+    // User location: cobalt dot with white border, soft pulsing ring, accuracy circle, label "You"
     user: {
       html: `
-        <div style="position:relative;width:22px;height:22px;display:flex;align-items:center;justify-content:center;">
-          <span style="position:absolute;inset:0;border-radius:50%;background:#3451F2;opacity:0.4;animation:ping 1.8s cubic-bezier(0,0,0.2,1) infinite;"></span>
-          <div style="width:14px;height:14px;border-radius:50%;background:#3451F2;border:2.5px solid #FFFFFF;box-shadow:0 0 10px rgba(52,81,242,0.7);z-index:2;"></div>
+        <div style="position:relative;display:flex;flex-direction:column;align-items:center;">
+          <div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+            <span style="position:absolute;inset:-4px;border-radius:50%;background:#0040FF;opacity:0.25;animation:ping 2s cubic-bezier(0,0,0.2,1) infinite;"></span>
+            <div style="width:14px;height:14px;border-radius:50%;background:#0040FF;border:3px solid #FFFFFF;box-shadow:0 0 10px rgba(0,64,255,0.6);z-index:2;"></div>
+          </div>
+          <span style="margin-top:1px;background:#050F45;color:#FFFFFF;font-size:9.5px;font-weight:700;padding:0.5px 5px;border-radius:9999px;border:1px solid rgba(255,255,255,0.8);white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.3);line-height:1.2;">
+            You
+          </span>
         </div>
       `,
       className: 'you-location-marker',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11],
+      iconSize: [30, 40],
+      iconAnchor: [15, 12],
     },
+    // Pin A = cobalt pin SVG with soft drop shadow
     pinA: {
-      html: `<div style="background:#12A676;color:white;font-weight:800;font-size:11px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">A</div>`,
+      html: `
+        <div style="position:relative;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 3px 6px rgba(0,32,165,0.35));">
+          <svg width="28" height="36" viewBox="0 0 28 36" fill="none">
+            <path d="M14 0C6.268 0 0 6.268 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.268 21.732 0 14 0Z" fill="#0040FF"/>
+            <circle cx="14" cy="14" r="10" fill="#FFFFFF"/>
+            <text x="14" y="18" font-family="'Outfit', sans-serif" font-weight="800" font-size="12" fill="#0040FF" text-anchor="middle">A</text>
+          </svg>
+        </div>
+      `,
       className: 'pin-a-marker',
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
+      iconSize: [28, 36],
+      iconAnchor: [14, 36],
     },
+    // Pin B = amber pin SVG with soft drop shadow (from logo)
     pinB: {
-      html: `<div style="background:#E5484D;color:white;font-weight:800;font-size:11px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">B</div>`,
+      html: `
+        <div style="position:relative;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 3px 6px rgba(0,19,110,0.35));">
+          <svg width="28" height="36" viewBox="0 0 28 36" fill="none">
+            <path d="M14 0C6.268 0 0 6.268 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.268 21.732 0 14 0Z" fill="#FFB400"/>
+            <circle cx="14" cy="14" r="10" fill="#00136E"/>
+            <text x="14" y="18" font-family="'Outfit', sans-serif" font-weight="800" font-size="12" fill="#FFB400" text-anchor="middle">B</text>
+          </svg>
+        </div>
+      `,
       className: 'pin-b-marker',
+      iconSize: [28, 36],
+      iconAnchor: [14, 36],
+    },
+    // Transfer = white circle with swap icon on cobalt
+    transfer: {
+      html: `
+        <div style="width:24px;height:24px;border-radius:50%;background:#0040FF;border:2.5px solid #FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,32,165,0.4);color:#FFFFFF;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>
+          </svg>
+        </div>
+      `,
+      className: 'transfer-marker',
       iconSize: [24, 24],
       iconAnchor: [12, 12],
     },
-    transfer: {
-      html: `<div style="background:#F59E0B;color:white;font-weight:800;font-size:10px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">⇄</div>`,
-      className: 'transfer-marker',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11],
-    },
+    // Regular Stop = white circle with 3px cobalt ring
     stop: {
-      html: `<div style="width:12px;height:12px;border-radius:50%;background:#0E1433;border:2px solid #FFFFFF;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>`,
+      html: `<div style="width:13px;height:13px;border-radius:50%;background:#FFFFFF;border:3px solid #0040FF;box-shadow:0 1px 4px rgba(5,15,69,0.25);"></div>`,
       className: 'stop-marker',
-      iconSize: [12, 12],
-      iconAnchor: [6, 6],
+      iconSize: [13, 13],
+      iconAnchor: [6.5, 6.5],
     },
+    // Terminal Stop = amber pin
+    terminalStop: {
+      html: `
+        <div style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+          <svg width="22" height="28" viewBox="0 0 28 36" fill="none">
+            <path d="M14 0C6.268 0 0 6.268 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.268 21.732 0 14 0Z" fill="#FFB400"/>
+            <circle cx="14" cy="14" r="5" fill="#00136E"/>
+          </svg>
+        </div>
+      `,
+      className: 'terminal-stop-marker',
+      iconSize: [22, 28],
+      iconAnchor: [11, 28],
+    },
+    // Walking leg midpoint badge chip: "N min walk"
     walkBadge: {
       html: `
-        <div style="background:#0E1433;color:#FFFFFF;font-size:10px;font-weight:700;padding:2px 7px;border-radius:9999px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.3);border:1.5px solid #FFFFFF;display:inline-flex;align-items:center;gap:3px;pointer-events:none;">
-          <span>🚶 ${label}</span>
+        <div style="background:#00136E;color:#FFFFFF;font-size:10px;font-weight:700;padding:2px 8px;border-radius:9999px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,19,110,0.35);border:1.5px solid #FFFFFF;display:inline-flex;align-items:center;gap:3px;pointer-events:none;">
+          <span>${label || 'Walk'}</span>
         </div>
       `,
       className: 'walk-midpoint-badge',
-      iconSize: [70, 20],
-      iconAnchor: [35, 10],
+      iconSize: [75, 20],
+      iconAnchor: [37.5, 10],
     },
   }
 
@@ -111,7 +158,6 @@ function MapController() {
   }, [center, zoom, map])
 
   useEffect(() => {
-    // Invalidate size on mount / updates
     const timer = setTimeout(() => {
       try {
         map.invalidateSize()
@@ -141,9 +187,9 @@ export default function MapView({ showUserBusLink = true }) {
   const selectedTrip = trips.find((t) => t.id === selectedTripId)
   const selectedBusPos =
     selectedTrip?.position?.lat &&
-    selectedTrip?.position?.lng &&
-    !Number.isNaN(Number(selectedTrip.position.lat)) &&
-    !Number.isNaN(Number(selectedTrip.position.lng))
+      selectedTrip?.position?.lng &&
+      !Number.isNaN(Number(selectedTrip.position.lat)) &&
+      !Number.isNaN(Number(selectedTrip.position.lng))
       ? { lat: Number(selectedTrip.position.lat), lng: Number(selectedTrip.position.lng) }
       : null
 
@@ -156,6 +202,21 @@ export default function MapView({ showUserBusLink = true }) {
 
   const uLat = isValidUserPos ? Number(userPos.lat) : null
   const uLng = isValidUserPos ? Number(userPos.lng) : null
+
+  // Calculate nearest bus to user
+  let nearestTripId = null
+  if (isValidUserPos && trips.length > 0) {
+    let minDist = Infinity
+    for (const t of trips) {
+      if (t?.position?.lat && t?.position?.lng) {
+        const d = Math.hypot(Number(t.position.lat) - uLat, Number(t.position.lng) - uLng)
+        if (d < minDist) {
+          minDist = d
+          nearestTripId = t.id
+        }
+      }
+    }
+  }
 
   const hasAnyApproximate = isApproximateRoute || (journeyLegs && journeyLegs.some((l) => l.isApproximate))
 
@@ -170,13 +231,14 @@ export default function MapView({ showUserBusLink = true }) {
         <TileLayer url={tileUrl} attribution={attribution} maxZoom={19} />
         <MapController />
 
-        {/* 1. Single Route Polyline (e.g. Route detail) */}
+        {/* 1. Single Route Polyline (Route detail / selected route) */}
+        {/* Signature road styling: 3px white casing, cobalt-500 weight 6, thin white dashed centre line on top */}
         {polyline && polyline.length > 1 && (
           isApproximateRoute ? (
             <Polyline
               positions={polyline}
               pathOptions={{
-                color: routeColor || '#3451F2',
+                color: '#0040FF',
                 weight: 4,
                 dashArray: '8, 8',
                 opacity: 0.9,
@@ -184,24 +246,36 @@ export default function MapView({ showUserBusLink = true }) {
             />
           ) : (
             <>
-              {/* 2px white casing */}
+              {/* Outer 3px White Casing */}
               <Polyline
                 positions={polyline}
                 pathOptions={{
                   color: '#FFFFFF',
-                  weight: 7,
-                  opacity: 0.95,
+                  weight: 9,
+                  opacity: 0.98,
                   lineCap: 'round',
                   lineJoin: 'round',
                 }}
               />
-              {/* Solid line in route colour */}
+              {/* Main Cobalt Road Line */}
               <Polyline
                 positions={polyline}
                 pathOptions={{
-                  color: routeColor || '#3451F2',
-                  weight: 5,
+                  color: routeColor || '#0040FF',
+                  weight: 6,
                   opacity: 1,
+                  lineCap: 'round',
+                  lineJoin: 'round',
+                }}
+              />
+              {/* Thin White Dashed Centre Line (like the road in the logo) */}
+              <Polyline
+                positions={polyline}
+                pathOptions={{
+                  color: '#FFFFFF',
+                  weight: 1.5,
+                  dashArray: '5, 8',
+                  opacity: 0.9,
                   lineCap: 'round',
                   lineJoin: 'round',
                 }}
@@ -218,22 +292,22 @@ export default function MapView({ showUserBusLink = true }) {
             if (leg.type === 'walk') {
               return (
                 <div key={`walk-${lIdx}`}>
-                  {/* Walking leg: DOTTED line (dashArray "2 8", round caps, ink colour, weight 4) */}
+                  {/* Walking leg: DOTTED navy-900 line, weight 4, round caps */}
                   <Polyline
                     positions={leg.polyline}
                     pathOptions={{
-                      color: '#0E1433',
+                      color: '#00136E',
                       weight: 4,
                       dashArray: '2, 8',
                       lineCap: 'round',
-                      opacity: 0.85,
+                      opacity: 0.9,
                     }}
                   />
-                  {/* Walk badge at midpoint */}
+                  {/* Walk badge at midpoint: "N min walk" */}
                   {leg.midpoint && (
                     <Marker
                       position={leg.midpoint}
-                      icon={createMarkerIcon('walkBadge', `${leg.walkMinutes || 1} min (${leg.distanceMeters || 0}m)`)}
+                      icon={createMarkerIcon('walkBadge', `${leg.walkMinutes || 1} min walk`)}
                       zIndexOffset={400}
                     />
                   )}
@@ -241,13 +315,13 @@ export default function MapView({ showUserBusLink = true }) {
               )
             }
 
-            // Bus leg: solid line in route color on top of 2px white casing
+            // Bus leg: road ribbon with casing + dashed centre line
             return leg.isApproximate ? (
               <Polyline
                 key={`bus-${lIdx}`}
                 positions={leg.polyline}
                 pathOptions={{
-                  color: leg.color || '#3451F2',
+                  color: leg.color || '#0040FF',
                   weight: 4,
                   dashArray: '8, 8',
                   opacity: 0.9,
@@ -259,8 +333,8 @@ export default function MapView({ showUserBusLink = true }) {
                   positions={leg.polyline}
                   pathOptions={{
                     color: '#FFFFFF',
-                    weight: 7,
-                    opacity: 0.95,
+                    weight: 9,
+                    opacity: 0.98,
                     lineCap: 'round',
                     lineJoin: 'round',
                   }}
@@ -268,9 +342,20 @@ export default function MapView({ showUserBusLink = true }) {
                 <Polyline
                   positions={leg.polyline}
                   pathOptions={{
-                    color: leg.color || '#3451F2',
-                    weight: 5,
+                    color: leg.color || '#0040FF',
+                    weight: 6,
                     opacity: 1,
+                    lineCap: 'round',
+                    lineJoin: 'round',
+                  }}
+                />
+                <Polyline
+                  positions={leg.polyline}
+                  pathOptions={{
+                    color: '#FFFFFF',
+                    weight: 1.5,
+                    dashArray: '5, 8',
+                    opacity: 0.9,
                     lineCap: 'round',
                     lineJoin: 'round',
                   }}
@@ -280,7 +365,7 @@ export default function MapView({ showUserBusLink = true }) {
           })
         )}
 
-        {/* Radius Circle (e.g. for Nearby) */}
+        {/* Radius Circle (Nearby) */}
         {circle &&
           !Number.isNaN(Number(circle.lat)) &&
           !Number.isNaN(Number(circle.lng)) &&
@@ -291,24 +376,24 @@ export default function MapView({ showUserBusLink = true }) {
               center={[Number(circle.lat), Number(circle.lng)]}
               radius={Number(circle.radiusM)}
               pathOptions={{
-                color: '#3451F2',
-                fillColor: '#3451F2',
+                color: '#0040FF',
+                fillColor: '#0040FF',
                 fillOpacity: 0.12,
                 weight: 2,
                 dashArray: '4, 4',
               }}
             />
-        )}
+          )}
 
-        {/* User Location Pulsing Dot + Accuracy Circle (Rendered above polylines, below buses) */}
+        {/* User Location Pulsing Dot + Accuracy Circle (Cobalt at 12%) */}
         {isValidUserPos && (
           <>
             <Circle
               center={[uLat, uLng]}
               radius={Math.min(Number(accuracy) || 30, 250)}
               pathOptions={{
-                color: '#3451F2',
-                fillColor: '#3451F2',
+                color: '#0040FF',
+                fillColor: '#0040FF',
                 fillOpacity: 0.12,
                 weight: 1.5,
                 dashArray: '3, 3',
@@ -322,7 +407,7 @@ export default function MapView({ showUserBusLink = true }) {
           </>
         )}
 
-        {/* Thin Dashed Line Between User and Selected Bus (Live Screen) */}
+        {/* Dashed Amber Line Between You and Selected Bus on Live */}
         {showUserBusLink && isValidUserPos && selectedBusPos && (
           <Polyline
             positions={[
@@ -330,10 +415,10 @@ export default function MapView({ showUserBusLink = true }) {
               [selectedBusPos.lat, selectedBusPos.lng],
             ]}
             pathOptions={{
-              color: '#3451F2',
-              weight: 2,
-              dashArray: '5, 5',
-              opacity: 0.75,
+              color: '#FFB400',
+              weight: 2.5,
+              dashArray: '6, 6',
+              opacity: 0.9,
             }}
           />
         )}
@@ -355,7 +440,7 @@ export default function MapView({ showUserBusLink = true }) {
               icon={createMarkerIcon(m.type || 'stop', m.label)}
               zIndexOffset={300}
             />
-        ))}
+          ))}
 
         {/* Live Buses (Rendered on top with highest z-index) */}
         {trips
@@ -372,15 +457,19 @@ export default function MapView({ showUserBusLink = true }) {
               key={trip.id}
               trip={trip}
               isSelected={selectedTripId === trip.id}
+              isNearest={trip.id === nearestTripId}
               onClick={() => setSelectedTripId(trip.id)}
             />
-        ))}
+          ))}
       </MapContainer>
 
-      {/* Approximate Path Chip (Problem 1.4) */}
+      {/* Soft white overlay of 10% on basemap per Section 5 */}
+      <div className="absolute inset-0 bg-white/10 pointer-events-none z-[400]" />
+
+      {/* Approximate Path Chip */}
       {hasAnyApproximate && (
-        <div className="absolute bottom-2 left-2 z-[400] bg-surface/90 backdrop-blur-md px-2.5 py-1 rounded-pill border border-line text-[10px] font-bold text-text-secondary shadow-xs pointer-events-none flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-warning"></span>
+        <div className="absolute bottom-2 left-2 z-[450] bg-white/95 backdrop-blur-md px-3 py-1 rounded-pill border border-line text-[10px] font-bold text-muted shadow-xs pointer-events-none flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
           <span>Approximate path</span>
         </div>
       )}

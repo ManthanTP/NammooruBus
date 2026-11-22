@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, Info, XCircle, Clock, X, ChevronRight } from 'lucide-react'
+import { Bell, X, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
+/**
+ * AlertBanner — latest alert as an amber-100 banner card with a bell icon.
+ */
 export default function AlertBanner() {
   const [activeAlert, setActiveAlert] = useState(null)
 
@@ -18,13 +21,11 @@ export default function AlertBanner() {
 
       if (error) throw error
 
-      // Get dismissed alert IDs from localStorage
       let dismissed = []
       try {
         dismissed = JSON.parse(localStorage.getItem('nb_dismissed_alerts') || '[]')
       } catch (e) {}
 
-      // Find the first alert that hasn't expired and hasn't been dismissed
       const candidate = (data || []).find((a) => {
         if (dismissed.includes(a.id)) return false
         if (!a.expires_at) return true
@@ -40,7 +41,6 @@ export default function AlertBanner() {
   useEffect(() => {
     fetchNewestAlert()
 
-    // Realtime listener for live alert pushes
     const channel = supabase
       .channel('home_alert_banner_channel')
       .on(
@@ -50,7 +50,6 @@ export default function AlertBanner() {
       )
       .subscribe()
 
-    // Heartbeat every 30s to check for expired alerts
     const interval = setInterval(fetchNewestAlert, 30000)
 
     return () => {
@@ -76,62 +75,33 @@ export default function AlertBanner() {
 
   if (!activeAlert) return null
 
-  const typeStyles = {
-    cancel: {
-      bg: 'bg-danger/10 border-danger/30 text-danger',
-      icon: XCircle,
-      badge: 'bg-danger text-white',
-    },
-    diversion: {
-      bg: 'bg-warning/15 border-warning/30 text-ink',
-      icon: AlertTriangle,
-      badge: 'bg-warning text-ink',
-    },
-    delay: {
-      bg: 'bg-warning/15 border-warning/30 text-ink',
-      icon: Clock,
-      badge: 'bg-warning text-ink',
-    },
-    info: {
-      bg: 'bg-cobalt-tint/60 border-cobalt/30 text-ink',
-      icon: Info,
-      badge: 'bg-cobalt text-white',
-    },
-  }[activeAlert.type] || {
-    bg: 'bg-cobalt-tint/60 border-cobalt/30 text-ink',
-    icon: Info,
-    badge: 'bg-cobalt text-white',
-  }
-
-  const Icon = typeStyles.icon
-
   return (
     <div
-      className={`p-3.5 rounded-card border shadow-soft flex items-start justify-between gap-3 transition-all ${typeStyles.bg}`}
+      className="p-4 rounded-[20px] bg-amber-100 border border-amber-500/30 text-ink-950 flex items-start justify-between gap-3 shadow-soft transition-all"
     >
-      <div className="flex items-start gap-2.5 min-w-0 flex-1">
-        <Icon className="w-4 h-4 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 min-w-0 flex-1">
+        <div className="w-8 h-8 rounded-full bg-amber-500/20 text-navy-900 flex items-center justify-center shrink-0 mt-0.5">
+          <Bell className="w-4 h-4 text-navy-900" />
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-bold text-ink leading-tight truncate">
+            <span className="text-xs font-bold font-heading text-ink-950 leading-tight">
               {activeAlert.title}
             </span>
-            <span
-              className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-full ${typeStyles.badge}`}
-            >
-              {activeAlert.type}
+            <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-navy-900 text-amber-500 tracking-wider">
+              {activeAlert.type || 'Notice'}
             </span>
           </div>
 
           {activeAlert.body && (
-            <p className="text-[11px] text-text-secondary leading-snug mt-1 line-clamp-2">
+            <p className="text-xs text-muted leading-snug mt-1 line-clamp-2">
               {activeAlert.body}
             </p>
           )}
 
           <Link
             to="/alerts"
-            className="inline-flex items-center gap-1 text-[11px] font-bold text-cobalt hover:underline mt-1.5"
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-cobalt-500 hover:underline mt-2"
           >
             <span>View alert details</span>
             <ChevronRight className="w-3 h-3" />
@@ -142,7 +112,7 @@ export default function AlertBanner() {
       <button
         type="button"
         onClick={handleDismiss}
-        className="text-text-secondary hover:text-ink p-1 rounded-full transition shrink-0"
+        className="text-muted hover:text-ink-950 p-1 rounded-full transition shrink-0"
         title="Dismiss notice"
       >
         <X className="w-4 h-4" />

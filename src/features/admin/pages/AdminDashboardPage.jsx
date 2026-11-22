@@ -26,9 +26,8 @@ import {
   Legend,
 } from 'recharts'
 import { supabase } from '@/lib/supabase'
-import RouteBadge from '@/components/ui/RouteBadge'
 
-const PIE_COLORS = ['#3451F2', '#F0643C', '#12A676', '#8B5CF6', '#F59E0B', '#E5484D']
+const PIE_COLORS = ['#0040FF', '#0020A5', '#00136E', '#FFB400', '#5B6591']
 
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true)
@@ -82,14 +81,12 @@ export default function AdminDashboardPage() {
         .gte('created_at', sevenDaysAgo)
         .limit(100)
 
-      // Fallback or aggregated chart data
       const searchFreq = {}
       ;(allRoutes || []).forEach((r) => {
         searchFreq[r.code] = 0
       })
 
       if (searchLogs && searchLogs.length > 0) {
-        // Distribute search logs
         searchLogs.forEach((s, idx) => {
           const codes = Array.from(routeMap.values())
           if (codes.length > 0) {
@@ -98,7 +95,6 @@ export default function AdminDashboardPage() {
           }
         })
       } else {
-        // Demo baseline for college presentation visualization
         ;(allRoutes || []).slice(0, 6).forEach((r, idx) => {
           searchFreq[r.code] = (6 - idx) * 12 + 5
         })
@@ -169,10 +165,10 @@ export default function AdminDashboardPage() {
       {/* Top Banner / Welcome */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-extrabold text-ink font-heading">
+          <h2 className="text-xl font-extrabold text-ink-950 font-heading">
             Transit Network Overview
           </h2>
-          <p className="text-xs text-text-secondary mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             Real-time public transport operations, fleet health, and passenger engagement.
           </p>
         </div>
@@ -181,14 +177,14 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={fetchDashboardData}
-            className="p-2 border border-line bg-surface hover:bg-page rounded-input text-text-secondary hover:text-ink transition"
+            className="p-2 border border-line bg-white hover:bg-sky-50 rounded-pill text-muted hover:text-ink-950 transition shadow-soft"
             title="Refresh statistics"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <Link
             to="/12345678/admin/live"
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-cobalt text-white text-xs font-bold rounded-input shadow-soft hover:bg-cobalt/90 transition"
+            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-brand text-white text-xs font-extrabold rounded-pill shadow-soft hover:opacity-95 active:scale-98 transition"
           >
             <Activity className="w-4 h-4" />
             <span>Open Live Dispatch</span>
@@ -196,115 +192,124 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* KPI Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
-        <Link
-          to="/12345678/admin/routes"
-          className="bg-surface p-4 rounded-card border border-line shadow-soft hover:border-cobalt transition group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-text-secondary">Routes</span>
-            <div className="w-7 h-7 rounded-input bg-cobalt-tint text-cobalt flex items-center justify-center group-hover:scale-105 transition-transform">
-              <RouteIcon className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="mt-2 text-2xl font-black text-ink font-heading">
-            {stats.routesCount}
-          </div>
-          <span className="text-[10px] text-text-secondary font-medium">Active transit lines</span>
-        </Link>
-
-        <Link
-          to="/12345678/admin/stops"
-          className="bg-surface p-4 rounded-card border border-line shadow-soft hover:border-cobalt transition group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-text-secondary">Stops</span>
-            <div className="w-7 h-7 rounded-input bg-cobalt-tint text-cobalt flex items-center justify-center group-hover:scale-105 transition-transform">
-              <MapPin className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="mt-2 text-2xl font-black text-ink font-heading">
-            {stats.stopsCount}
-          </div>
-          <span className="text-[10px] text-text-secondary font-medium">Boarding stations</span>
-        </Link>
-
-        <Link
-          to="/12345678/admin/fleet"
-          className="bg-surface p-4 rounded-card border border-line shadow-soft hover:border-cobalt transition group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-text-secondary">Fleet Buses</span>
-            <div className="w-7 h-7 rounded-input bg-cobalt-tint text-cobalt flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Bus className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="mt-2 text-2xl font-black text-ink font-heading">
-            {stats.busesCount}
-          </div>
-          <span className="text-[10px] text-text-secondary font-medium">Registered vehicles</span>
-        </Link>
-
+      {/* KPI Stats Grid (4 primary tiles + 1 alert tile)
+          First tile uses signature gradient with white text (the primary KPI),
+          the other 3 are white cards with cobalt-500 numbers in Outfit 800 */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+        {/* 1. Primary KPI: Active Trips with signature gradient */}
         <Link
           to="/12345678/admin/live"
-          className="bg-surface p-4 rounded-card border border-line shadow-soft hover:border-success transition group"
+          className="p-4 rounded-card text-white shadow-soft hover:opacity-95 transition col-span-2 sm:col-span-1 relative overflow-hidden"
+          style={{ background: 'var(--gradient-brand)' }}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-text-secondary">Active Trips</span>
-            <div className="w-7 h-7 rounded-input bg-success/15 text-success flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Activity className="w-3.5 h-3.5" />
+            <span className="text-[11px] font-bold text-white/80 uppercase tracking-wider">Active Trips</span>
+            <div className="w-8 h-8 rounded-pill bg-white/20 text-amber-500 flex items-center justify-center">
+              <Activity className="w-4 h-4 animate-pulse" />
             </div>
           </div>
-          <div className="mt-2 text-2xl font-black text-ink font-heading">
+          <div className="mt-2 text-3xl font-extrabold text-white font-heading">
             {stats.activeTripsCount}
           </div>
-          <span className="text-[10px] text-success font-bold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-success animate-ping" />
-            Tracking live
+          <span className="text-[10px] text-amber-500 font-bold flex items-center gap-1 mt-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+            Live GPS broadcast
           </span>
+          <div className="absolute -bottom-3 -right-3 w-16 h-16 rounded-full bg-white/5 pointer-events-none" />
         </Link>
 
+        {/* 2. Routes (White card, cobalt number) */}
         <Link
-          to="/12345678/admin/complaints"
-          className="bg-surface p-4 rounded-card border border-line shadow-soft hover:border-danger transition group col-span-2 md:col-span-1"
+          to="/12345678/admin/routes"
+          className="bg-white p-4 rounded-card border border-line shadow-soft hover:border-cobalt-500 transition group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-text-secondary">Open Issues</span>
-            <div className="w-7 h-7 rounded-input bg-danger/15 text-danger flex items-center justify-center group-hover:scale-105 transition-transform">
-              <MessageSquare className="w-3.5 h-3.5" />
+            <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Routes</span>
+            <div className="w-8 h-8 rounded-pill bg-sky-100 text-cobalt-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <RouteIcon className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2 text-2xl font-black text-ink font-heading">
+          <div className="mt-2 text-3xl font-extrabold text-cobalt-500 font-heading">
+            {stats.routesCount}
+          </div>
+          <span className="text-[10px] text-muted font-medium mt-1 block">Active transit lines</span>
+        </Link>
+
+        {/* 3. Stops (White card, cobalt number) */}
+        <Link
+          to="/12345678/admin/stops"
+          className="bg-white p-4 rounded-card border border-line shadow-soft hover:border-cobalt-500 transition group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Stops</span>
+            <div className="w-8 h-8 rounded-pill bg-sky-100 text-cobalt-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <MapPin className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2 text-3xl font-extrabold text-cobalt-500 font-heading">
+            {stats.stopsCount}
+          </div>
+          <span className="text-[10px] text-muted font-medium mt-1 block">Boarding stations</span>
+        </Link>
+
+        {/* 4. Fleet Buses (White card, cobalt number) */}
+        <Link
+          to="/12345678/admin/fleet"
+          className="bg-white p-4 rounded-card border border-line shadow-soft hover:border-cobalt-500 transition group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Fleet Buses</span>
+            <div className="w-8 h-8 rounded-pill bg-sky-100 text-cobalt-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Bus className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2 text-3xl font-extrabold text-cobalt-500 font-heading">
+            {stats.busesCount}
+          </div>
+          <span className="text-[10px] text-muted font-medium mt-1 block">Registered vehicles</span>
+        </Link>
+
+        {/* 5. Open Issues */}
+        <Link
+          to="/12345678/admin/complaints"
+          className="bg-white p-4 rounded-card border border-line shadow-soft hover:border-danger transition group col-span-2 lg:col-span-1"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Open Issues</span>
+            <div className="w-8 h-8 rounded-pill bg-danger/10 text-danger flex items-center justify-center group-hover:scale-105 transition-transform">
+              <MessageSquare className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2 text-3xl font-extrabold text-danger font-heading">
             {stats.openComplaintsCount}
           </div>
-          <span className="text-[10px] text-danger font-semibold">Requires attention</span>
+          <span className="text-[10px] text-danger font-bold mt-1 block">Requires attention</span>
         </Link>
       </div>
 
       {/* Quick Actions Bar */}
-      <div className="bg-surface p-4 rounded-card border border-line shadow-soft flex items-center justify-between gap-3 flex-wrap">
-        <span className="text-xs font-bold text-ink">Administrative Fast Actions:</span>
+      <div className="bg-white p-4 rounded-card border border-line shadow-soft flex items-center justify-between gap-3 flex-wrap">
+        <span className="text-xs font-extrabold text-ink-950 font-heading">Administrative Actions:</span>
         <div className="flex items-center gap-2 flex-wrap">
           <Link
             to="/12345678/admin/routes/new"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-page hover:bg-line/40 border border-line rounded-input text-xs font-bold text-ink transition"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 border border-line rounded-pill text-xs font-bold text-ink-950 transition"
           >
-            <Plus className="w-3.5 h-3.5 text-cobalt" />
+            <Plus className="w-3.5 h-3.5 text-cobalt-500" />
             <span>New Route</span>
           </Link>
           <Link
             to="/12345678/admin/stops"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-page hover:bg-line/40 border border-line rounded-input text-xs font-bold text-ink transition"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 border border-line rounded-pill text-xs font-bold text-ink-950 transition"
           >
-            <MapPin className="w-3.5 h-3.5 text-cobalt" />
+            <MapPin className="w-3.5 h-3.5 text-cobalt-500" />
             <span>Add Stop</span>
           </Link>
           <Link
             to="/12345678/admin/import"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-page hover:bg-line/40 border border-line rounded-input text-xs font-bold text-ink transition"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 border border-line rounded-pill text-xs font-bold text-ink-950 transition"
           >
-            <Upload className="w-3.5 h-3.5 text-cobalt" />
+            <Upload className="w-3.5 h-3.5 text-cobalt-500" />
             <span>Import CSV</span>
           </Link>
         </div>
@@ -313,52 +318,48 @@ export default function AdminDashboardPage() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Chart 1: Top Routes by Searches */}
-        <div className="bg-surface rounded-card border border-line p-5 shadow-soft space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4 text-cobalt" />
-                Top Routes by Searches (Last 7 Days)
-              </h3>
-              <span className="text-[11px] text-text-secondary">
-                Demand analysis based on passenger journey queries.
-              </span>
-            </div>
+        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
+          <div>
+            <h3 className="text-xs font-extrabold text-ink-950 uppercase tracking-wider flex items-center gap-1.5">
+              <TrendingUp className="w-4 h-4 text-cobalt-500" />
+              Top Routes by Searches (Last 7 Days)
+            </h3>
+            <span className="text-[11px] text-muted">
+              Demand analysis based on passenger journey queries.
+            </span>
           </div>
 
           <div className="h-64 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topSearches} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="code" tickLine={false} tick={{ fontSize: 11, fill: '#6B7494' }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#6B7494' }} />
+                <XAxis dataKey="code" tickLine={false} tick={{ fontSize: 11, fill: '#5B6591' }} />
+                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#5B6591' }} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: '#FFFFFF',
-                    borderColor: '#E1E6F2',
+                    borderColor: '#D9E2F7',
                     borderRadius: '12px',
                     fontSize: '12px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                    boxShadow: '0 4px 12px rgba(5,15,69,0.08)',
                   }}
-                  cursor={{ fill: 'rgba(52,81,242,0.05)' }}
+                  cursor={{ fill: 'rgba(0,64,255,0.05)' }}
                 />
-                <Bar dataKey="searches" fill="#3451F2" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="searches" fill="#0040FF" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Chart 2: Complaints by Category */}
-        <div className="bg-surface rounded-card border border-line p-5 shadow-soft space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider flex items-center gap-1.5">
-                <AlertCircle className="w-4 h-4 text-warning" />
-                Grievance Distribution
-              </h3>
-              <span className="text-[11px] text-text-secondary">
-                Classification of passenger service feedback.
-              </span>
-            </div>
+        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
+          <div>
+            <h3 className="text-xs font-extrabold text-ink-950 uppercase tracking-wider flex items-center gap-1.5">
+              <AlertCircle className="w-4 h-4 text-amber-500" />
+              Grievance Distribution
+            </h3>
+            <span className="text-[11px] text-muted">
+              Classification of passenger service feedback.
+            </span>
           </div>
 
           <div className="h-64 w-full flex items-center justify-center">
@@ -383,7 +384,7 @@ export default function AdminDashboardPage() {
                 <Tooltip
                   contentStyle={{
                     backgroundColor: '#FFFFFF',
-                    borderColor: '#E1E6F2',
+                    borderColor: '#D9E2F7',
                     borderRadius: '12px',
                     fontSize: '12px',
                   }}
@@ -391,7 +392,7 @@ export default function AdminDashboardPage() {
                 <Legend
                   verticalAlign="bottom"
                   height={36}
-                  formatter={(val) => <span className="text-xs text-ink">{val}</span>}
+                  formatter={(val) => <span className="text-xs text-ink-950 font-medium">{val}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -400,14 +401,14 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Recent Complaints Table */}
-      <div className="bg-surface rounded-card border border-line p-5 shadow-soft space-y-4">
+      <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider">
+          <h3 className="text-xs font-extrabold text-ink-950 uppercase tracking-wider">
             Recent Passenger Grievances
           </h3>
           <Link
             to="/12345678/admin/complaints"
-            className="text-xs font-bold text-cobalt hover:underline flex items-center gap-1"
+            className="text-xs font-bold text-cobalt-500 hover:underline flex items-center gap-1"
           >
             <span>View all complaints</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -415,7 +416,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {recentComplaints.length === 0 ? (
-          <div className="p-8 text-center text-xs text-text-secondary">
+          <div className="p-8 text-center text-xs text-muted">
             No active complaints in the system.
           </div>
         ) : (
@@ -427,36 +428,36 @@ export default function AdminDashboardPage() {
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="capitalize text-xs font-bold text-cobalt bg-cobalt-tint px-2 py-0.5 rounded-full">
+                    <span className="capitalize text-xs font-bold text-cobalt-500 bg-sky-100 px-2 py-0.5 rounded-pill">
                       {c.category}
                     </span>
                     {c.routes && (
-                      <span className="text-xs font-semibold text-text-secondary">
+                      <span className="text-xs font-bold text-ink-950">
                         Route {c.routes.code}
                       </span>
                     )}
-                    <span className="text-[11px] text-text-secondary">
+                    <span className="text-[11px] text-muted">
                       &bull; by {c.profiles?.full_name || 'Passenger'}
                     </span>
                   </div>
-                  <p className="text-xs text-ink mt-1 line-clamp-1">{c.message}</p>
+                  <p className="text-xs text-ink-950 mt-1 line-clamp-1">{c.message}</p>
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    className={`px-2 py-0.5 rounded-pill text-[10px] font-bold ${
                       c.status === 'resolved'
-                        ? 'bg-success/15 text-success'
+                        ? 'bg-emerald-50 text-emerald-700'
                         : c.status === 'in_progress'
-                        ? 'bg-warning/15 text-warning'
-                        : 'bg-danger/15 text-danger'
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-danger/10 text-danger'
                     }`}
                   >
                     {c.status}
                   </span>
                   <Link
                     to="/12345678/admin/complaints"
-                    className="text-xs font-bold text-cobalt hover:underline"
+                    className="text-xs font-bold text-cobalt-500 hover:underline"
                   >
                     Review &rarr;
                   </Link>

@@ -3,19 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   Calendar,
-  Clock,
   Download,
   Printer,
-  AlertTriangle,
   Bus,
-  CheckCircle2,
   FileSpreadsheet,
-  TrendingUp,
-  RotateCcw,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import RouteBadge from '@/components/ui/RouteBadge'
+import StatTile from '@/components/ui/StatTile'
 
 export default function DriverHistoryPage() {
   const navigate = useNavigate()
@@ -143,7 +139,7 @@ export default function DriverHistoryPage() {
     return `${mins} min`
   }
 
-  // Client-side CSV Download (Problem 5.4)
+  // Client-side CSV Download
   const handleDownloadCsv = () => {
     if (trips.length === 0) return
 
@@ -203,90 +199,92 @@ export default function DriverHistoryPage() {
       {/* Print Stylesheet */}
       <style>{`
         @media print {
-          body { background: #FFFFFF !important; color: #000000 !important; }
+          body { background: #FFFFFF !important; color: #050F45 !important; }
           .no-print { display: none !important; }
-          .print-clean { background: transparent !important; color: #000000 !important; border-color: #CCCCCC !important; box-shadow: none !important; }
-          .print-text-dark { color: #000000 !important; }
+          .print-clean { background: transparent !important; color: #050F45 !important; border-color: #D9E2F7 !important; box-shadow: none !important; }
+          .print-text-dark { color: #050F45 !important; }
         }
       `}</style>
 
-      {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10 no-print">
+      {/* Header with Secondary Pills */}
+      <div className="flex items-center justify-between pb-2 border-b border-line no-print">
         <button
           type="button"
           onClick={() => navigate('/driver')}
-          className="flex items-center gap-1.5 text-xs font-semibold text-white/60 hover:text-white transition"
+          className="flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-ink-950 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back</span>
         </button>
-        <span className="font-extrabold text-sm text-white font-heading">Driver History & Reports</span>
-        <div className="flex items-center gap-1.5">
+        <span className="font-extrabold text-sm text-ink-950 font-heading">Driver History & Reports</span>
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleDownloadCsv}
             disabled={trips.length === 0}
-            className="p-1.5 rounded-pill bg-[#121B3D] border border-white/10 text-white/80 hover:text-white disabled:opacity-40 transition"
+            className="px-3 py-1.5 rounded-pill bg-white border border-line text-ink-950 shadow-soft hover:bg-sky-50 disabled:opacity-40 transition text-xs font-bold flex items-center gap-1.5"
             title="Download CSV"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">CSV</span>
           </button>
           <button
             type="button"
             onClick={handlePrint}
-            className="p-1.5 rounded-pill bg-[#121B3D] border border-white/10 text-white/80 hover:text-white transition"
+            className="px-3 py-1.5 rounded-pill bg-white border border-line text-ink-950 shadow-soft hover:bg-sky-50 transition text-xs font-bold flex items-center gap-1.5"
             title="Print / Save PDF"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Print</span>
           </button>
         </div>
       </div>
 
       {/* Driver Info Header Card */}
-      <div className="p-4 bg-[#121B3D] border border-white/10 rounded-card flex items-center justify-between print-clean">
+      <div className="p-4 bg-white rounded-card border border-line shadow-soft flex items-center justify-between print-clean">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-cobalt/20 text-cobalt flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-full bg-sky-100 text-cobalt-500 flex items-center justify-center shrink-0">
             <Bus className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-sm font-extrabold text-white font-heading print-text-dark">{driverName}</h2>
-            <p className="text-xs text-white/60 font-mono print-text-dark">Assigned Bus: <strong>{busNumber}</strong></p>
+            <h2 className="text-sm font-extrabold text-ink-950 font-heading print-text-dark">{driverName}</h2>
+            <p className="text-xs text-muted font-mono print-text-dark">Assigned Bus: <strong className="text-ink-950">{busNumber}</strong></p>
           </div>
         </div>
         <div className="text-right">
-          <span className="text-[10px] uppercase font-bold text-white/50 block print-text-dark">Total Logged Trips</span>
-          <span className="text-base font-extrabold text-white font-heading print-text-dark">{summary.totalTrips}</span>
+          <span className="text-[10px] uppercase font-bold text-muted block print-text-dark">Total Trips</span>
+          <span className="text-base font-extrabold text-ink-950 font-heading print-text-dark">{summary.totalTrips}</span>
         </div>
       </div>
 
       {/* Date Range Filter (no-print) */}
       <div className="space-y-2 no-print">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-white/60">Filter Date Range</span>
-          <div className="flex p-0.5 bg-[#121B3D] border border-white/10 rounded-pill text-[11px] font-bold">
+          <span className="text-xs font-bold uppercase tracking-wider text-muted">Filter Date Range</span>
+          <div className="flex p-1 bg-white border border-line rounded-pill text-xs font-bold shadow-soft">
             <button
               type="button"
               onClick={() => setRangeType('7d')}
               className={`px-3 py-1 rounded-pill transition ${
-                rangeType === '7d' ? 'bg-cobalt text-white' : 'text-white/60 hover:text-white'
+                rangeType === '7d' ? 'bg-cobalt-500 text-white' : 'text-muted hover:text-ink-950'
               }`}
             >
-              Last 7 Days
+              7 Days
             </button>
             <button
               type="button"
               onClick={() => setRangeType('30d')}
               className={`px-3 py-1 rounded-pill transition ${
-                rangeType === '30d' ? 'bg-cobalt text-white' : 'text-white/60 hover:text-white'
+                rangeType === '30d' ? 'bg-cobalt-500 text-white' : 'text-muted hover:text-ink-950'
               }`}
             >
-              Last 30 Days
+              30 Days
             </button>
             <button
               type="button"
               onClick={() => setRangeType('custom')}
               className={`px-3 py-1 rounded-pill transition ${
-                rangeType === 'custom' ? 'bg-cobalt text-white' : 'text-white/60 hover:text-white'
+                rangeType === 'custom' ? 'bg-cobalt-500 text-white' : 'text-muted hover:text-ink-950'
               }`}
             >
               Custom
@@ -295,23 +293,23 @@ export default function DriverHistoryPage() {
         </div>
 
         {rangeType === 'custom' && (
-          <div className="grid grid-cols-2 gap-2 p-3 bg-[#121B3D] border border-white/10 rounded-input animate-fadeIn">
+          <div className="grid grid-cols-2 gap-2 p-3 bg-white border border-line rounded-input shadow-soft animate-fadeIn">
             <div>
-              <label className="block text-[10px] uppercase font-bold text-white/60 mb-1">From Date</label>
+              <label className="block text-[10px] uppercase font-bold text-muted mb-1">From Date</label>
               <input
                 type="date"
                 value={customFrom}
                 onChange={(e) => setCustomFrom(e.target.value)}
-                className="w-full h-9 px-2 bg-page border border-white/10 rounded-input text-xs text-white focus:outline-none focus:border-cobalt"
+                className="w-full h-10 px-2 bg-sky-50 border border-line rounded-input text-xs text-ink-950 focus:outline-none focus:border-cobalt-500"
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase font-bold text-white/60 mb-1">To Date</label>
+              <label className="block text-[10px] uppercase font-bold text-muted mb-1">To Date</label>
               <input
                 type="date"
                 value={customTo}
                 onChange={(e) => setCustomTo(e.target.value)}
-                className="w-full h-9 px-2 bg-page border border-white/10 rounded-input text-xs text-white focus:outline-none focus:border-cobalt"
+                className="w-full h-10 px-2 bg-sky-50 border border-line rounded-input text-xs text-ink-950 focus:outline-none focus:border-cobalt-500"
               />
             </div>
           </div>
@@ -319,54 +317,42 @@ export default function DriverHistoryPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <div className="p-3 bg-[#121B3D] border border-white/10 rounded-card print-clean">
-          <span className="text-[10px] uppercase font-bold text-white/50 block print-text-dark">Total Trips</span>
-          <span className="text-xl font-extrabold text-white font-heading print-text-dark">{summary.totalTrips}</span>
-        </div>
-        <div className="p-3 bg-[#121B3D] border border-white/10 rounded-card print-clean">
-          <span className="text-[10px] uppercase font-bold text-white/50 block print-text-dark">Hours Driven</span>
-          <span className="text-xl font-extrabold text-cobalt font-heading print-text-dark">{summary.totalHours} hrs</span>
-        </div>
-        <div className="p-3 bg-[#121B3D] border border-white/10 rounded-card print-clean">
-          <span className="text-[10px] uppercase font-bold text-white/50 block print-text-dark">Delayed Trips</span>
-          <span className="text-xl font-extrabold text-warning font-heading print-text-dark">{summary.delayedCount}</span>
-        </div>
-        <div className="p-3 bg-[#121B3D] border border-white/10 rounded-card print-clean">
-          <span className="text-[10px] uppercase font-bold text-white/50 block print-text-dark">Breakdowns</span>
-          <span className="text-xl font-extrabold text-danger font-heading print-text-dark">{summary.breakdownCount}</span>
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <StatTile label="Total Trips" value={summary.totalTrips} variant="gradient" />
+        <StatTile label="Hours Driven" value={`${summary.totalHours}h`} />
+        <StatTile label="Delayed Trips" value={summary.delayedCount} />
+        <StatTile label="Breakdowns" value={summary.breakdownCount} />
       </div>
 
       {/* Daily Aggregation Table (from driver_report RPC) */}
       {dailyReport && dailyReport.length > 0 && (
-        <div className="p-4 bg-[#121B3D] border border-white/10 rounded-card space-y-3 print-clean">
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-white print-text-dark">
+        <div className="p-4 bg-white border border-line rounded-card space-y-3 shadow-soft print-clean">
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-ink-950 print-text-dark">
             Daily Shift Summary
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead>
-                <tr className="border-b border-white/10 text-white/50 text-[10px] uppercase print-text-dark">
-                  <th className="py-2 pr-3">Date</th>
-                  <th className="py-2 px-3">Trips</th>
-                  <th className="py-2 px-3">Time</th>
-                  <th className="py-2 px-3">Delayed</th>
-                  <th className="py-2 pl-3">Breakdowns</th>
+                <tr className="border-b border-line text-muted text-[10px] uppercase print-text-dark">
+                  <th className="py-2.5 pr-3 font-bold">Date</th>
+                  <th className="py-2.5 px-3 font-bold">Trips</th>
+                  <th className="py-2.5 px-3 font-bold">Time</th>
+                  <th className="py-2.5 px-3 font-bold">Delayed</th>
+                  <th className="py-2.5 pl-3 font-bold">Breakdowns</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-line">
                 {dailyReport.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-white/5 print-clean">
-                    <td className="py-2 pr-3 font-mono font-bold text-white print-text-dark">
+                  <tr key={idx} className={idx % 2 === 1 ? 'bg-sky-50/50 print-clean' : 'print-clean'}>
+                    <td className="py-2.5 pr-3 font-mono font-bold text-ink-950 print-text-dark">
                       {row.report_date}
                     </td>
-                    <td className="py-2 px-3 text-white/90 print-text-dark">{row.trips_count}</td>
-                    <td className="py-2 px-3 text-white/90 print-text-dark">
+                    <td className="py-2.5 px-3 text-ink-950 print-text-dark font-medium">{row.trips_count}</td>
+                    <td className="py-2.5 px-3 text-ink-950 print-text-dark font-medium">
                       {Math.round(row.total_minutes / 60)}h {row.total_minutes % 60}m
                     </td>
-                    <td className="py-2 px-3 text-warning font-bold print-text-dark">{row.delayed_count}</td>
-                    <td className="py-2 pl-3 text-danger font-bold print-text-dark">{row.breakdown_count}</td>
+                    <td className="py-2.5 px-3 text-amber-600 font-bold print-text-dark">{row.delayed_count}</td>
+                    <td className="py-2.5 pl-3 text-danger font-bold print-text-dark">{row.breakdown_count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -378,14 +364,14 @@ export default function DriverHistoryPage() {
       {/* Detailed Trip List */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-white print-text-dark">
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-ink-950 print-text-dark">
             Trip Logs ({trips.length})
           </h3>
           <button
             type="button"
             onClick={handleDownloadCsv}
             disabled={trips.length === 0}
-            className="text-[11px] font-bold text-cobalt hover:underline flex items-center gap-1 no-print disabled:opacity-50"
+            className="text-[11px] font-bold text-cobalt-500 hover:underline flex items-center gap-1 no-print disabled:opacity-50"
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
             <span>Download CSV</span>
@@ -394,59 +380,59 @@ export default function DriverHistoryPage() {
 
         {loading ? (
           <div className="flex items-center justify-center p-8">
-            <div className="w-8 h-8 border-4 border-cobalt border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : trips.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {trips.map((t) => (
               <div
                 key={t.id}
-                className="p-3.5 bg-[#121B3D] border border-white/10 rounded-card space-y-2 text-left print-clean"
+                className="p-3.5 bg-white border border-line rounded-card shadow-soft space-y-2 text-left print-clean"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <RouteBadge code={t.route?.code} color={t.route?.color} size="sm" />
-                    <span className="text-xs font-bold text-white truncate max-w-[160px] print-text-dark">
+                    <span className="text-xs font-bold text-ink-950 truncate max-w-[160px] print-text-dark">
                       {t.route?.name_en}
                     </span>
                   </div>
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-pill capitalize ${
                       t.status === 'ended'
-                        ? 'bg-white/10 text-white/70'
+                        ? 'bg-sky-100 text-muted'
                         : t.status === 'delayed'
-                        ? 'bg-warning/20 text-warning'
+                        ? 'bg-amber-100 text-amber-800'
                         : t.status === 'breakdown'
-                        ? 'bg-danger/20 text-danger'
-                        : 'bg-success/20 text-success'
+                        ? 'bg-danger/10 text-danger'
+                        : 'bg-emerald-50 text-emerald-700'
                     }`}
                   >
                     {t.status}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-white/5 text-[11px] text-white/60 print-text-dark">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-line text-[11px] text-muted print-text-dark">
                   <div>
-                    <span className="block text-[9px] uppercase font-bold text-white/40">Direction</span>
-                    <span className="font-bold text-white print-text-dark">
+                    <span className="block text-[9px] uppercase font-bold text-muted">Direction</span>
+                    <span className="font-bold text-ink-950 print-text-dark">
                       {t.direction === 1 ? 'Return (1)' : 'Forward (0)'}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[9px] uppercase font-bold text-white/40">Bus</span>
-                    <span className="font-mono font-bold text-white print-text-dark">
+                    <span className="block text-[9px] uppercase font-bold text-muted">Bus</span>
+                    <span className="font-mono font-bold text-ink-950 print-text-dark">
                       {t.bus?.reg_no || '---'}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[9px] uppercase font-bold text-white/40">Start Time</span>
-                    <span className="font-mono text-white print-text-dark">
+                    <span className="block text-[9px] uppercase font-bold text-muted">Start Time</span>
+                    <span className="font-mono text-ink-950 print-text-dark">
                       {t.started_at ? new Date(t.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--'}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[9px] uppercase font-bold text-white/40">Duration</span>
-                    <span className="font-mono font-bold text-cobalt print-text-dark">
+                    <span className="block text-[9px] uppercase font-bold text-muted">Duration</span>
+                    <span className="font-mono font-bold text-cobalt-500 print-text-dark">
                       {formatDuration(t.started_at, t.ended_at)}
                     </span>
                   </div>
@@ -455,9 +441,9 @@ export default function DriverHistoryPage() {
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center bg-[#121B3D] border border-white/10 rounded-card print-clean">
-            <Calendar className="w-8 h-8 text-white/30 mx-auto mb-2" />
-            <p className="text-xs text-white/60 print-text-dark">No trips found in this date range.</p>
+          <div className="p-8 text-center bg-white border border-line rounded-card shadow-soft print-clean">
+            <Calendar className="w-8 h-8 text-muted/40 mx-auto mb-2" />
+            <p className="text-xs text-muted print-text-dark">No trips found in this date range.</p>
           </div>
         )}
       </div>

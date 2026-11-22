@@ -75,11 +75,11 @@ export default function DataTable({
   }
 
   return (
-    <div className="bg-surface rounded-card border border-line shadow-soft flex flex-col">
+    <div className="bg-white rounded-[20px] shadow-soft overflow-hidden flex flex-col">
       {/* Table Toolbar */}
       <div className="p-4 border-b border-line flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
           <input
             type="text"
             value={searchTerm}
@@ -88,7 +88,7 @@ export default function DataTable({
               setCurrentPage(1)
             }}
             placeholder={searchPlaceholder}
-            className="w-full pl-9 pr-8 py-2 bg-page border border-line rounded-input text-xs text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt"
+            className="w-full pl-9 pr-8 py-2 bg-sky-50 border border-line rounded-[12px] text-xs text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 focus:bg-white transition"
           />
           {searchTerm && (
             <button
@@ -97,7 +97,7 @@ export default function DataTable({
                 setSearchTerm('')
                 setCurrentPage(1)
               }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary hover:text-ink p-0.5"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink-950 p-0.5"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -107,33 +107,38 @@ export default function DataTable({
         {headerActions && <div className="flex items-center gap-2">{headerActions}</div>}
       </div>
 
-      {/* Table Element */}
+      {/* Table Element: Header in sky-100 with ink-950 uppercase 11px. Zebra rows in sky-50. Row hover lifts slightly. */}
       <div className="overflow-x-auto flex-1">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="bg-page/70 border-b border-line text-text-secondary uppercase font-bold text-[11px] tracking-wider select-none">
+            <tr className="bg-sky-100 text-ink-950 uppercase font-extrabold text-[11px] tracking-wider select-none border-b border-line">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   onClick={() => handleSort(col.key, col.sortable)}
-                  className={`px-4 py-3 ${col.sortable ? 'cursor-pointer hover:text-ink' : ''} ${col.className || ''}`}
+                  className={`px-4 py-3.5 ${col.sortable ? 'cursor-pointer hover:text-cobalt-500' : ''} ${col.className || ''}`}
                 >
                   <div className="flex items-center gap-1.5">
                     <span>{col.label}</span>
                     {col.sortable && sortKey === col.key && (
-                      sortOrder === 'asc' ? <ChevronUp className="w-3.5 h-3.5 text-cobalt" /> : <ChevronDown className="w-3.5 h-3.5 text-cobalt" />
+                      sortOrder === 'asc' ? <ChevronUp className="w-3.5 h-3.5 text-cobalt-500" /> : <ChevronDown className="w-3.5 h-3.5 text-cobalt-500" />
                     )}
                   </div>
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody className="divide-y divide-line/60">
             {paginatedData.length > 0 ? (
               paginatedData.map((row, idx) => (
-                <tr key={row.id || idx} className="hover:bg-page/40 transition-colors">
+                <tr
+                  key={row.id || idx}
+                  className={`${
+                    idx % 2 === 1 ? 'bg-sky-50/60' : 'bg-white'
+                  } hover:bg-sky-100/50 hover:shadow-xs transition-all`}
+                >
                   {columns.map((col) => (
-                    <td key={col.key} className={`px-4 py-3 text-ink ${col.cellClassName || ''}`}>
+                    <td key={col.key} className={`px-4 py-3 text-ink-950 ${col.cellClassName || ''}`}>
                       {col.render ? col.render(row[col.key], row, idx) : row[col.key]}
                     </td>
                   ))}
@@ -141,7 +146,7 @@ export default function DataTable({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="text-center py-8 text-text-secondary">
+                <td colSpan={columns.length} className="text-center py-8 text-muted">
                   {emptyMessage}
                 </td>
               </tr>
@@ -151,7 +156,7 @@ export default function DataTable({
       </div>
 
       {/* Pagination Footer */}
-      <div className="p-3.5 border-t border-line flex items-center justify-between text-xs text-text-secondary">
+      <div className="p-3.5 border-t border-line flex items-center justify-between text-xs text-muted">
         <div>
           Showing {sortedData.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} to{' '}
           {Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length} records
@@ -162,20 +167,20 @@ export default function DataTable({
             type="button"
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage((p) => p - 1)}
-            className="p-1.5 rounded-input bg-page border border-line hover:border-cobalt disabled:opacity-40 transition"
+            className="p-1.5 rounded-pill bg-sky-50 border border-line hover:border-cobalt-500 disabled:opacity-40 transition"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4 text-ink-950" />
           </button>
-          <span className="font-semibold text-ink px-2">
+          <span className="font-bold text-ink-950 px-2">
             Page {currentPage} of {totalPages}
           </span>
           <button
             type="button"
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage((p) => p + 1)}
-            className="p-1.5 rounded-input bg-page border border-line hover:border-cobalt disabled:opacity-40 transition"
+            className="p-1.5 rounded-pill bg-sky-50 border border-line hover:border-cobalt-500 disabled:opacity-40 transition"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 text-ink-950" />
           </button>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
 import { useToastStore } from '@/components/ui/Toast'
 import LanguageToggle from '@/components/ui/LanguageToggle'
+import Button from '@/components/ui/Button'
 
 export default function ProfilePage() {
   const { t } = useTranslation()
@@ -78,170 +79,181 @@ export default function ProfilePage() {
   const isPassenger = !profile?.role || profile.role === 'passenger'
 
   return (
-    <div className="space-y-4 pt-1 pb-6">
-      {/* Top Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-line">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink transition p-1"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>{t('common.back')}</span>
-        </button>
-        <span className="font-extrabold text-xs font-heading">{t('nav.profile')}</span>
-        <div className="w-10" />
-      </div>
-
-      {/* User Info Card */}
-      <div className="p-4 bg-surface rounded-card border border-line shadow-soft flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-cobalt-tint text-cobalt flex items-center justify-center font-bold text-lg shrink-0">
-          <User className="w-6 h-6" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-extrabold text-ink truncate font-heading">
-            {profile?.full_name || user?.email?.split('@')[0] || 'Guest User'}
-          </h3>
-          <p className="text-xs text-text-secondary truncate">{user?.email || 'Not logged in'}</p>
-          <span className="inline-block mt-1 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-page border border-line rounded-pill">
-            Role: {profile?.role || 'passenger'}
+    <div className="space-y-4 pb-8">
+      {/* 1. Gradient Profile Header */}
+      <div
+        className="rounded-[28px] p-6 text-white shadow-soft relative overflow-hidden"
+        style={{ background: 'var(--gradient-brand)' }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="w-8 h-8 rounded-full bg-white/15 text-white flex items-center justify-center transition active:scale-95"
+            title="Back"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <span className="font-heading font-extrabold text-xs text-white uppercase tracking-wider">
+            {t('nav.profile') || 'My Profile'}
           </span>
+          <div className="w-8" />
         </div>
-      </div>
 
-      {/* Language Preference */}
-      <div className="p-4 bg-surface rounded-card border border-line shadow-soft flex items-center justify-between">
-        <div>
-          <span className="text-xs font-bold text-ink block">{t('auth.preferred_lang_label')}</span>
-          <span className="text-[11px] text-text-secondary">App interface language</span>
-        </div>
-        <LanguageToggle />
-      </div>
-
-      {/* Become a Driver Section (Part D.3: Only for Passengers) */}
-      {isPassenger && user && (
-        <div className="p-4 bg-surface rounded-card border border-line shadow-soft space-y-3">
-          <div className="flex items-center gap-2">
-            <KeyRound className="w-4 h-4 text-cobalt" />
-            <h4 className="text-xs font-bold text-ink font-heading">Become a Driver</h4>
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-full border-4 border-white bg-white text-cobalt-500 font-heading font-extrabold text-2xl flex items-center justify-center shadow-float shrink-0">
+            {profile?.full_name ? profile.full_name[0].toUpperCase() : 'U'}
           </div>
-          <p className="text-xs text-text-secondary">
-            If you are a transit driver, enter your depot secret key to unlock the Driver tracking portal.
-          </p>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-heading font-extrabold text-lg text-white truncate">
+              {profile?.full_name || 'Nammooru Passenger'}
+            </h2>
+            <p className="text-xs text-white/75 truncate mt-0.5">
+              {user?.email || 'user@example.com'}
+            </p>
+            <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+              {profile?.role === 'driver' ? (
+                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-500 text-navy-900 shadow-xs">
+                  Driver
+                </span>
+              ) : profile?.role === 'admin' ? (
+                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-white text-navy-900 shadow-xs">
+                  Administrator
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-white/20 text-white">
+                  Passenger
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Driver Quick Switch if already a driver */}
+      {profile?.role === 'driver' && (
+        <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-100 text-navy-900 flex items-center justify-center">
+              <Bus className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-heading font-bold text-sm text-ink-950">Driver Console</h3>
+              <p className="text-xs text-muted">Switch to your vehicle dashboard</p>
+            </div>
+          </div>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => navigate('/driver')}
+          >
+            Open &rarr;
+          </Button>
+        </div>
+      )}
+
+      {/* 3. Become a Driver Card (for passengers) */}
+      {isPassenger && (
+        <div className="p-5 bg-white rounded-[20px] border border-line shadow-soft space-y-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-sky-100 text-cobalt-500 flex items-center justify-center">
+              <KeyRound className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-heading font-bold text-sm text-ink-950">
+                Are you a NWKRTC Driver?
+              </h3>
+              <p className="text-xs text-muted">Claim driver role with your depot secret key</p>
+            </div>
+          </div>
 
           {claimError && (
-            <div className="p-2.5 bg-danger/10 border border-danger/30 rounded-input text-xs text-danger flex items-center gap-2">
+            <div className="p-3 bg-danger/10 border border-danger/30 rounded-[12px] text-xs text-danger font-semibold flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{claimError}</span>
             </div>
           )}
 
-          <form onSubmit={handleClaimDriver} className="space-y-3">
-            <div className="space-y-1">
-              <label className="block text-[11px] font-bold text-ink">
-                Driver Secret Key <span className="text-danger">*</span>
-              </label>
-              <input
-                type="password"
-                value={driverKey}
-                onChange={(e) => setDriverKey(e.target.value)}
-                placeholder="Driver secret key..."
-                required
-                className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs text-ink focus:outline-none focus:border-cobalt font-mono"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="block text-[11px] font-bold text-ink">
-                Bus Registration Number <span className="text-danger">*</span>
-              </label>
-              <input
-                type="text"
-                value={busRegNo}
-                onChange={(e) => setBusRegNo(e.target.value.toUpperCase())}
-                placeholder="e.g. KA25 F 1234"
-                required
-                className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs font-mono font-bold uppercase text-ink focus:outline-none focus:border-cobalt"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="block text-[11px] font-bold text-ink">
-                Assigned Route
-              </label>
-              <select
-                value={selectedRouteId}
-                onChange={(e) => setSelectedRouteId(e.target.value)}
-                className="w-full px-3 py-2 bg-page border border-line rounded-input text-xs font-bold text-ink focus:outline-none focus:border-cobalt"
-              >
-                {routes.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    Route {r.code} - {r.name_en}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              disabled={claimLoading}
-              className="w-full py-2.5 bg-cobalt text-white text-xs font-bold rounded-pill shadow-xs hover:opacity-95 disabled:opacity-50 transition"
+          <form onSubmit={handleClaimDriver} className="space-y-2.5 pt-1">
+            <input
+              type="password"
+              value={driverKey}
+              onChange={(e) => setDriverKey(e.target.value)}
+              placeholder="Enter driver secret key"
+              className="w-full h-11 px-3.5 bg-sky-50 border border-line rounded-[12px] text-xs font-mono text-ink-950 focus:outline-none focus:border-cobalt-500"
+            />
+            <input
+              type="text"
+              value={busRegNo}
+              onChange={(e) => setBusRegNo(e.target.value.toUpperCase())}
+              placeholder="Bus Registration Number (e.g. KA25 F 1234)"
+              className="w-full h-11 px-3.5 bg-sky-50 border border-line rounded-[12px] text-xs font-mono font-bold text-ink-950 uppercase focus:outline-none focus:border-cobalt-500"
+            />
+            <select
+              value={selectedRouteId}
+              onChange={(e) => setSelectedRouteId(e.target.value)}
+              className="w-full h-11 px-3 bg-sky-50 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500"
             >
-              {claimLoading ? 'Verifying & Linking Bus...' : 'Unlock Driver Portal'}
-            </button>
+              {routes.map((r) => (
+                <option key={r.id} value={r.id}>
+                  Route {r.code} - {r.name_en}
+                </option>
+              ))}
+            </select>
+            <Button
+              type="submit"
+              variant="secondary"
+              size="sm"
+              loading={claimLoading}
+              className="w-full font-bold"
+            >
+              Verify & Claim Role
+            </Button>
           </form>
         </div>
       )}
 
-      {/* Quick Links */}
-      <div className="p-3 bg-surface rounded-card border border-line shadow-soft divide-y divide-line text-xs font-semibold">
+      {/* 4. Menu Links */}
+      <div className="bg-white rounded-[20px] border border-line shadow-soft divide-y divide-line overflow-hidden">
         <Link
           to="/complaints"
-          className="py-2.5 flex items-center justify-between text-ink hover:text-cobalt transition"
+          className="p-4 flex items-center justify-between hover:bg-sky-50 transition"
         >
-          <span className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-text-secondary" />
-            <span>{t('nav.complaints')}</span>
-          </span>
-          <span className="text-text-secondary">&rarr;</span>
+          <div className="flex items-center gap-3">
+            <MessageSquare className="w-4 h-4 text-cobalt-500" />
+            <span className="text-xs font-bold text-ink-950">{t('nav.complaints') || 'Feedback & Complaints'}</span>
+          </div>
+          <span className="text-xs text-muted">&rarr;</span>
         </Link>
 
         <Link
           to="/help"
-          className="py-2.5 flex items-center justify-between text-ink hover:text-cobalt transition"
+          className="p-4 flex items-center justify-between hover:bg-sky-50 transition"
         >
-          <span className="flex items-center gap-2">
-            <HelpCircle className="w-4 h-4 text-text-secondary" />
-            <span>{t('nav.help')}</span>
-          </span>
-          <span className="text-text-secondary">&rarr;</span>
+          <div className="flex items-center gap-3">
+            <HelpCircle className="w-4 h-4 text-cobalt-500" />
+            <span className="text-xs font-bold text-ink-950">{t('nav.help') || 'Help & Support'}</span>
+          </div>
+          <span className="text-xs text-muted">&rarr;</span>
         </Link>
-
-        {profile?.role === 'driver' && (
-          <Link
-            to="/driver"
-            className="py-2.5 flex items-center justify-between text-cobalt hover:underline transition font-bold"
-          >
-            <span className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
-              <span>Go to Driver Portal</span>
-            </span>
-            <span>&rarr;</span>
-          </Link>
-        )}
       </div>
 
-      {/* Logout Button */}
-      {user && (
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="w-full py-3 bg-surface hover:bg-danger/10 border border-line hover:border-danger/30 text-danger text-xs font-bold rounded-card shadow-soft transition flex items-center justify-center gap-2"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>{t('auth.logout')}</span>
-        </button>
-      )}
+      {/* 5. Language toggle card */}
+      <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft flex items-center justify-between">
+        <span className="text-xs font-bold text-ink-950 font-heading">{t('common.switch_lang') || 'Language'}</span>
+        <LanguageToggle />
+      </div>
+
+      {/* 6. Logout Button */}
+      <Button
+        variant="danger"
+        size="md"
+        onClick={handleLogout}
+        className="w-full h-12 text-sm font-bold font-heading shadow-soft"
+      >
+        <LogOut className="w-4 h-4 mr-1" />
+        <span>{t('auth.logout') || 'Log Out'}</span>
+      </Button>
     </div>
   )
 }

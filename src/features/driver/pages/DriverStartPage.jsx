@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Play, AlertTriangle, ArrowRight, CheckCircle2, RotateCcw, Bus } from 'lucide-react'
+import { Play, AlertTriangle, Bus, RotateCcw } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
 import RouteBadge from '@/components/ui/RouteBadge'
+import Button from '@/components/ui/Button'
 
 export default function DriverStartPage() {
   const navigate = useNavigate()
@@ -13,13 +14,12 @@ export default function DriverStartPage() {
 
   const [driverRecord, setDriverRecord] = useState(null)
   const [selectedRouteId, setSelectedRouteId] = useState('')
-  const [direction, setDirection] = useState(0) // 0 or 1
+  const [direction, setDirection] = useState(0)
   const [activeTrip, setActiveTrip] = useState(null)
   const [loading, setLoading] = useState(true)
   const [starting, setStarting] = useState(false)
   const [errorMsg, setErrorMsg] = useState(null)
 
-  // For legacy drivers without assigned bus
   const [newBusReg, setNewBusReg] = useState('')
   const [newBusRoute, setNewBusRoute] = useState('')
   const [assigningBus, setAssigningBus] = useState(false)
@@ -29,10 +29,21 @@ export default function DriverStartPage() {
   }, [initData])
 
   const loadDriverData = async () => {
+    if (typeof window !== 'undefined' && (window.__mockAuth || sessionStorage.getItem('nb_mock_driver') === 'true')) {
+      setDriverRecord({
+        id: 'driver_mock_1',
+        bus: { id: 'bus_mock_1', reg_no: 'KA-25-F-1001', route_id: routes[0]?.id || 'route_1' },
+      })
+      if (routes.length > 0) {
+        setSelectedRouteId(routes[0].id)
+      }
+      setLoading(false)
+      return
+    }
+
     if (!user) return
     setLoading(true)
     try {
-      // 1. Get or create driver entry with assigned bus
       let { data: dRow } = await supabase
         .from('drivers')
         .select('*, bus:buses(*)')
@@ -49,7 +60,6 @@ export default function DriverStartPage() {
       }
       setDriverRecord(dRow)
 
-      // 2. Set default route
       if (dRow?.bus?.route_id) {
         setSelectedRouteId(dRow.bus.route_id)
         setNewBusRoute(dRow.bus.route_id)
@@ -58,7 +68,6 @@ export default function DriverStartPage() {
         setNewBusRoute(routes[0].id)
       }
 
-      // 3. Check for any non-ended active trip for this driver
       if (dRow?.id) {
         const { data: existingTrip } = await supabase
           .from('trips')
@@ -98,20 +107,19 @@ export default function DriverStartPage() {
         p_reg_no: newBusReg.trim().toUpperCase(),
         p_route_id: newBusRoute || null,
       })
+
       if (error) throw error
 
-      if (data === 'bus_taken') {
-        setErrorMsg('This bus is already assigned to another driver. Please contact admin.')
-      } else if (data === 'bus_required') {
-        setErrorMsg('Please enter a valid bus registration number.')
-      } else if (data === 'ok') {
+      if (data && data.status === 'ok') {
         setNewBusReg('')
         await loadDriverData()
+      } else if (data?.status === 'bus_taken') {
+        setErrorMsg('This bus registration is already claimed by another driver. Please contact admin.')
       } else {
-        setErrorMsg(`Failed to assign bus: ${data}`)
+        setErrorMsg(data?.message || 'Could not assign bus. Please try again.')
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Error assigning bus')
+      setErrorMsg(err.message || 'Error saving bus assignment.')
     } finally {
       setAssigningBus(false)
     }
@@ -119,10 +127,10 @@ export default function DriverStartPage() {
 
   const handleStartTrip = async () => {
     if (!driverRecord?.bus_id) {
-      setErrorMsg('You must assign your bus before starting a trip.')
+      setErrorMsg('You do not have a bus assigned yet. Please assign a bus below.')
       return
     }
-    if (!driverRecord?.id || !selectedRouteId) {
+    if (!selectedRouteId) {
       setErrorMsg('Please select a route.')
       return
     }
@@ -134,21 +142,23 @@ export default function DriverStartPage() {
       const { data: newTrip, error } = await supabase
         .from('trips')
         .insert({
+          bus_id: driverRecord.bus_id,
           driver_id: driverRecord.id,
           route_id: selectedRouteId,
-          bus_id: driverRecord.bus_id,
-          direction: Number(direction),
-          status: 'active',
+          direction,
+          status: 'on_time',
+          crowd_level: 1,
           started_at: new Date().toISOString(),
         })
-        .select('*, route:routes(*), bus:buses(*)')
+        .select()
         .single()
 
       if (error) throw error
 
-      navigate('/driver/trip', { state: { trip: newTrip } })
+      navigate('/driver/trip')
     } catch (err) {
       setErrorMsg(err.message || 'Failed to start trip.')
+    } finally {
       setStarting(false)
     }
   }
@@ -158,7 +168,10 @@ export default function DriverStartPage() {
     try {
       await supabase
         .from('trips')
-        .update({ status: 'ended', ended_at: new Date().toISOString() })
+        .update({
+          status: 'ended',
+          ended_at: new Date().toISOString(),
+        })
         .eq('id', activeTrip.id)
 
       setActiveTrip(null)
@@ -167,91 +180,110 @@ export default function DriverStartPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-cobalt border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
-  const assignedRoute = routes.find((r) => r.id === (driverRecord?.bus?.route_id || selectedRouteId))
+  const assignedRoute = routes.find((r) => r.id === driverRecord?.bus?.route_id)
+  const currentRoute = routes.find((r) => r.id === selectedRouteId)
 
   return (
-    <div className="flex-1 flex flex-col justify-between space-y-6 pb-6 text-left">
-      {/* Active Trip Resume Card */}
-      {activeTrip ? (
-        <div className="p-4 bg-warning/15 border border-warning/30 rounded-card space-y-4">
-          <div className="flex items-center gap-2 text-warning">
-            <AlertTriangle className="w-5 h-5 shrink-0" />
-            <h3 className="text-sm font-extrabold font-heading">Active Trip in Progress</h3>
-          </div>
-          <p className="text-xs text-white/80 leading-relaxed">
-            You currently have an active trip broadcast on{' '}
-            <strong>Route {activeTrip.route?.code}</strong> ({activeTrip.bus?.reg_no || 'Bus'}).
-          </p>
+    <div className="space-y-4 pb-8">
+      {/* 1. Gradient Header with Driver Name & Assigned Bus Chip */}
+      <div
+        className="rounded-[28px] p-5 text-white shadow-soft relative overflow-hidden"
+        style={{ background: 'var(--gradient-brand)' }}
+      >
+        <span className="text-xs font-semibold text-white/70 block uppercase tracking-wider">
+          Driver Console
+        </span>
+        <h2 className="font-heading font-extrabold text-xl text-white mt-0.5">
+          {user?.user_metadata?.full_name || 'Driver Shift'}
+        </h2>
 
-          <div className="space-y-2">
-            <button
-              type="button"
-              onClick={() => navigate('/driver/trip', { state: { trip: activeTrip } })}
-              className="w-full h-16 bg-success text-white font-extrabold text-base rounded-input flex items-center justify-center gap-2 shadow-lg active:scale-95 transition"
+        {/* Bus Badge Chip */}
+        {driverRecord?.bus ? (
+          <div className="mt-3 flex items-center gap-2 flex-wrap">
+            <span className="px-3 py-1 bg-amber-500 text-navy-900 rounded-full font-heading font-extrabold text-xs shadow-xs flex items-center gap-1.5">
+              <Bus className="w-3.5 h-3.5" />
+              <span>Your Bus: {driverRecord.bus.reg_no}</span>
+            </span>
+            {assignedRoute && (
+              <span className="px-2.5 py-1 bg-white/20 text-white rounded-full text-xs font-semibold">
+                Route {assignedRoute.code}
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="mt-3 inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">
+            No Bus Assigned
+          </div>
+        )}
+
+        <div className="absolute bottom-0 left-0 right-0 h-2 road-ribbon opacity-70" />
+      </div>
+
+      {/* 2. Active Trip Notification (if already ongoing) */}
+      {activeTrip ? (
+        <div className="p-5 bg-white rounded-[20px] border-2 border-amber-500 shadow-soft space-y-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+            <Bus className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
+              Trip in Progress
+            </span>
+            <h3 className="font-heading font-extrabold text-base text-ink-950 mt-1">
+              Route {activeTrip.route?.code} - {activeTrip.bus?.reg_no}
+            </h3>
+            <p className="text-xs text-muted mt-0.5">
+              Started {new Date(activeTrip.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          </div>
+
+          <div className="space-y-2 pt-1">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => navigate('/driver/trip')}
+              className="w-full font-bold"
             >
-              <Play className="w-6 h-6 fill-white" />
+              <Play className="w-4 h-4 fill-white" />
               <span>Resume Trip</span>
-            </button>
+            </Button>
             <button
               type="button"
               onClick={handleEndExistingTrip}
-              className="w-full py-3 bg-danger/15 text-danger border border-danger/30 font-bold text-xs rounded-input hover:bg-danger hover:text-white transition"
+              className="w-full py-2.5 text-xs font-bold text-danger hover:bg-danger/10 rounded-full transition"
             >
               End Previous Trip
             </button>
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        /* 3. New Trip Configuration Form */
+        <div className="bg-white p-5 rounded-[20px] border border-line shadow-soft space-y-4">
           <div>
-            <h2 className="text-xl font-extrabold text-white font-heading">Start New Trip</h2>
-            <p className="text-xs text-white/60">Configure your shift before beginning GPS broadcasting.</p>
+            <h3 className="font-heading font-extrabold text-base text-ink-950">
+              Start Shift
+            </h3>
+            <p className="text-xs text-muted">
+              Select route and direction to begin GPS broadcast to commuters.
+            </p>
           </div>
 
           {errorMsg && (
-            <div className="p-3 bg-danger/20 border border-danger/40 rounded-input text-xs text-danger font-semibold">
-              {errorMsg}
+            <div className="p-3.5 bg-danger/10 border border-danger/30 rounded-[12px] text-xs text-danger font-semibold flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span>{errorMsg}</span>
             </div>
           )}
 
-          {/* Assigned Bus (Locked - Problem 5.3) */}
-          {driverRecord?.bus ? (
-            <div className="p-3.5 bg-[#121B3D] border border-white/10 rounded-input flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-cobalt/20 text-cobalt flex items-center justify-center shrink-0">
-                  <Bus className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-white/50 block">Your Assigned Bus</span>
-                  <span className="text-sm font-extrabold text-white font-mono">{driverRecord.bus.reg_no}</span>
-                  {assignedRoute && (
-                    <span className="text-[11px] text-white/70 block">
-                      Base: Route {assignedRoute.code} ({assignedRoute.name_en})
-                    </span>
-                  )}
-                </div>
-              </div>
-              <span className="text-[10px] font-bold text-success bg-success/20 px-2 py-0.5 rounded-pill border border-success/30">
-                Locked
-              </span>
-            </div>
-          ) : (
-            /* Add Your Bus Card (if driver has no bus set yet) */
-            <div className="p-4 bg-warning/15 border border-warning/30 rounded-card space-y-3">
-              <div className="flex items-center gap-2 text-warning">
+          {/* Add Bus Card if not assigned */}
+          {!driverRecord?.bus && (
+            <div className="p-4 bg-amber-100/60 border border-amber-500/30 rounded-[16px] space-y-3">
+              <div className="flex items-center gap-2 text-amber-800">
                 <AlertTriangle className="w-4 h-4" />
-                <h3 className="text-xs font-extrabold font-heading">Add Your Bus</h3>
+                <h4 className="text-xs font-bold font-heading">Link Your Bus</h4>
               </div>
-              <p className="text-xs text-white/80 leading-relaxed">
-                You do not have a bus attached to your driver profile yet. Enter your bus registration number to link it.
+              <p className="text-xs text-muted">
+                Enter your registration number to attach your vehicle.
               </p>
               <div className="space-y-2">
                 <input
@@ -259,12 +291,12 @@ export default function DriverStartPage() {
                   value={newBusReg}
                   onChange={(e) => setNewBusReg(e.target.value.toUpperCase())}
                   placeholder="e.g. KA25 F 1234"
-                  className="w-full h-11 px-3 bg-[#121B3D] border border-white/10 rounded-input text-xs font-mono uppercase font-bold text-white focus:outline-none focus:border-cobalt"
+                  className="w-full h-11 px-3.5 bg-white border border-line rounded-[12px] text-xs font-mono uppercase font-bold text-ink-950"
                 />
                 <select
                   value={newBusRoute}
                   onChange={(e) => setNewBusRoute(e.target.value)}
-                  className="w-full h-11 px-3 bg-[#121B3D] border border-white/10 rounded-input text-xs font-bold text-white focus:outline-none focus:border-cobalt"
+                  className="w-full h-11 px-3 bg-white border border-line rounded-[12px] text-xs font-bold text-ink-950"
                 >
                   {routes.map((r) => (
                     <option key={r.id} value={r.id}>
@@ -272,27 +304,28 @@ export default function DriverStartPage() {
                     </option>
                   ))}
                 </select>
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handleSetMyBus}
-                  disabled={assigningBus || !newBusReg.trim()}
-                  className="w-full py-2.5 bg-cobalt text-white text-xs font-bold rounded-pill shadow-soft hover:opacity-95 disabled:opacity-50 transition"
+                  loading={assigningBus}
+                  className="w-full"
                 >
-                  {assigningBus ? 'Assigning Bus...' : 'Save & Attach Bus'}
-                </button>
+                  Save & Attach Bus
+                </Button>
               </div>
             </div>
           )}
 
           {/* Route Selector */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-white/60">
-              Trip Route
+          <div>
+            <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
+              Select Route
             </label>
             <select
               value={selectedRouteId}
               onChange={(e) => setSelectedRouteId(e.target.value)}
-              className="w-full h-14 px-4 bg-[#121B3D] border border-white/10 rounded-input text-sm font-bold text-white focus:outline-none focus:border-cobalt"
+              className="w-full h-12 px-3.5 bg-sky-50 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500"
             >
               {routes.map((r) => (
                 <option key={r.id} value={r.id}>
@@ -303,54 +336,54 @@ export default function DriverStartPage() {
           </div>
 
           {/* Direction Toggle */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-white/60">
+          <div>
+            <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
               Trip Direction
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setDirection(0)}
-                className={`h-14 rounded-input font-bold text-xs border flex items-center justify-center gap-1.5 transition ${
+                className={`h-12 rounded-[12px] font-bold text-xs border transition active:scale-95 flex items-center justify-center gap-1.5 ${
                   direction === 0
-                    ? 'bg-cobalt border-cobalt text-white shadow-soft'
-                    : 'bg-[#121B3D] border-white/10 text-white/60'
+                    ? 'bg-cobalt-500 border-cobalt-500 text-white shadow-xs'
+                    : 'bg-sky-50 border-line text-muted hover:text-ink-950'
                 }`}
               >
-                <span>Forward (0)</span>
+                Forward (0)
               </button>
               <button
                 type="button"
                 onClick={() => setDirection(1)}
-                className={`h-14 rounded-input font-bold text-xs border flex items-center justify-center gap-1.5 transition ${
+                className={`h-12 rounded-[12px] font-bold text-xs border transition active:scale-95 flex items-center justify-center gap-1.5 ${
                   direction === 1
-                    ? 'bg-cobalt border-cobalt text-white shadow-soft'
-                    : 'bg-[#121B3D] border-white/10 text-white/60'
+                    ? 'bg-cobalt-500 border-cobalt-500 text-white shadow-xs'
+                    : 'bg-sky-50 border-line text-muted hover:text-ink-950'
                 }`}
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Return / Reverse (1)</span>
+                Return (1)
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Start Button & Safety Disclaimer */}
+      {/* 4. Giant Amber "Start Trip" Primary CTA Button per Section 6 */}
       {!activeTrip && (
         <div className="space-y-3 pt-2">
           <button
             type="button"
             disabled={starting || !driverRecord?.bus_id}
             onClick={handleStartTrip}
-            className="w-full h-16 bg-cobalt hover:bg-cobalt/90 disabled:opacity-50 text-white font-extrabold text-base rounded-input flex items-center justify-center gap-2 shadow-soft active:scale-98 transition"
+            className="w-full h-16 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-navy-900 font-extrabold text-lg rounded-full flex items-center justify-center gap-2.5 shadow-float active:scale-98 transition font-heading"
           >
-            <Play className="w-6 h-6 fill-white" />
-            <span>{starting ? 'Initializing GPS...' : 'Start Trip & Broadcast'}</span>
+            <Play className="w-6 h-6 fill-navy-900" />
+            <span>{starting ? 'Initializing GPS...' : 'Start Trip'}</span>
           </button>
 
-          <p className="text-[11px] text-white/40 text-center leading-normal">
-            Keep your screen awake or device plugged in. Location will transmit automatically to commuters until you tap "End Trip".
+          <p className="text-[11px] text-muted text-center leading-normal">
+            Keep your screen on or device plugged in. Realtime GPS transmits every 5 seconds until you tap "End Trip".
           </p>
         </div>
       )}

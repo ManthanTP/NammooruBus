@@ -24,7 +24,8 @@ export default function FloatingTabBar() {
   return (
     <nav
       aria-label="Main Navigation"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-md bg-surface/90 backdrop-blur-md border border-line rounded-pill p-1.5 shadow-float flex items-center justify-around"
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-[420px] h-16 bg-white px-2 py-1.5 rounded-full flex items-center justify-around border border-line"
+      style={{ boxShadow: 'var(--shadow-float)' }}
     >
       {tabs.map((tab) => {
         const Icon = tab.icon
@@ -34,19 +35,28 @@ export default function FloatingTabBar() {
           <Link
             key={tab.key}
             to={tab.path}
-            className={`relative flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-pill text-[11px] font-semibold transition-colors ${
-              active ? 'text-cobalt font-bold' : 'text-text-secondary hover:text-ink'
-            }`}
+            className="relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full py-1 px-1 rounded-full select-none"
           >
             {active && (
               <motion.div
                 layoutId="activeTabPill"
-                className="absolute inset-0 bg-cobalt-tint rounded-pill -z-10"
+                className="absolute inset-0 rounded-full -z-10 shadow-sm"
+                style={{ background: 'var(--gradient-brand)' }}
                 transition={{ type: 'spring', stiffness: 450, damping: 35 }}
               />
             )}
-            <Icon className={`w-4 h-4 mb-0.5 ${active ? 'text-cobalt' : 'text-text-secondary'}`} />
-            <span className="truncate max-w-[54px]">{tab.label}</span>
+            <Icon
+              size={22}
+              strokeWidth={2}
+              className={`transition-colors ${active ? 'text-white' : 'text-muted hover:text-ink-950'}`}
+            />
+            <span
+              className={`text-[10.5px] font-semibold leading-tight tracking-tight truncate max-w-[62px] ${
+                active ? 'text-white font-bold' : 'text-muted'
+              }`}
+            >
+              {tab.label}
+            </span>
           </Link>
         )
       })}

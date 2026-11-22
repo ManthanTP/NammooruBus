@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Bus, AlertCircle, ArrowRight } from 'lucide-react'
+import { AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import LanguageToggle from '@/components/ui/LanguageToggle'
+import Button from '@/components/ui/Button'
 
 export default function LoginPage() {
   const { t } = useTranslation()
@@ -12,6 +13,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [formError, setFormError] = useState(null)
   const [adminNotice, setAdminNotice] = useState(false)
 
@@ -21,7 +23,7 @@ export default function LoginPage() {
     setAdminNotice(false)
 
     if (!email || !password) {
-      setFormError(t('auth.login_failed'))
+      setFormError(t('auth.login_failed') || 'Please enter email and password')
       return
     }
 
@@ -32,7 +34,6 @@ export default function LoginPage() {
       return
     }
 
-    // Role-based redirect
     if (profile?.role === 'admin') {
       setAdminNotice(true)
     } else if (profile?.role === 'driver') {
@@ -43,116 +44,148 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-page flex flex-col justify-between p-6">
-      <header className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-input bg-cobalt text-white flex items-center justify-center shadow-soft">
-            <Bus className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-lg font-extrabold text-ink leading-tight">{t('app.name')}</h1>
-            <p className="text-xs text-text-secondary">{t('app.tagline')}</p>
-          </div>
+    <div className="min-h-screen bg-sky-50 flex flex-col justify-between">
+      {/* 1. Top Half: Signature Gradient with logo-full on white plate */}
+      <div
+        className="pt-10 pb-16 px-6 text-white flex flex-col items-center justify-center relative overflow-hidden"
+        style={{ background: 'var(--gradient-brand)' }}
+      >
+        <div className="absolute top-4 right-4 z-10">
+          <LanguageToggle />
         </div>
-        <LanguageToggle />
-      </header>
 
-      <main className="w-full max-w-sm mx-auto my-8">
-        <div className="bg-surface p-6 rounded-card border border-line shadow-soft">
-          <h2 className="text-xl font-bold text-ink mb-1">{t('auth.login')}</h2>
-          <p className="text-sm text-text-secondary mb-6">{t('app.tagline')}</p>
+        {/* White rounded plate with logo-full */}
+        <div className="bg-white rounded-[20px] p-4 shadow-float mb-4 flex items-center justify-center max-w-[200px]">
+          <img
+            src="/brand/logo-full.png"
+            alt="Nammooru Bus"
+            className="w-36 h-auto object-contain"
+          />
+        </div>
+
+        <h1 className="font-heading font-extrabold text-2xl text-white tracking-tight">
+          Welcome Back
+        </h1>
+        <p className="text-xs text-white/75 font-medium mt-1">
+          {t('app.tagline') || 'Our town. Our bus.'}
+        </p>
+
+        {/* Road ribbon at bottom of top section */}
+        <div className="absolute bottom-0 left-0 right-0 h-2.5 road-ribbon opacity-80" />
+      </div>
+
+      {/* 2. Bottom Half: White Sheet Form */}
+      <main className="flex-1 w-full max-w-md mx-auto -mt-8 relative z-10 px-4 pb-8">
+        <div
+          className="bg-white p-6 rounded-[28px] border border-line shadow-soft space-y-4"
+        >
+          <div className="space-y-1">
+            <h2 className="font-heading font-extrabold text-xl text-ink-950">
+              {t('auth.login') || 'Sign In'}
+            </h2>
+            <p className="text-xs text-muted">
+              Access your saved trips and personalized alerts
+            </p>
+          </div>
 
           {adminNotice && (
-            <div className="mb-4 p-3 bg-warning/10 border border-warning/30 rounded-input text-sm text-ink flex flex-col gap-2">
+            <div className="p-3.5 bg-amber-100 border border-amber-500/30 rounded-[16px] text-xs text-navy-900 flex flex-col gap-2">
               <div className="flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-                <span>{t('auth.admin_login_notice')}</span>
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <span>{t('auth.admin_login_notice') || 'Admin accounts must log in via the administrator portal.'}</span>
               </div>
               <Link
                 to="/12345678/admin/login"
-                className="text-xs font-semibold text-cobalt hover:underline flex items-center gap-1 self-end"
+                className="text-xs font-bold text-cobalt-500 hover:underline flex items-center gap-1 self-end"
               >
-                {t('auth.admin_portal_link')} <ArrowRight className="w-3 h-3" />
+                {t('auth.admin_portal_link') || 'Go to Admin Portal'} <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           )}
 
           {formError && (
-            <div className="mb-4 p-3 bg-danger/10 border border-danger/20 rounded-input text-xs text-danger flex items-center gap-2">
+            <div className="p-3.5 bg-danger/10 border border-danger/30 rounded-[16px] text-xs text-danger font-semibold flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{formError}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>
-              <label className="block text-xs font-semibold text-ink mb-1.5">
-                {t('auth.email_label')}
+              <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
+                {t('auth.email_label') || 'Email Address'}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('auth.email_placeholder')}
+                placeholder={t('auth.email_placeholder') || 'name@example.com'}
                 required
-                className="w-full px-3.5 py-2.5 bg-page border border-line rounded-input text-sm text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt"
+                className="w-full h-12 px-4 bg-sky-50 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-ink">
-                  {t('auth.password_label')}
+                <label className="block text-xs font-bold text-ink-950 font-heading">
+                  {t('auth.password_label') || 'Password'}
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-cobalt hover:underline font-medium"
+                  className="text-xs font-bold text-cobalt-500 hover:underline"
                 >
-                  {t('auth.forgot_password')}?
+                  {t('auth.forgot_password') || 'Forgot?'}
                 </Link>
               </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t('auth.password_placeholder')}
-                required
-                className="w-full px-3.5 py-2.5 bg-page border border-line rounded-input text-sm text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full h-12 px-4 pr-11 bg-sky-50 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink-950"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-cobalt text-white text-sm font-semibold rounded-input shadow-soft hover:opacity-95 active:scale-[0.99] disabled:opacity-50 transition"
+              variant="primary"
+              size="md"
+              loading={loading}
+              className="w-full h-12 text-sm font-bold font-heading tracking-tight mt-2"
             >
-              {loading ? t('common.loading') : t('auth.login_action')}
-            </button>
+              <span>{t('auth.login_btn') || 'Sign In'}</span>
+            </Button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-line text-center">
-            <p className="text-xs text-text-secondary">
-              {t('auth.dont_have_account')}{' '}
-              <Link to="/register" className="text-cobalt font-semibold hover:underline">
-                {t('auth.register')}
-              </Link>
-            </p>
+          {/* Divider */}
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-line" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-3 text-muted font-medium">or</span>
+            </div>
           </div>
-        </div>
 
-        <div className="text-center mt-5">
+          {/* Create account button */}
           <Link
-            to="/"
-            className="text-xs font-semibold text-text-secondary hover:text-ink transition inline-flex items-center gap-1"
+            to="/register"
+            className="w-full h-12 rounded-full border-2 border-cobalt-500 text-cobalt-500 hover:bg-sky-50 text-xs font-bold flex items-center justify-center transition active:scale-98 font-heading"
           >
-            {t('common.continue_as_guest')} &rarr;
+            <span>{t('auth.no_account') || 'Create an account'}</span>
           </Link>
         </div>
       </main>
-
-      <footer className="text-center text-xs text-text-secondary py-2">
-        &copy; {new Date().getFullYear()} {t('app.name')}
-      </footer>
     </div>
   )
 }

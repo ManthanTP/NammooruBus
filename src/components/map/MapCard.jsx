@@ -4,9 +4,14 @@ import MapView from './MapView'
 import { useLocationStore } from '@/store/locationStore'
 import { useMapStore } from '@/store/mapStore'
 
+/**
+ * MapCard — mobile in-page map container.
+ * Radius 28, white border 3px, soft shadow,
+ * Expand button (round white, top right), Locate me button (round, bottom right, cobalt icon).
+ */
 export default function MapCard({ height = 220, isSticky = false, className = '' }) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const { position, status, accuracy, start } = useLocationStore()
+  const { position, accuracy, start } = useLocationStore()
   const { setCenter, setView } = useMapStore()
 
   const handleLocateMe = (e) => {
@@ -29,55 +34,59 @@ export default function MapCard({ height = 220, isSticky = false, className = ''
     <>
       {/* 1. Normal In-Page Map Card (Mobile Only) */}
       <div
-        className={`w-full rounded-[24px] border border-line overflow-hidden relative shadow-soft bg-surface shrink-0 md:hidden transition-all ${
-          isSticky ? 'sticky top-16 z-20' : ''
-        } ${className}`}
-        style={{ height }}
+        className={`w-full rounded-[28px] border-[3px] border-white overflow-hidden relative bg-white shrink-0 md:hidden transition-all ${isSticky ? 'sticky top-16 z-20' : ''
+          } ${className}`}
+        style={{
+          height,
+          boxShadow: 'var(--shadow-soft)',
+        }}
       >
         <MapView />
 
-        {/* Top-Right Action Controls (Locate me + Expand) */}
-        <div className="absolute top-2.5 right-2.5 z-[400] flex items-center gap-1.5 pointer-events-auto">
-          {/* Approximate Accuracy Pill */}
+        {/* Top-Right: Expand button */}
+        <div className="absolute top-3 right-3 z-[400] flex items-center gap-1.5 pointer-events-auto">
           {isApproximate && (
-            <div className="bg-surface/90 backdrop-blur-md px-2 py-0.5 rounded-pill border border-warning/40 text-[10px] font-semibold text-warning flex items-center gap-1 shadow-xs">
-              <AlertCircle className="w-3 h-3" />
+            <div className="bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-pill border border-amber-500/30 text-[10px] font-bold text-amber-600 flex items-center gap-1 shadow-xs">
+              <AlertCircle className="w-3 h-3 text-amber-500" />
               <span>Approximate</span>
             </div>
           )}
 
-          {/* Locate Me */}
-          <button
-            type="button"
-            onClick={handleLocateMe}
-            className="w-8 h-8 rounded-full bg-surface/90 backdrop-blur-md border border-line shadow-soft text-ink flex items-center justify-center hover:text-cobalt active:scale-95 transition"
-            title="Locate me"
-          >
-            <Navigation className={`w-4 h-4 ${position ? 'text-cobalt' : 'text-text-secondary'}`} />
-          </button>
-
-          {/* Expand */}
           <button
             type="button"
             onClick={() => setIsExpanded(true)}
-            className="w-8 h-8 rounded-full bg-surface/90 backdrop-blur-md border border-line shadow-soft text-ink flex items-center justify-center hover:text-cobalt active:scale-95 transition"
+            className="w-9 h-9 rounded-full bg-white border border-line shadow-soft text-ink-950 flex items-center justify-center hover:text-cobalt-500 active:scale-95 transition"
             title="Expand map"
+            aria-label="Expand map"
           >
             <Maximize2 className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Bottom-Right: Locate Me button (round white button with cobalt icon) */}
+        <div className="absolute bottom-3 right-3 z-[400] pointer-events-auto">
+          <button
+            type="button"
+            onClick={handleLocateMe}
+            className="w-10 h-10 rounded-full bg-white border border-line shadow-soft text-cobalt-500 flex items-center justify-center hover:bg-sky-50 active:scale-95 transition"
+            title="Locate me"
+            aria-label="Locate me"
+          >
+            <Navigation className="w-4 h-4 fill-cobalt-500/10 text-cobalt-500" />
           </button>
         </div>
       </div>
 
       {/* 2. Full-Screen Modal Overlay when Expanded */}
       {isExpanded && (
-        <div className="fixed inset-0 z-50 bg-surface flex flex-col md:hidden">
-          <header className="p-3 bg-surface/95 backdrop-blur-md border-b border-line flex items-center justify-between shrink-0 z-10">
-            <span className="font-extrabold text-sm text-ink font-heading">Full Map</span>
+        <div className="fixed inset-0 z-50 bg-white flex flex-col md:hidden">
+          <header className="p-3 bg-white/95 backdrop-blur-md border-b border-line flex items-center justify-between shrink-0 z-10">
+            <span className="font-heading font-extrabold text-sm text-ink-950">Full Map</span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleLocateMe}
-                className="w-8 h-8 rounded-full bg-page border border-line shadow-xs text-cobalt flex items-center justify-center active:scale-95"
+                className="w-9 h-9 rounded-full bg-sky-50 border border-line text-cobalt-500 flex items-center justify-center active:scale-95 shadow-xs"
                 title="Locate me"
               >
                 <Navigation className="w-4 h-4" />
@@ -85,7 +94,7 @@ export default function MapCard({ height = 220, isSticky = false, className = ''
               <button
                 type="button"
                 onClick={() => setIsExpanded(false)}
-                className="w-8 h-8 rounded-full bg-page border border-line shadow-xs text-ink flex items-center justify-center active:scale-95"
+                className="w-9 h-9 rounded-full bg-sky-50 border border-line text-ink-950 flex items-center justify-center active:scale-95 shadow-xs"
                 title="Close full map"
               >
                 <Minimize2 className="w-4 h-4" />

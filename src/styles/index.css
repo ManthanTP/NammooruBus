@@ -2,37 +2,57 @@
 @import "./tokens.css";
 
 @theme {
-  --color-ink: var(--color-ink);
-  --color-cobalt: var(--color-cobalt);
-  --color-cobalt-tint: var(--color-cobalt-tint);
-  --color-page: var(--color-page);
-  --color-surface: var(--color-surface);
-  --color-line: var(--color-line);
-  --color-text-secondary: var(--color-text-secondary);
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
+  /* Colors */
+  --color-cobalt-500: var(--cobalt-500);
+  --color-cobalt-600: var(--cobalt-600);
+  --color-royal-700: var(--royal-700);
+  --color-navy-900: var(--navy-900);
+  --color-ink-950: var(--ink-950);
+  --color-amber-500: var(--amber-500);
+  --color-amber-100: var(--amber-100);
+  --color-sky-50: var(--sky-50);
+  --color-sky-100: var(--sky-100);
+  --color-line: var(--line);
+  --color-white: var(--white);
+  --color-muted: var(--muted);
   --color-danger: var(--color-danger);
-  --color-led-amber: var(--color-led-amber);
-  --color-led-bg: var(--color-led-bg);
+  --color-warning: var(--color-warning);
+  --color-success: var(--color-success);
 
+  /* Legacy aliases mapped to new tokens */
+  --color-ink: var(--ink-950);
+  --color-cobalt: var(--cobalt-500);
+  --color-cobalt-tint: var(--sky-100);
+  --color-page: var(--sky-50);
+  --color-surface: var(--white);
+  --color-text-secondary: var(--muted);
+  --color-led-amber: var(--amber-500);
+  --color-led-bg: var(--navy-900);
+
+  /* Fonts */
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
   --font-led: var(--font-led);
   --font-kannada: var(--font-kannada);
 
+  /* Radii */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
   --radius-card: var(--radius-card);
   --radius-sheet: var(--radius-sheet);
   --radius-input: var(--radius-input);
-  --radius-pill: var(--radius-pill);
 
+  /* Shadows */
   --shadow-soft: var(--shadow-soft);
   --shadow-float: var(--shadow-float);
 }
 
 body {
   font-family: var(--font-body);
-  color: var(--color-ink);
-  background-color: var(--color-page);
+  color: var(--ink-950);
+  background: var(--sky-50);
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
@@ -48,4 +68,46 @@ h1, h2, h3, h4, h5, h6 {
 
 .font-kannada {
   font-family: var(--font-kannada);
+  line-height: 1.6;
+}
+
+.road-gradient {
+  background: var(--gradient-brand);
+}
+
+/* White road ribbon with dashed centre line - brand device */
+.road-ribbon {
+  height: 48px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 18px,
+      var(--amber-500) 18px,
+      var(--amber-500) 34px
+    )
+    center / 100% 3px no-repeat,
+    var(--white);
+}
+
+/* Button & interactive press shrink */
+button:active, a[role="button"]:active {
+  transform: scale(0.98);
+  transition: transform 100ms ease;
+}
+
+/* Page transition: 180ms fade + 12px upward slide */
+@keyframes pageFadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: pageFadeSlide 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

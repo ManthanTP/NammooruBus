@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 export const useMapStore = create((set) => ({
   polyline: null,
-  routeColor: '#3451F2',
+  routeColor: '#0040FF',
   isApproximateRoute: false,
   journeyLegs: [], // Array of { type: 'bus'|'walk', polyline, color, distanceMeters, walkMinutes, midpoint, isApproximate }
   markers: [],
@@ -11,10 +11,10 @@ export const useMapStore = create((set) => ({
   center: null,
   zoom: null,
 
-  setRoute: (polyline, color = '#3451F2', isApproximate = false) => {
+  setRoute: (polyline, color = '#0040FF', isApproximate = false) => {
     set({ polyline, routeColor: color, isApproximateRoute: isApproximate, journeyLegs: [] })
   },
-  setPolyline: (polyline, color = '#3451F2', isApproximate = false) => {
+  setPolyline: (polyline, color = '#0040FF', isApproximate = false) => {
     set({ polyline, routeColor: color, isApproximateRoute: isApproximate, journeyLegs: [] })
   },
 
@@ -99,7 +99,7 @@ export const useMapStore = create((set) => ({
   clearMap: () => {
     set({
       polyline: null,
-      routeColor: '#3451F2',
+      routeColor: '#0040FF',
       isApproximateRoute: false,
       journeyLegs: [],
       markers: [],

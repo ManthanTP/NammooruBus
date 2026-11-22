@@ -1,6 +1,7 @@
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, HelpCircle, MessageSquare, Bus, MapPin, Radio, Shield } from 'lucide-react'
+import { ArrowLeft, HelpCircle, MessageSquare } from 'lucide-react'
+import Button from '@/components/ui/Button'
 
 export default function HelpPage() {
   const { t } = useTranslation()
@@ -26,58 +27,70 @@ export default function HelpPage() {
   ]
 
   return (
-    <div className="space-y-4 pt-1 pb-6">
-      {/* Top Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-line">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>{t('common.back')}</span>
-        </button>
-        <span className="font-extrabold text-xs font-heading">{t('nav.help')}</span>
-        <div className="w-10" />
-      </div>
-
-      {/* Guide Banner */}
-      <div className="p-4 bg-surface rounded-card border border-line shadow-soft">
-        <div className="flex items-center gap-2 mb-2">
-          <HelpCircle className="w-5 h-5 text-cobalt" />
-          <h2 className="text-sm font-extrabold text-ink font-heading">
-            Frequently Asked Questions
-          </h2>
+    <div className="space-y-4 pb-8">
+      {/* 1. Header with logo-full */}
+      <div
+        className="rounded-[28px] p-6 text-white shadow-soft relative overflow-hidden text-center flex flex-col items-center"
+        style={{ background: 'var(--gradient-brand)' }}
+      >
+        <div className="w-full flex items-center justify-between mb-2">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="w-8 h-8 rounded-full bg-white/15 text-white flex items-center justify-center transition active:scale-95"
+            title="Back"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <span className="font-heading font-extrabold text-xs text-white uppercase tracking-wider">
+            {t('nav.help') || 'Help & Support'}
+          </span>
+          <div className="w-8" />
         </div>
-        <p className="text-xs text-text-secondary">
-          Find answers about routes, tracking, schedules, and fares in Nammooru Bus.
+
+        {/* Logo full on white plate */}
+        <div className="bg-white rounded-[20px] p-3 shadow-float mb-3 flex items-center justify-center max-w-[170px]">
+          <img
+            src="/brand/logo-full.png"
+            alt="Nammooru Bus"
+            className="w-28 h-auto object-contain"
+          />
+        </div>
+
+        <h1 className="font-heading font-extrabold text-xl text-white">
+          Frequently Asked Questions
+        </h1>
+        <p className="text-xs text-white/75 mt-0.5 max-w-xs">
+          Learn how live tracking, offline search, and ticketing work
         </p>
+
+        <div className="absolute bottom-0 left-0 right-0 h-2 road-ribbon opacity-75" />
       </div>
 
-      {/* FAQ Accordions / List */}
-      <div className="space-y-2">
+      {/* 2. FAQ Accordions */}
+      <div className="space-y-2.5">
         {faqs.map((faq, idx) => (
           <div
             key={idx}
-            className="p-3.5 bg-surface rounded-card border border-line shadow-soft space-y-1.5"
+            className="p-4 bg-white rounded-[20px] border border-line shadow-soft space-y-1.5 text-left"
           >
-            <h4 className="text-xs font-bold text-ink">{faq.q}</h4>
-            <p className="text-[11px] text-text-secondary leading-relaxed">{faq.a}</p>
+            <h3 className="text-xs font-bold font-heading text-ink-950">{faq.q}</h3>
+            <p className="text-xs text-muted leading-relaxed">{faq.a}</p>
           </div>
         ))}
       </div>
 
-      {/* Feedback & Complaints CTA */}
-      <div className="p-4 bg-cobalt-tint/60 border border-cobalt/20 rounded-card flex items-center justify-between">
+      {/* 3. Feedback CTA */}
+      <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft flex items-center justify-between gap-3">
         <div>
-          <h4 className="text-xs font-bold text-ink">Have a grievance or complaint?</h4>
-          <p className="text-[11px] text-text-secondary">Submit feedback directly to city transport admins.</p>
+          <h3 className="text-xs font-bold font-heading text-ink-950">Have a grievance or complaint?</h3>
+          <p className="text-xs text-muted mt-0.5">Submit feedback directly to transport admins.</p>
         </div>
         <Link
           to="/complaints"
-          className="px-3 py-1.5 bg-cobalt text-white text-xs font-bold rounded-pill hover:opacity-95 transition shrink-0 ml-2"
+          className="px-4 py-2 bg-cobalt-500 text-white text-xs font-bold rounded-full hover:bg-cobalt-600 transition shrink-0 active:scale-95 shadow-xs"
         >
-          {t('nav.complaints')}
+          {t('nav.complaints') || 'Feedback'}
         </Link>
       </div>
     </div>

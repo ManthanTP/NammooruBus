@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Clock, Calendar, MapPin, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Clock, Calendar, MapPin } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
 import { useMapStore } from '@/store/mapStore'
 import { localName } from '@/lib/formatters'
@@ -20,7 +20,6 @@ export default function RouteDetailPage() {
 
   const [dayType, setDayType] = useState('weekday') // 'weekday' | 'weekend'
 
-  // Ensure data store is initialized on reload
   useEffect(() => {
     if (stops.length === 0 && !storeLoading) {
       initData()
@@ -29,7 +28,6 @@ export default function RouteDetailPage() {
 
   const route = routes.find((r) => r.id === id)
 
-  // Ordered stops for this route
   const orderedStops = useMemo(() => {
     const list = routeStops.filter((rs) => rs.route_id === id).sort((a, b) => a.seq - b.seq)
     let cumulativeMin = 0
@@ -51,7 +49,6 @@ export default function RouteDetailPage() {
 
   const schedule = schedules.find((s) => s.route_id === id && s.day_type === dayType)
 
-  // Draw road-following route and markers on map
   useEffect(() => {
     if (orderedStops.length < 2) return
 
@@ -67,7 +64,6 @@ export default function RouteDetailPage() {
 
     setMarkers(markers)
 
-    // 1. If route has pre-computed road geometry from database, use it directly!
     let precomputed = null
     if (Array.isArray(route?.geometry) && route.geometry.length > 1) {
       precomputed = route.geometry
@@ -76,22 +72,20 @@ export default function RouteDetailPage() {
     }
 
     if (precomputed && precomputed.length > 1) {
-      setRoute(precomputed, route?.color || '#3451F2', false)
+      setRoute(precomputed, '#0040FF', false)
       fitBounds(precomputed)
     } else {
-      // 2. Otherwise draw straight line initially and fetch OSRM road geometry
-      setRoute(straightLine, route?.color || '#3451F2', true)
+      setRoute(straightLine, '#0040FF', true)
       fitBounds(straightLine)
 
       fetchDrivingRoute(straightLine).then((res) => {
         if (!cancelled && res?.polyline && res.polyline.length > 1) {
-          setRoute(res.polyline, route?.color || '#3451F2', res.isApproximate)
+          setRoute(res.polyline, '#0040FF', res.isApproximate)
           fitBounds(res.polyline)
         }
       })
     }
 
-    // Clean up map layers on leave per Problem 3.2
     return () => {
       cancelled = true
       clearMap()
@@ -101,53 +95,54 @@ export default function RouteDetailPage() {
   if (!route && (storeLoading || stops.length === 0)) {
     return (
       <div className="space-y-4 pt-1 pb-6">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-[220px] w-full rounded-[24px]" />
-        <Skeleton className="h-24 w-full rounded-card" />
+        <Skeleton height="36px" width="160px" />
+        <Skeleton height="240px" />
+        <Skeleton height="100px" />
       </div>
     )
   }
 
   if (!route) {
     return (
-      <div className="p-6 text-center text-xs text-text-secondary">
+      <div className="p-8 text-center text-xs text-muted">
         Route not found
       </div>
     )
   }
 
   return (
-    <div className="space-y-4 pt-1 pb-6">
-      {/* Top Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-line">
+    <div className="space-y-3.5 pb-6">
+      {/* 1. Coloured Header with Badge */}
+      <div
+        className="rounded-[20px] p-4 text-white shadow-soft flex items-center justify-between"
+        style={{ background: 'var(--gradient-brand)' }}
+      >
         <button
           type="button"
           onClick={() => navigate('/routes')}
-          className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink transition"
+          className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition active:scale-95 shrink-0"
+          title="Back to routes"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{t('common.back')}</span>
         </button>
-        <RouteBadge code={route.code} color={route.color} size="md" />
-        <div className="w-10" />
+
+        <div className="text-center min-w-0 px-2 flex-1">
+          <h2 className="font-heading font-extrabold text-base text-white truncate">
+            {localName(route, i18n.language)}
+          </h2>
+          <span className="text-[11px] text-white/70 block mt-0.5">
+            {orderedStops.length} stops &bull; {route.two_way ? 'Two-way service' : 'One-way service'}
+          </span>
+        </div>
+
+        <RouteBadge code={route.code} size="md" />
       </div>
 
-      {/* Small Map Card on Mobile (Height 220px per Part B) */}
-      <MapCard height={220} />
+      {/* 2. Small Map Card (Height 240px on Route Detail per Section 3) */}
+      <MapCard height={240} />
 
-      {/* Route Title */}
-      <div>
-        <h2 className="text-base font-extrabold text-ink font-heading">
-          {localName(route, i18n.language)}
-        </h2>
-        <p className="text-xs text-text-secondary mt-0.5">
-          {t('passenger.stops_count', { count: orderedStops.length })} &bull;{' '}
-          {route.two_way ? 'Two-way service' : 'One-way service'}
-        </p>
-      </div>
-
-      {/* Weekday / Weekend Toggle */}
-      <div className="flex p-1 bg-page rounded-pill border border-line shadow-xs">
+      {/* 3. Weekday / Weekend Segmented Pill */}
+      <div className="flex p-1 bg-white rounded-full border border-line shadow-xs">
         {['weekday', 'weekend'].map((dt) => {
           const isSelected = dayType === dt
           return (
@@ -155,91 +150,102 @@ export default function RouteDetailPage() {
               key={dt}
               type="button"
               onClick={() => setDayType(dt)}
-              className={`relative flex-1 py-1 text-xs font-bold rounded-pill capitalize transition-colors flex items-center justify-center gap-1 ${isSelected ? 'text-white' : 'text-text-secondary hover:text-ink'
-                }`}
+              className={`relative flex-1 py-1.5 text-xs font-bold rounded-full capitalize transition-colors flex items-center justify-center gap-1.5 select-none ${
+                isSelected ? 'text-white' : 'text-muted hover:text-ink-950'
+              }`}
             >
               {isSelected && (
                 <motion.div
                   layoutId="dayTypePill"
-                  className="absolute inset-0 bg-cobalt rounded-pill -z-10"
+                  className="absolute inset-0 rounded-full -z-10 shadow-xs"
+                  style={{ background: 'var(--gradient-brand)' }}
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
-              <Calendar className="w-3.5 h-3.5" />
-              <span>{t(`passenger.${dt}`)}</span>
+              <Calendar size={14} strokeWidth={2} />
+              <span>{t(`passenger.${dt}`) || dt}</span>
             </button>
           )
         })}
       </div>
 
-      {/* Schedule Summary Banner */}
-      <div className="grid grid-cols-3 gap-2 p-3 bg-surface rounded-card border border-line text-center text-xs">
+      {/* 4. Schedule Summary Stat Row */}
+      <div className="grid grid-cols-3 gap-2 p-3.5 bg-white rounded-[20px] border border-line shadow-soft text-center text-xs">
         <div>
-          <span className="text-[10px] font-bold text-text-secondary uppercase block">
-            {t('passenger.first_bus')}
+          <span className="text-[10px] font-bold text-muted uppercase block">
+            {t('passenger.first_bus') || 'First Bus'}
           </span>
-          <span className="font-bold text-ink font-mono">
+          <span className="font-extrabold text-ink-950 font-mono text-sm block mt-0.5">
             {schedule?.first_bus ? schedule.first_bus.slice(0, 5) : '06:00'}
           </span>
         </div>
         <div>
-          <span className="text-[10px] font-bold text-text-secondary uppercase block">
-            {t('passenger.last_bus')}
+          <span className="text-[10px] font-bold text-muted uppercase block">
+            {t('passenger.last_bus') || 'Last Bus'}
           </span>
-          <span className="font-bold text-ink font-mono">
+          <span className="font-extrabold text-ink-950 font-mono text-sm block mt-0.5">
             {schedule?.last_bus ? schedule.last_bus.slice(0, 5) : '21:30'}
           </span>
         </div>
         <div>
-          <span className="text-[10px] font-bold text-text-secondary uppercase block">
+          <span className="text-[10px] font-bold text-muted uppercase block">
             Headway
           </span>
-          <span className="font-bold text-cobalt font-mono">
+          <span className="font-extrabold text-cobalt-500 font-mono text-sm block mt-0.5">
             {schedule?.headway_min ? `${schedule.headway_min}m` : '15m'}
           </span>
         </div>
       </div>
 
-      {/* Ordered Stop Timeline */}
-      <div className="p-4 bg-surface rounded-card border border-line shadow-soft space-y-3">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-3">
+      {/* 5. Stop Timeline on the Road Rail */}
+      <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft space-y-3">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted mb-2">
           Route Timeline ({orderedStops.length} stops)
         </h3>
 
-        <div className="space-y-0">
+        <div className="relative pl-6 space-y-4">
+          {/* Vertical signature road rail */}
+          <div
+            className="absolute left-2.5 top-2 bottom-2 w-1.5 bg-sky-100 rounded-full"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(180deg, var(--cobalt-500) 0px, var(--cobalt-500) 4px, transparent 4px, transparent 8px)'
+            }}
+          />
+
           {orderedStops.map((item, idx) => {
             const isFirst = idx === 0
             const isLast = idx === orderedStops.length - 1
 
             return (
-              <div key={item.id} className="flex gap-3">
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${isFirst
-                      ? 'bg-success text-white'
-                      : isLast
-                        ? 'bg-danger text-white'
-                        : 'bg-page border-2 border-line text-ink'
-                      }`}
-                  >
-                    {idx + 1}
-                  </div>
-                  {!isLast && <div className="w-0.5 flex-1 bg-line my-1" />}
+              <div key={item.id} className="relative flex items-start gap-3">
+                {/* Timeline node */}
+                <div className="absolute -left-6 top-0.5 flex items-center justify-center">
+                  {isFirst ? (
+                    <div className="w-5 h-5 rounded-full bg-cobalt-500 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+                      A
+                    </div>
+                  ) : isLast ? (
+                    <div className="w-5 h-5 rounded-full bg-amber-500 text-navy-900 flex items-center justify-center text-[10px] font-bold shadow-xs">
+                      B
+                    </div>
+                  ) : (
+                    <div className="w-3.5 h-3.5 rounded-full bg-white border-2 border-cobalt-500 shadow-xs" />
+                  )}
                 </div>
 
-                <div className={`pb-4 flex-1 min-w-0 ${!isLast ? '' : ''}`}>
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <span
                       onClick={() => navigate(`/stops/${item.stop.id}`)}
-                      className="text-xs font-bold text-ink hover:text-cobalt cursor-pointer truncate"
+                      className="text-xs font-bold text-ink-950 hover:text-cobalt-500 cursor-pointer truncate font-heading"
                     >
                       {localName(item.stop, i18n.language)}
                     </span>
-                    <span className="text-[11px] text-text-secondary font-mono shrink-0 ml-2">
+                    <span className="text-[11px] text-muted font-mono shrink-0 ml-2">
                       +{item.cumulativeMin}m
                     </span>
                   </div>
-                  <span className="text-[10px] text-text-secondary">
+                  <span className="text-[10px] text-muted block mt-0.5">
                     {item.cumulativeKm} km from start
                   </span>
                 </div>

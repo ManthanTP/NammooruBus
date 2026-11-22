@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Bus, AlertCircle, KeyRound, ShieldAlert, CheckCircle2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { AlertCircle, KeyRound, Bus, Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
 import LanguageToggle from '@/components/ui/LanguageToggle'
+import Button from '@/components/ui/Button'
 
 export default function RegisterPage() {
   const { t } = useTranslation()
@@ -15,6 +17,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [preferredLang, setPreferredLang] = useState('en')
   const [isDriver, setIsDriver] = useState(false)
   const [driverKey, setDriverKey] = useState('')
@@ -39,7 +42,7 @@ export default function RegisterPage() {
     setNoticeMessage(null)
 
     if (password.length < 8) {
-      setFormError(t('auth.password_hint'))
+      setFormError(t('auth.password_hint') || 'Password must be at least 8 characters')
       return
     }
 
@@ -57,7 +60,6 @@ export default function RegisterPage() {
     const submittedKey = driverKey
     const submittedBus = busRegNo.trim().toUpperCase()
     const submittedRoute = selectedRouteId
-    // Clear key field from state immediately
     setDriverKey('')
 
     const { data, error } = await signUp(email, password, fullName, preferredLang)
@@ -67,7 +69,6 @@ export default function RegisterPage() {
       return
     }
 
-    // If driver toggle was selected, claim driver role via RPC
     if (isDriver) {
       const { status } = await claimDriverRole(submittedKey, submittedBus, submittedRoute)
 
@@ -102,147 +103,163 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-page flex flex-col justify-between p-6">
-      <header className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-input bg-cobalt text-white flex items-center justify-center shadow-soft">
-            <Bus className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-lg font-extrabold text-ink leading-tight">{t('app.name')}</h1>
-            <p className="text-xs text-text-secondary">{t('app.tagline')}</p>
-          </div>
+    <div className="min-h-screen bg-sky-50 flex flex-col justify-between">
+      {/* 1. Top Half: Signature Gradient with logo-full */}
+      <div
+        className="pt-8 pb-14 px-6 text-white flex flex-col items-center justify-center relative overflow-hidden"
+        style={{ background: 'var(--gradient-brand)' }}
+      >
+        <div className="absolute top-4 right-4 z-10">
+          <LanguageToggle />
         </div>
-        <LanguageToggle />
-      </header>
 
-      <main className="w-full max-w-sm mx-auto my-8">
-        <div className="bg-surface p-6 rounded-card border border-line shadow-soft">
-          <h2 className="text-xl font-bold text-ink mb-1">{t('auth.register')}</h2>
-          <p className="text-sm text-text-secondary mb-6">{t('app.tagline')}</p>
+        <div className="bg-white rounded-[20px] p-3.5 shadow-float mb-3 flex items-center justify-center max-w-[180px]">
+          <img
+            src="/brand/logo-full.png"
+            alt="Nammooru Bus"
+            className="w-32 h-auto object-contain"
+          />
+        </div>
 
+        <h1 className="font-heading font-extrabold text-2xl text-white tracking-tight">
+          Join Nammooru Bus
+        </h1>
+        <p className="text-xs text-white/75 font-medium mt-0.5">
+          {t('app.tagline') || 'Our town. Our bus.'}
+        </p>
+
+        <div className="absolute bottom-0 left-0 right-0 h-2.5 road-ribbon opacity-80" />
+      </div>
+
+      {/* 2. Bottom Half: White Sheet Form */}
+      <main className="flex-1 w-full max-w-md mx-auto -mt-8 relative z-10 px-4 pb-8">
+        <div className="bg-white p-6 rounded-[28px] border border-line shadow-soft space-y-4">
           {formError && (
-            <div className="mb-4 p-3 bg-danger/10 border border-danger/20 rounded-input text-xs text-danger flex items-center gap-2">
+            <div className="p-3.5 bg-danger/10 border border-danger/30 rounded-[16px] text-xs text-danger font-semibold flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{formError}</span>
             </div>
           )}
 
           {noticeMessage && (
-            <div className="mb-4 p-3 bg-warning/15 border border-warning/30 rounded-input text-xs text-ink space-y-2">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
-                <p className="font-medium text-[11px] leading-snug">{noticeMessage.text}</p>
-              </div>
-              <div className="flex items-center gap-2 pt-1">
-                <Link
-                  to="/profile"
-                  className="px-3 py-1 bg-cobalt text-white font-bold rounded-pill text-[11px] inline-block shadow-xs"
-                >
-                  Go to Profile
-                </Link>
-                <Link
-                  to="/"
-                  className="px-3 py-1 bg-page border border-line text-text-secondary font-bold rounded-pill text-[11px] inline-block"
-                >
-                  Continue as passenger
-                </Link>
-              </div>
+            <div className="p-3.5 bg-amber-100 border border-amber-500/30 rounded-[16px] text-xs text-navy-900 font-medium">
+              {noticeMessage.text}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>
-              <label className="block text-xs font-semibold text-ink mb-1.5">
-                {t('auth.name_label')}
+              <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
+                {t('auth.name_label') || 'Full Name'}
               </label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder={t('auth.name_placeholder')}
+                placeholder="Basavaraj"
                 required
-                className="w-full px-3.5 py-2.5 bg-page border border-line rounded-input text-sm text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt"
+                className="w-full h-12 px-4 bg-sky-50 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ink mb-1.5">
-                {t('auth.email_label')}
+              <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
+                {t('auth.email_label') || 'Email Address'}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('auth.email_placeholder')}
+                placeholder="name@example.com"
                 required
-                className="w-full px-3.5 py-2.5 bg-page border border-line rounded-input text-sm text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt"
+                className="w-full h-12 px-4 bg-sky-50 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ink mb-1.5">
-                {t('auth.password_label')}
+              <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
+                {t('auth.password_label') || 'Password'}
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t('auth.password_placeholder')}
-                required
-                minLength={8}
-                className="w-full px-3.5 py-2.5 bg-page border border-line rounded-input text-sm text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt"
-              />
-              <p className="text-[11px] text-text-secondary mt-1">{t('auth.password_hint')}</p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-ink mb-1.5">
-                {t('auth.preferred_lang_label')}
-              </label>
-              <select
-                value={preferredLang}
-                onChange={(e) => setPreferredLang(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-page border border-line rounded-input text-sm text-ink focus:outline-none focus:border-cobalt"
-              >
-                <option value="en">English (EN)</option>
-                <option value="kn">ಕನ್ನಡ (Kannada)</option>
-              </select>
-            </div>
-
-            {/* Driver Role Toggle (Part D.1) */}
-            <div className="pt-2 border-t border-line">
-              <label className="flex items-center gap-2.5 cursor-pointer select-none">
+              <div className="relative">
                 <input
-                  type="checkbox"
-                  checked={isDriver}
-                  onChange={(e) => setIsDriver(e.target.checked)}
-                  className="w-4 h-4 rounded text-cobalt focus:ring-cobalt cursor-pointer"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 8 characters"
+                  required
+                  minLength={8}
+                  className="w-full h-12 px-4 pr-11 bg-sky-50 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition"
                 />
-                <span className="text-xs font-bold text-ink">I am a driver</span>
-              </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink-950"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
 
-              {/* Driver Details (Only visible when toggle is ON) */}
+            {/* Account Role Selector / Driver Switch */}
+            <div className="pt-1">
+              <div className="flex items-center justify-between p-1 bg-sky-50 rounded-full border border-line">
+                <button
+                  type="button"
+                  onClick={() => setIsDriver(false)}
+                  className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    !isDriver
+                      ? 'bg-cobalt-500 text-white shadow-xs'
+                      : 'text-muted hover:text-ink-950'
+                  }`}
+                >
+                  Passenger
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsDriver(true)}
+                  className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    isDriver
+                      ? 'bg-amber-500 text-navy-900 shadow-xs'
+                      : 'text-muted hover:text-ink-950'
+                  }`}
+                >
+                  Driver 🚌
+                </button>
+              </div>
+            </div>
+
+            {/* Smooth height-animated Driver Details fields */}
+            <AnimatePresence>
               {isDriver && (
-                <div className="mt-3 p-3.5 bg-page rounded-input border border-line space-y-3 animate-fadeIn">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-ink">
-                      <KeyRound className="w-3.5 h-3.5 text-cobalt" />
-                      <span>Driver Secret Key <span className="text-danger">*</span></span>
-                    </div>
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                  className="space-y-3 pt-2 overflow-hidden"
+                >
+                  <div className="p-3 bg-amber-100/60 rounded-[16px] border border-amber-500/30 text-xs text-navy-900 font-medium flex items-start gap-2">
+                    <KeyRound className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <span>Enter your driver credentials assigned by the depot supervisor.</span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-ink-950 mb-1 font-heading">
+                      Driver Secret Key
+                    </label>
                     <input
                       type="password"
                       value={driverKey}
                       onChange={(e) => setDriverKey(e.target.value)}
-                      placeholder="Enter driver registration secret..."
+                      placeholder="Enter depot key"
                       required={isDriver}
-                      className="w-full px-3 py-2 bg-surface border border-line rounded-input text-xs text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt font-mono"
+                      className="w-full h-11 px-4 bg-sky-50 border border-line rounded-[12px] text-xs font-mono text-ink-950 focus:outline-none focus:border-cobalt-500"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="block text-xs font-bold text-ink">
-                      Bus Registration Number <span className="text-danger">*</span>
+                  <div>
+                    <label className="block text-xs font-bold text-ink-950 mb-1 font-heading">
+                      Bus Registration Number
                     </label>
                     <input
                       type="text"
@@ -250,18 +267,18 @@ export default function RegisterPage() {
                       onChange={(e) => setBusRegNo(e.target.value.toUpperCase())}
                       placeholder="e.g. KA25 F 1234"
                       required={isDriver}
-                      className="w-full px-3 py-2 bg-surface border border-line rounded-input text-xs font-mono font-bold uppercase text-ink placeholder:text-text-secondary focus:outline-none focus:border-cobalt"
+                      className="w-full h-11 px-4 bg-sky-50 border border-line rounded-[12px] text-xs font-mono font-bold text-ink-950 uppercase focus:outline-none focus:border-cobalt-500"
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="block text-xs font-bold text-ink">
+                  <div>
+                    <label className="block text-xs font-bold text-ink-950 mb-1 font-heading">
                       Assigned Route
                     </label>
                     <select
                       value={selectedRouteId}
                       onChange={(e) => setSelectedRouteId(e.target.value)}
-                      className="w-full px-3 py-2 bg-surface border border-line rounded-input text-xs font-bold text-ink focus:outline-none focus:border-cobalt"
+                      className="w-full h-11 px-3 bg-sky-50 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500"
                     >
                       {routes.map((r) => (
                         <option key={r.id} value={r.id}>
@@ -270,46 +287,32 @@ export default function RegisterPage() {
                       ))}
                     </select>
                   </div>
-
-                  <p className="text-[10px] text-text-secondary">
-                    Obtain the secret key and bus details from your depot manager or bus administrator.
-                  </p>
-                </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-cobalt text-white text-sm font-semibold rounded-input shadow-soft hover:opacity-95 active:scale-[0.99] disabled:opacity-50 transition"
+              variant="primary"
+              size="md"
+              loading={loading}
+              className="w-full h-12 text-sm font-bold font-heading tracking-tight mt-2"
             >
-              {loading ? t('common.loading') : isDriver ? 'Register as Driver' : t('auth.register_action')}
-            </button>
+              <span>{t('auth.register_btn') || 'Create Account'}</span>
+            </Button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-line text-center">
-            <p className="text-xs text-text-secondary">
-              {t('auth.already_have_account')}{' '}
-              <Link to="/login" className="text-cobalt font-semibold hover:underline">
-                {t('auth.login')}
-              </Link>
-            </p>
+          <div className="text-center pt-2">
+            <span className="text-xs text-muted">Already have an account? </span>
+            <Link
+              to="/login"
+              className="text-xs font-bold text-cobalt-500 hover:underline"
+            >
+              Sign in
+            </Link>
           </div>
         </div>
-
-        <div className="text-center mt-5">
-          <Link
-            to="/"
-            className="text-xs font-semibold text-text-secondary hover:text-ink transition inline-flex items-center gap-1"
-          >
-            {t('common.continue_as_guest')} &rarr;
-          </Link>
-        </div>
       </main>
-
-      <footer className="text-center text-xs text-text-secondary py-2">
-        &copy; {new Date().getFullYear()} {t('app.name')}
-      </footer>
     </div>
   )
 }

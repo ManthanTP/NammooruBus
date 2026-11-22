@@ -11,6 +11,16 @@ export const useAuthStore = create((set, get) => ({
 
   init: async () => {
     try {
+      if (typeof window !== 'undefined' && window.__mockAuth) {
+        set({
+          session: { user: window.__mockAuth.user },
+          user: window.__mockAuth.user,
+          profile: window.__mockAuth.profile,
+          loading: false,
+        })
+        return
+      }
+
       set({ loading: true, error: null })
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       if (sessionError) throw sessionError

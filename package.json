@@ -7,9 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "eslint src",
+    "icons": "npx @capacitor/assets generate"
   },
   "dependencies": {
+    "@fontsource/dotgothic16": "^5.0.0",
+    "@fontsource/figtree": "^5.0.0",
+    "@fontsource/noto-sans-kannada": "^5.0.0",
+    "@fontsource/outfit": "^5.0.0",
     "@supabase/supabase-js": "^2.49.1",
     "framer-motion": "^12.4.7",
     "i18next": "^24.2.2",
@@ -27,6 +33,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.8",
     "@vitejs/plugin-react": "^4.3.4",
+    "playwright": "^1.65.1",
     "tailwindcss": "^4.0.8",
     "vite": "^6.2.0",
     "vitest": "^5.1.1"

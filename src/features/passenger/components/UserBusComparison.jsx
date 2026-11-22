@@ -1,10 +1,14 @@
 import { useMemo } from 'react'
-import { Navigation, Footprints, Clock, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react'
+import { Navigation, Footprints, Clock, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { haversine } from '@/lib/geo'
 import { calculateBusEta } from '@/lib/eta'
 import { localName } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 
+/**
+ * UserBusComparison — leave-now comparison panel as a signature gradient Card
+ * with a big verdict line and 3 numbers (you to bus, walk to stop, bus ETA).
+ */
 export default function UserBusComparison({
   userPos,
   selectedTrip,
@@ -24,14 +28,12 @@ export default function UserBusComparison({
       lng: selectedTrip.position.lng,
     }
 
-    // 1. Straight line distance to bus
     const distToBusKm = haversine(userPos.lat, userPos.lng, busPos.lat, busPos.lng)
     const distToBusStr =
       distToBusKm < 1
-        ? `${Math.round(distToBusKm * 1000)} m`
-        : `${distToBusKm.toFixed(1)} km`
+        ? `${Math.round(distToBusKm * 1000)}m`
+        : `${distToBusKm.toFixed(1)}km`
 
-    // 2. Filter route stops for this trip
     const tripRouteStops = routeStops
       .filter((rs) => rs.route_id === selectedTrip.route_id)
       .map((rs) => ({
@@ -43,7 +45,6 @@ export default function UserBusComparison({
       return { distToBusStr, verdict: null }
     }
 
-    // 3. Find user's nearest stop on this route
     let nearestStop = null
     let minWalkDistKm = Infinity
 
@@ -62,14 +63,12 @@ export default function UserBusComparison({
       return { distToBusStr, verdict: null }
     }
 
-    // Walking speed: 80 meters per minute (PRD Part C.4)
     const walkMinutes = Math.max(1, Math.round((minWalkDistKm * 1000) / 80))
     const walkDistStr =
       minWalkDistKm < 1
-        ? `${Math.round(minWalkDistKm * 1000)} m`
-        : `${minWalkDistKm.toFixed(1)} km`
+        ? `${Math.round(minWalkDistKm * 1000)}m`
+        : `${minWalkDistKm.toFixed(1)}km`
 
-    // 4. Calculate bus ETA to that nearest stop
     const etaData = calculateBusEta({
       busPosition: busPos,
       routeStops: tripRouteStops,
@@ -79,13 +78,10 @@ export default function UserBusComparison({
     })
 
     const busEtaMin = etaData.etaMinutes
-
-    // Find headway for next bus estimate
     const sched = schedules.find((s) => s.route_id === selectedTrip.route_id)
     const headway = sched?.headway_min || 15
 
-    // 5. Compute verdict
-    let verdictType = 'info' // 'success' | 'warning' | 'info'
+    let verdictType = 'info'
     let verdictText = ''
 
     if (etaData.hasPassed || busEtaMin === null) {
@@ -93,14 +89,14 @@ export default function UserBusComparison({
       verdictText = `Bus has passed ${localName(nearestStop, i18n.language)}. Next in ${headway} min`
     } else if (walkMinutes > busEtaMin) {
       verdictType = 'warning'
-      verdictText = `You will miss this bus (${walkMinutes}m walk vs ${busEtaMin}m ETA). Next in ${headway} min`
+      verdictText = `You will miss this bus (${walkMinutes}m walk vs ${busEtaMin}m ETA)`
     } else if (busEtaMin <= walkMinutes + 1) {
       verdictType = 'success'
       verdictText = 'Leave now, you can make it!'
     } else {
       const leaveInMin = busEtaMin - walkMinutes
       verdictType = 'info'
-      verdictText = `Leave in ${leaveInMin} min (${walkMinutes}m walk, bus arrives in ${busEtaMin}m)`
+      verdictText = `Leave in ${leaveInMin} min (${walkMinutes}m walk, bus in ${busEtaMin}m)`
     }
 
     return {
@@ -117,49 +113,58 @@ export default function UserBusComparison({
   if (!comparison) return null
 
   return (
-    <div className="bg-surface rounded-card border border-line p-3.5 shadow-soft space-y-2.5">
-      {/* Top metrics comparison row */}
-      <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="p-2 bg-page rounded-input border border-line flex items-center gap-2">
-          <Navigation className="w-4 h-4 text-cobalt shrink-0" />
-          <div className="truncate">
-            <span className="text-[10px] text-text-secondary block">To this bus</span>
-            <span className="font-extrabold text-ink">{comparison.distToBusStr} away</span>
+    <div
+      className="rounded-[20px] p-4 text-white shadow-soft space-y-3"
+      style={{ background: 'var(--gradient-brand)' }}
+    >
+      {/* Big Verdict Line */}
+      <div className="flex items-center gap-2">
+        {comparison.verdictType === 'warning' ? (
+          <div className="w-7 h-7 rounded-full bg-amber-500 text-navy-900 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-4 h-4" />
           </div>
-        </div>
-
-        {comparison.nearestStopName && (
-          <div className="p-2 bg-page rounded-input border border-line flex items-center gap-2">
-            <Footprints className="w-4 h-4 text-emerald-600 shrink-0" />
-            <div className="truncate">
-              <span className="text-[10px] text-text-secondary block">To {comparison.nearestStopName}</span>
-              <span className="font-extrabold text-ink">
-                {comparison.walkDistStr} ({comparison.walkMinutes} min)
-              </span>
-            </div>
+        ) : (
+          <div className="w-7 h-7 rounded-full bg-white text-cobalt-500 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-4 h-4" />
           </div>
         )}
+        <h4 className="font-heading font-extrabold text-sm md:text-base text-white leading-tight">
+          {comparison.verdictText}
+        </h4>
       </div>
 
-      {/* Clear Verdict Banner */}
-      {comparison.verdictText && (
-        <div
-          className={`flex items-center gap-2 px-3 py-2 rounded-input text-xs font-bold ${
-            comparison.verdictType === 'success'
-              ? 'bg-success/15 text-success border border-success/30'
-              : comparison.verdictType === 'warning'
-              ? 'bg-warning/15 text-warning border border-warning/30'
-              : 'bg-cobalt-tint text-cobalt border border-cobalt/20'
-          }`}
-        >
-          {comparison.verdictType === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-          ) : (
-            <AlertTriangle className="w-4 h-4 shrink-0" />
-          )}
-          <span className="leading-snug">{comparison.verdictText}</span>
+      {/* 3 Metric Numbers Row */}
+      <div className="grid grid-cols-3 gap-2 pt-1 border-t border-white/15">
+        {/* 1. You to bus */}
+        <div className="bg-white/10 backdrop-blur-xs rounded-[14px] p-2.5 text-center">
+          <span className="text-[10px] uppercase font-bold text-white/70 block">
+            To Bus
+          </span>
+          <span className="font-heading font-extrabold text-base text-white">
+            {comparison.distToBusStr}
+          </span>
         </div>
-      )}
+
+        {/* 2. Walk to stop */}
+        <div className="bg-white/10 backdrop-blur-xs rounded-[14px] p-2.5 text-center">
+          <span className="text-[10px] uppercase font-bold text-white/70 block">
+            Walk
+          </span>
+          <span className="font-heading font-extrabold text-base text-white">
+            {comparison.walkMinutes} min
+          </span>
+        </div>
+
+        {/* 3. Bus ETA */}
+        <div className="bg-white/10 backdrop-blur-xs rounded-[14px] p-2.5 text-center">
+          <span className="text-[10px] uppercase font-bold text-white/70 block">
+            Bus ETA
+          </span>
+          <span className="font-heading font-extrabold text-base text-amber-500">
+            {comparison.busEtaMin ? `${comparison.busEtaMin} min` : '--'}
+          </span>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Navigation, Footprints, Bus, ArrowRight } from 'lucide-react'
+import { MapPin, Footprints, Navigation, ArrowRight } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
 import { useMapStore } from '@/store/mapStore'
 import { useLocationStore } from '@/store/locationStore'
@@ -10,6 +10,7 @@ import { localName } from '@/lib/formatters'
 import RouteBadge from '@/components/ui/RouteBadge'
 import MapCard from '@/components/map/MapCard'
 import LocationBanner from '@/components/ui/LocationBanner'
+import Button from '@/components/ui/Button'
 
 export default function NearbyPage() {
   const { t, i18n } = useTranslation()
@@ -32,16 +33,15 @@ export default function NearbyPage() {
   const uLat = hasValidUserPos ? Number(userPos.lat) : defaultLat
   const uLng = hasValidUserPos ? Number(userPos.lng) : defaultLng
 
-  // If user GPS is outside Hubballi (>35 km), fall back to Hubballi center so stops are visible
   const distFromCity = hasValidUserPos ? haversine(uLat, uLng, defaultLat, defaultLng) : 0
   const isOutsideCity = distFromCity > 35
 
   const centerLat = (!isOutsideCity && hasValidUserPos) ? uLat : defaultLat
   const centerLng = (!isOutsideCity && hasValidUserPos) ? uLng : defaultLng
 
-  const [radiusM, setRadiusM] = useState(1000) // Default 1000m (1 km)
+  // Filter chips: 300m, 500m, 1 km, 2 km per Section 6
+  const [radiusM, setRadiusM] = useState(500)
 
-  // Map route badges per stop
   const routesByStop = useMemo(() => {
     const map = {}
     for (const rs of routeStops) {
@@ -56,7 +56,6 @@ export default function NearbyPage() {
     return result
   }, [routes, routeStops])
 
-  // Compute nearby stops
   const nearbyStops = useMemo(() => {
     const radiusKm = radiusM / 1000
     const list = []
@@ -68,7 +67,7 @@ export default function NearbyPage() {
         list.push({
           ...stop,
           distKm,
-          walkMin: Math.max(1, Math.round((distKm * 1000) / 80)), // 80 m/min
+          walkMin: Math.max(1, Math.round((distKm * 1000) / 80)),
           distMeters: Math.round(distKm * 1000),
           routes: routesByStop[stop.id] || [],
         })
@@ -78,7 +77,6 @@ export default function NearbyPage() {
     return list.sort((a, b) => a.distKm - b.distKm)
   }, [stops, centerLat, centerLng, radiusM, routesByStop])
 
-  // Update map radius and stop markers
   useEffect(() => {
     if (typeof setCircle === 'function') {
       setCircle({ lat: centerLat, lng: centerLng, radiusM })
@@ -101,50 +99,59 @@ export default function NearbyPage() {
     }
   }, [centerLat, centerLng, radiusM, nearbyStops, setCircle, setMarkers, setCenter, setView])
 
+  const handleDirections = (e, stop) => {
+    e.stopPropagation()
+    navigate(`/results?to=${stop.id}`)
+  }
+
   return (
-    <div className="space-y-3.5 pt-1 pb-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-lg font-extrabold text-ink font-heading flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-cobalt" />
-          <span>{t('nav.nearby')}</span>
+    <div className="space-y-3.5 pb-6">
+      {/* 1. Header */}
+      <div className="pt-1">
+        <h1 className="font-heading font-extrabold text-xl text-ink-950 flex items-center gap-2">
+          <MapPin className="w-5 h-5 text-amber-500 fill-amber-500/20" />
+          <span>{t('nav.nearby') || 'Nearby Stops'}</span>
         </h1>
-        <p className="text-xs text-text-secondary">
+        <p className="text-xs text-muted mt-0.5">
           {nearbyStops.length} stops within {radiusM >= 1000 ? `${radiusM / 1000} km` : `${radiusM} m`}
-          {isOutsideCity && ' • Showing Hubballi Center (Outside city)'}
+          {isOutsideCity && ' • Hubballi Center view'}
         </p>
       </div>
 
-      {/* Small Map Card (Height 260px on Nearby per Part B) */}
+      {/* 2. Map Card (Height 260px on Nearby per Section 3) */}
       <MapCard height={260} />
 
-      {/* Location Banner if GPS is not active */}
+      {/* 3. Location Banner */}
       <LocationBanner />
 
-      {/* Radius Filter Pills */}
-      <div className="flex items-center gap-2">
-        <span className="text-[11px] font-bold text-text-secondary">Radius:</span>
-        {[500, 1000, 2000].map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => setRadiusM(m)}
-            className={`px-3 py-1 rounded-pill text-xs font-bold transition ${
-              radiusM === m
-                ? 'bg-cobalt text-white shadow-xs'
-                : 'bg-surface text-text-secondary border border-line hover:text-ink'
-            }`}
-          >
-            {m >= 1000 ? `${m / 1000} km` : `${m} m`}
-          </button>
-        ))}
+      {/* 4. Distance Filter Chip Row: 300m, 500m, 1km, 2km */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-0.5 no-scrollbar select-none">
+        <span className="text-xs font-bold text-muted shrink-0">Radius:</span>
+        {[300, 500, 1000, 2000].map((m) => {
+          const isSelected = radiusM === m
+          return (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setRadiusM(m)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 active:scale-95 ${
+                isSelected
+                  ? 'text-white shadow-xs'
+                  : 'bg-white text-muted border border-line hover:text-ink-950'
+              }`}
+              style={isSelected ? { background: 'var(--gradient-brand)' } : {}}
+            >
+              {m >= 1000 ? `${m / 1000} km` : `${m} m`}
+            </button>
+          )
+        })}
       </div>
 
-      {/* Nearby Stops List */}
-      <div className="space-y-2 pt-1">
+      {/* 5. Nearby Stops List */}
+      <div className="space-y-2.5 pt-1">
         {nearbyStops.length === 0 ? (
-          <div className="p-8 bg-surface rounded-card border border-line text-center text-xs text-text-secondary">
-            No stops found within {radiusM}m. Try increasing the search radius above.
+          <div className="p-8 bg-white rounded-[20px] border border-line text-center text-xs text-muted shadow-soft">
+            No stops found within {radiusM}m. Try selecting a larger radius above.
           </div>
         ) : (
           nearbyStops.map((stop) => (
@@ -153,39 +160,53 @@ export default function NearbyPage() {
               onClick={() => navigate(`/stops/${stop.id}`)}
               role="button"
               tabIndex={0}
-              className="p-3.5 bg-surface rounded-card border border-line shadow-soft hover:border-cobalt transition flex items-center justify-between cursor-pointer"
+              className="p-4 bg-white rounded-[20px] border border-line shadow-soft hover:border-cobalt-500 transition-all flex flex-col gap-3 cursor-pointer active:scale-[0.99]"
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-full bg-cobalt-tint text-cobalt flex items-center justify-center shrink-0">
-                  <MapPin className="w-4 h-4" />
-                </div>
-                <div className="truncate">
-                  <p className="text-xs font-bold text-ink truncate">
-                    {localName(stop, i18n.language)}
-                  </p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[11px] text-text-secondary flex items-center gap-1">
-                      <Footprints className="w-3 h-3" />
-                      <span>{stop.walkMin} min walk ({stop.distMeters} m)</span>
-                    </span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-amber-100 text-navy-900 flex items-center justify-center shrink-0 mt-0.5">
+                    <MapPin className="w-4 h-4 text-amber-600 fill-amber-500/20" />
                   </div>
-
-                  {stop.routes.length > 0 && (
-                    <div className="flex items-center gap-1 mt-1.5 flex-wrap">
-                      {stop.routes.slice(0, 4).map((code) => (
-                        <RouteBadge key={code} code={code} size="xs" />
-                      ))}
-                      {stop.routes.length > 4 && (
-                        <span className="text-[9px] text-text-secondary font-medium">
-                          +{stop.routes.length - 4}
-                        </span>
-                      )}
+                  <div className="truncate">
+                    <p className="text-sm font-bold text-ink-950 font-heading truncate">
+                      {localName(stop, i18n.language)}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-muted flex items-center gap-1 font-medium">
+                        <Footprints className="w-3.5 h-3.5 text-muted" />
+                        <span>{stop.walkMin} min walk ({stop.distMeters} m)</span>
+                      </span>
                     </div>
-                  )}
+                  </div>
                 </div>
+
+                {/* Directions Button */}
+                <button
+                  type="button"
+                  onClick={(e) => handleDirections(e, stop)}
+                  className="px-3 py-1.5 bg-sky-100 hover:bg-sky-100/80 text-cobalt-500 text-xs font-bold rounded-full flex items-center gap-1 transition shrink-0 active:scale-95"
+                >
+                  <Navigation className="w-3 h-3" />
+                  <span>Directions</span>
+                </button>
               </div>
 
-              <ArrowRight className="w-4 h-4 text-text-secondary shrink-0" />
+              {/* Next buses chips */}
+              {stop.routes.length > 0 && (
+                <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-line/60">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted mr-1">
+                    Buses:
+                  </span>
+                  {stop.routes.slice(0, 5).map((code) => (
+                    <RouteBadge key={code} code={code} size="xs" />
+                  ))}
+                  {stop.routes.length > 5 && (
+                    <span className="text-[10px] text-muted font-semibold">
+                      +{stop.routes.length - 5} more
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           ))
         )}

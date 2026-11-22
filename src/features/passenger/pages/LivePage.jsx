@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Radio, Users, AlertTriangle, Clock, MapPin, ChevronRight, RefreshCw, LogIn, X, ShieldAlert, Bus, Navigation } from 'lucide-react'
+import { Radio, Users, ChevronRight, RefreshCw, LogIn, X, Navigation } from 'lucide-react'
 import { useLiveStore } from '@/store/liveStore'
 import { useDataStore } from '@/store/dataStore'
 import { useMapStore } from '@/store/mapStore'
@@ -16,7 +16,7 @@ import RouteBadge from '@/components/ui/RouteBadge'
 import CrowdMeter from '@/components/ui/CrowdMeter'
 import Countdown from '@/components/ui/Countdown'
 import EmptyState from '@/components/ui/EmptyState'
-import SosButton from '@/components/ui/SosButton'
+import LiveDot from '@/components/ui/LiveDot'
 import MapCard from '@/components/map/MapCard'
 import UserBusComparison from '@/features/passenger/components/UserBusComparison'
 import LocationBanner from '@/components/ui/LocationBanner'
@@ -28,7 +28,7 @@ export default function LivePage() {
 
   const { user } = useAuthStore()
   const { routes, routeStops, stops, schedules } = useDataStore()
-  const { trips, selectedTripId, setSelectedTripId, isReconnecting, reportCrowd, speedsByTrip } = useLiveStore()
+  const { trips, selectedTripId, setSelectedTripId, isReconnecting, reportCrowd } = useLiveStore()
   const { setBounds, fitBounds, setCenter, setView } = useMapStore()
   const { position: userPos } = useLocationStore()
   const { addToast } = useToastStore()
@@ -38,7 +38,6 @@ export default function LivePage() {
   const [crowdReporting, setCrowdReporting] = useState(false)
   const [crowdError, setCrowdError] = useState(null)
 
-  // Handle URL query ?trip=<id>
   const tripParam = searchParams.get('trip')
   useEffect(() => {
     if (tripParam && trips.length > 0) {
@@ -52,19 +51,16 @@ export default function LivePage() {
     }
   }, [tripParam, trips, setSelectedTripId])
 
-  // Filter trips by route code
   const filteredTrips = useMemo(() => {
     if (selectedRouteCode === 'all') return trips
     return trips.filter((t) => t.route?.code === selectedRouteCode)
   }, [trips, selectedRouteCode])
 
-  // Get currently selected trip or fallback to first trip
   const selectedTrip = useMemo(() => {
     if (!selectedTripId && filteredTrips.length > 0) return filteredTrips[0]
     return trips.find((t) => t.id === selectedTripId) || filteredTrips[0] || null
   }, [trips, selectedTripId, filteredTrips])
 
-  // Center or fit bounds on selected bus + user
   useEffect(() => {
     const busLat = Number(selectedTrip?.position?.lat)
     const busLng = Number(selectedTrip?.position?.lng)
@@ -92,107 +88,124 @@ export default function LivePage() {
     }
   }, [selectedTrip, userPos, setBounds, fitBounds, setCenter, setView])
 
-  // Compute ETA and Next Stop for selected trip
   const tripDetails = useMemo(() => {
     if (!selectedTrip || !selectedTrip.position) return null
 
     const rStops = routeStops
       .filter((rs) => rs.route_id === selectedTrip.route_id)
+      .sort((a, b) => a.stop_sequence - b.stop_sequence)
       .map((rs) => ({
         ...rs,
         stop: stops.find((s) => s.id === rs.stop_id) || { id: rs.stop_id, name_en: 'Stop' },
       }))
 
-    const speedHistory = speedsByTrip[selectedTrip.id] || []
-    const etaData = calculateBusEta({
+    if (rStops.length === 0) return null
+
+    let targetStop = rStops[rStops.length - 1]?.stop
+    if (userPos) {
+      let minDist = Infinity
+      for (const rs of rStops) {
+        if (rs.stop?.lat && rs.stop?.lng) {
+          const d = haversine(userPos.lat, userPos.lng, rs.stop.lat, rs.stop.lng)
+          if (d < minDist) {
+            minDist = d
+            targetStop = rs.stop
+          }
+        }
+      }
+    }
+
+    const etaResult = calculateBusEta({
       busPosition: selectedTrip.position,
       routeStops: rStops,
       direction: selectedTrip.direction || 0,
-      speedHistory,
+      targetStopId: targetStop?.id,
+      speedHistory: selectedTrip.position.speed_kmh ? [selectedTrip.position.speed_kmh] : [],
     })
 
     const now = Date.now()
-    const updatedAt = selectedTrip.position.updated_at
+    const updatedAt = selectedTrip.position?.updated_at
       ? new Date(selectedTrip.position.updated_at).getTime()
       : now
-    const ageSeconds = Math.floor((now - updatedAt) / 1000)
-    const isStale = ageSeconds > 60
+    const ageSeconds = Math.max(0, Math.floor((now - updatedAt) / 1000))
 
     return {
-      ...etaData,
-      isStale,
-      ageMinutes: Math.max(1, Math.floor(ageSeconds / 60)),
+      nextStop: etaResult.nextStop,
+      etaMinutes: etaResult.etaMinutes,
+      progressPercent: Math.round(etaResult.progressPercent || 0),
+      remainingKm: (etaResult.remainingDistanceMeters / 1000).toFixed(1),
+      speedKmh: Math.round(selectedTrip.position.speed_kmh || 0),
+      isStale: ageSeconds > 60,
+      ageMinutes: Math.floor(ageSeconds / 60),
     }
-  }, [selectedTrip, routeStops, stops, speedsByTrip])
+  }, [selectedTrip, routeStops, stops, userPos])
 
-  // Handle Crowd Reporting
+  const filterChips = useMemo(() => {
+    const list = [{ key: 'all', code: 'All Buses' }]
+    const seen = new Set()
+    for (const t of trips) {
+      const code = t.route?.code
+      if (code && !seen.has(code)) {
+        seen.add(code)
+        list.push({ key: code, code: `Route ${code}` })
+      }
+    }
+    return list
+  }, [trips])
+
   const handleReportCrowd = async (level) => {
     if (!user) {
       setCrowdError('login_required')
       return
     }
-    if (!selectedTrip) return
-
     setCrowdReporting(true)
     setCrowdError(null)
-
-    const { error } = await reportCrowd(selectedTrip.id, level)
-    setCrowdReporting(false)
-
-    if (error) {
-      if (error.message?.includes('rate_limit') || error.code === 'P0001') {
+    try {
+      const res = await reportCrowd(selectedTrip.id, level, user.id)
+      if (res.success) {
+        addToast(t('passenger.crowd_reported_success') || 'Thank you for reporting crowd level!', 'success')
+        setShowCrowdModal(false)
+      } else if (res.rateLimited) {
         setCrowdError('rate_limited')
       } else {
-        setCrowdError('Failed to record report. Please try again.')
+        setCrowdError('failed')
       }
-    } else {
-      setShowCrowdModal(false)
-      addToast('Crowd status reported. Thank you for helping!', 'success')
+    } catch (e) {
+      setCrowdError('failed')
+    } finally {
+      setCrowdReporting(false)
     }
   }
 
-  // Route filter list
-  const filterChips = useMemo(() => {
-    const list = [{ key: 'all', code: 'All' }]
-    const activeRouteIds = new Set(trips.map((t) => t.route_id))
-    routes.forEach((r) => {
-      if (activeRouteIds.has(r.id)) {
-        list.push({ key: r.code, code: r.code })
-      }
-    })
-    return list
-  }, [routes, trips])
-
   return (
-    <div className="space-y-3.5 pt-1">
-      {/* 1. Header with live status & SOS button */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-extrabold text-ink font-heading flex items-center gap-2">
-            <Radio className="w-5 h-5 text-cobalt" />
-            <span>{t('passenger.live_tracking')}</span>
+    <div className="space-y-3.5 pb-6">
+      {/* 1. Header with LiveDot */}
+      <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center gap-2">
+          <LiveDot />
+          <h1 className="font-heading font-extrabold text-xl text-ink-950 tracking-tight">
+            Live Buses
           </h1>
-          <p className="text-xs text-text-secondary">
-            {trips.length} active buses &bull; Real-time GPS pings
-          </p>
+          <span className="text-xs font-bold text-cobalt-500 bg-sky-100 px-2.5 py-0.5 rounded-full">
+            {trips.length} active
+          </span>
         </div>
 
-        {selectedTrip && (
-          <SosButton
-            routeCode={selectedTrip.route?.code}
-            busRegNo={selectedTrip.bus?.reg_no}
-            tripId={selectedTrip.id}
-          />
+        {isReconnecting && (
+          <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-100 px-2.5 py-1 rounded-full">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            <span>Reconnecting</span>
+          </div>
         )}
       </div>
 
-      {/* 2. Small Map Card (Height 300px on Live, sticky per Part B) */}
-      <MapCard height={300} isSticky={true} />
+      {/* 2. Map Card (Height 300px per Section 6) */}
+      <MapCard height={300} />
 
-      {/* 3. Location Banner if location is not active */}
+      {/* 3. Location Banner */}
       <LocationBanner />
 
-      {/* 4. Comparison Panel between User and Selected Bus (Part C.4) */}
+      {/* 4. Leave-Now Comparison Panel as Gradient Card */}
       {selectedTrip && (
         <UserBusComparison
           userPos={userPos}
@@ -204,7 +217,7 @@ export default function LivePage() {
       )}
 
       {/* 5. Route Filter Chips */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar select-none">
+      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar select-none">
         {filterChips.map((chip) => {
           const isSelected = selectedRouteCode === chip.key
           return (
@@ -212,17 +225,13 @@ export default function LivePage() {
               key={chip.key}
               type="button"
               onClick={() => setSelectedRouteCode(chip.key)}
-              className={`relative px-3 py-1 rounded-pill text-xs font-bold transition-colors shrink-0 ${
-                isSelected ? 'text-white' : 'text-text-secondary bg-surface border border-line hover:text-ink'
+              className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 active:scale-95 ${
+                isSelected
+                  ? 'text-white shadow-xs'
+                  : 'text-muted bg-white border border-line hover:text-ink-950'
               }`}
+              style={isSelected ? { background: 'var(--gradient-brand)' } : {}}
             >
-              {isSelected && (
-                <motion.div
-                  layoutId="liveFilterPill"
-                  className="absolute inset-0 bg-cobalt rounded-pill -z-10"
-                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                />
-              )}
               {chip.code}
             </button>
           )
@@ -231,58 +240,60 @@ export default function LivePage() {
 
       {/* 6. Selected Bus Detail Card */}
       {selectedTrip && tripDetails ? (
-        <div className="p-4 bg-surface rounded-card border border-line shadow-soft space-y-3">
+        <div
+          className="p-4 bg-white rounded-[20px] border border-line space-y-3.5"
+          style={{ boxShadow: 'var(--shadow-soft)' }}
+        >
           {/* Header */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <RouteBadge
                 code={selectedTrip.route?.code}
-                color={selectedTrip.route?.color}
                 size="md"
               />
               <div className="min-w-0">
-                <h3 className="text-xs font-bold text-ink truncate">
+                <h3 className="text-xs font-bold font-heading text-ink-950 truncate">
                   {localName(selectedTrip.route, i18n.language)}
                 </h3>
-                <span className="text-[10px] text-text-secondary font-mono">
+                <span className="text-[10px] text-muted font-mono block">
                   Bus: {selectedTrip.bus?.reg_no || 'KA-25-1001'}
                 </span>
               </div>
             </div>
 
             {/* Status Chip */}
-            <div className="flex items-center gap-1.5">
+            <div>
               {tripDetails.isStale ? (
-                <span className="px-2 py-0.5 bg-line text-text-secondary text-[10px] font-bold rounded-pill">
+                <span className="px-2.5 py-0.5 bg-sky-100 text-muted text-[10px] font-bold rounded-full">
                   Last seen {tripDetails.ageMinutes}m ago
                 </span>
               ) : selectedTrip.status === 'delayed' ? (
-                <span className="px-2 py-0.5 bg-warning/15 text-warning text-[10px] font-bold rounded-pill">
+                <span className="px-2.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full">
                   Delayed
                 </span>
               ) : selectedTrip.status === 'breakdown' ? (
-                <span className="px-2 py-0.5 bg-danger/15 text-danger text-[10px] font-bold rounded-pill">
+                <span className="px-2.5 py-0.5 bg-danger/10 text-danger text-[10px] font-bold rounded-full">
                   Breakdown
                 </span>
               ) : (
-                <span className="px-2 py-0.5 bg-success/15 text-success text-[10px] font-bold rounded-pill flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                <span className="px-2.5 py-0.5 bg-amber-500 text-navy-900 text-[10px] font-bold rounded-full flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-navy-900 animate-pulse" />
                   On time
                 </span>
               )}
             </div>
           </div>
 
-          {/* Next stop and Rolling ETA */}
-          <div className="p-3 bg-page rounded-input flex items-center justify-between">
+          {/* Next stop and Countdown ETA */}
+          <div className="p-3 bg-sky-50 rounded-[14px] flex items-center justify-between border border-line">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted block">
                 Next Stop
               </span>
-              <p className="text-xs font-extrabold text-ink truncate">
+              <p className="text-xs font-bold text-ink-950 truncate font-heading">
                 {tripDetails.nextStop?.stop?.name_en || 'Approaching stop'}
               </p>
-              <span className="text-[10px] text-text-secondary">
+              <span className="text-[10px] text-muted">
                 {tripDetails.remainingKm} km away &bull; {tripDetails.speedKmh} km/h
               </span>
             </div>
@@ -292,16 +303,17 @@ export default function LivePage() {
             </div>
           </div>
 
-          {/* Progress Bar from First to Last Stop */}
+          {/* Route progress */}
           <div>
-            <div className="flex items-center justify-between text-[10px] font-semibold text-text-secondary mb-1">
+            <div className="flex items-center justify-between text-[10px] font-semibold text-muted mb-1">
               <span>Origin</span>
               <span>{tripDetails.progressPercent}% of route completed</span>
               <span>Destination</span>
             </div>
-            <div className="w-full h-2 bg-line rounded-pill overflow-hidden">
+            <div className="w-full h-2 bg-sky-100 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-cobalt rounded-pill"
+                className="h-full rounded-full"
+                style={{ background: 'var(--gradient-brand)' }}
                 initial={{ width: 0 }}
                 animate={{ width: `${tripDetails.progressPercent}%` }}
                 transition={{ duration: 0.5 }}
@@ -310,12 +322,12 @@ export default function LivePage() {
           </div>
 
           {/* Crowd & Report Action */}
-          <div className="flex items-center justify-between pt-1 border-t border-line text-xs">
+          <div className="flex items-center justify-between pt-2 border-t border-line text-xs">
             <CrowdMeter level={selectedTrip.crowd_level || 1} />
             <button
               type="button"
               onClick={() => setShowCrowdModal(true)}
-              className="text-xs font-bold text-cobalt hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-cobalt-500 hover:underline flex items-center gap-1"
             >
               <Users className="w-3.5 h-3.5" />
               <span>Report crowd</span>
@@ -325,8 +337,8 @@ export default function LivePage() {
       ) : null}
 
       {/* 7. Active Bus List */}
-      <div className="space-y-2 pt-2 pb-6">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
+      <div className="space-y-2 pt-1">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted">
           Active Buses ({filteredTrips.length})
         </h3>
 
@@ -349,30 +361,33 @@ export default function LivePage() {
                 onClick={() => setSelectedTripId(trip.id)}
                 role="button"
                 tabIndex={0}
-                className={`p-3 rounded-card border transition flex items-center justify-between cursor-pointer ${
+                className={`p-3.5 rounded-[20px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.99] ${
                   isSelected
-                    ? 'bg-cobalt-tint/60 border-cobalt shadow-soft'
-                    : 'bg-surface hover:bg-page border-line'
+                    ? 'bg-sky-50 border-cobalt-500 shadow-soft'
+                    : 'bg-white hover:border-cobalt-500 border-line shadow-xs'
                 }`}
               >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <RouteBadge code={trip.route?.code} color={trip.route?.color} size="sm" />
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="shrink-0 flex items-center gap-1.5">
+                    <LiveDot />
+                    <RouteBadge code={trip.route?.code} size="sm" />
+                  </div>
                   <div className="truncate">
-                    <p className="text-xs font-bold text-ink truncate">
+                    <p className="text-xs font-bold text-ink-950 font-heading truncate">
                       {localName(trip.route, i18n.language)}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-text-secondary font-mono">
+                      <span className="text-[10px] text-muted font-mono">
                         {trip.bus?.reg_no || 'KA-25-1001'}
                       </span>
                       {tripDistKm !== null && (
-                        <span className="text-[10px] text-cobalt font-bold flex items-center gap-0.5">
+                        <span className="text-[10px] text-cobalt-500 font-bold flex items-center gap-0.5">
                           <Navigation className="w-2.5 h-2.5" />
                           <span>
                             {tripDistKm < 1
                               ? `${Math.round(tripDistKm * 1000)}m`
                               : `${tripDistKm.toFixed(1)}km`}{' '}
-                            from you
+                            away
                           </span>
                         </span>
                       )}
@@ -380,19 +395,9 @@ export default function LivePage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-pill ${
-                      trip.status === 'delayed'
-                        ? 'bg-warning/15 text-warning'
-                        : trip.status === 'breakdown'
-                        ? 'bg-danger/15 text-danger'
-                        : 'bg-success/15 text-success'
-                    }`}
-                  >
-                    {trip.status || 'Active'}
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-text-secondary" />
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <CrowdMeter level={trip.crowd_level || 1} />
+                  <ChevronRight className="w-4 h-4 text-muted" />
                 </div>
               </div>
             )
@@ -403,21 +408,21 @@ export default function LivePage() {
       {/* Crowd Reporting Modal */}
       <AnimatePresence>
         {showCrowdModal && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-ink/50 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-ink-950/40 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 50 }}
-              className="w-full max-w-sm bg-surface rounded-card p-5 border border-line shadow-float space-y-4"
+              className="w-full max-w-sm bg-white rounded-[28px] p-5 border border-line shadow-float space-y-4"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-ink font-heading">
+                <h3 className="text-sm font-extrabold text-ink-950 font-heading">
                   Report Crowd Level
                 </h3>
                 <button
                   type="button"
                   onClick={() => setShowCrowdModal(false)}
-                  className="p-1 text-text-secondary hover:text-ink"
+                  className="p-1 text-muted hover:text-ink-950"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -425,19 +430,20 @@ export default function LivePage() {
 
               {crowdError === 'login_required' ? (
                 <div className="space-y-3 text-center py-2">
-                  <p className="text-xs text-text-secondary">
+                  <p className="text-xs text-muted">
                     Please log in to report crowd levels and help your community.
                   </p>
                   <Link
                     to="/login"
-                    className="inline-flex items-center justify-center gap-1.5 w-full py-2 bg-cobalt text-white text-xs font-bold rounded-pill"
+                    className="inline-flex items-center justify-center gap-1.5 w-full h-11 text-white text-xs font-bold rounded-full shadow-soft"
+                    style={{ background: 'var(--gradient-brand)' }}
                   >
                     <LogIn className="w-4 h-4" />
                     <span>Log in</span>
                   </Link>
                 </div>
               ) : crowdError === 'rate_limited' ? (
-                <div className="p-3 bg-warning/15 rounded-input text-xs text-warning font-medium">
+                <div className="p-3 bg-amber-100 rounded-[14px] text-xs text-amber-700 font-medium">
                   You already reported recently for this trip. Thank you!
                 </div>
               ) : (
@@ -446,30 +452,30 @@ export default function LivePage() {
                     type="button"
                     disabled={crowdReporting}
                     onClick={() => handleReportCrowd(1)}
-                    className="p-3 bg-page hover:bg-success/15 border border-line hover:border-success rounded-card text-center transition flex flex-col items-center gap-1.5"
+                    className="p-3 bg-sky-50 hover:bg-sky-100 border border-line rounded-[16px] text-center transition flex flex-col items-center gap-1.5 active:scale-95"
                   >
                     <span className="text-xl">💺</span>
-                    <span className="text-xs font-bold text-ink">Seats free</span>
+                    <span className="text-xs font-bold text-ink-950">Seats free</span>
                   </button>
 
                   <button
                     type="button"
                     disabled={crowdReporting}
                     onClick={() => handleReportCrowd(2)}
-                    className="p-3 bg-page hover:bg-warning/15 border border-line hover:border-warning rounded-card text-center transition flex flex-col items-center gap-1.5"
+                    className="p-3 bg-amber-100/60 hover:bg-amber-100 border border-amber-500/30 rounded-[16px] text-center transition flex flex-col items-center gap-1.5 active:scale-95"
                   >
                     <span className="text-xl">🚶</span>
-                    <span className="text-xs font-bold text-ink">Filling up</span>
+                    <span className="text-xs font-bold text-ink-950">Filling up</span>
                   </button>
 
                   <button
                     type="button"
                     disabled={crowdReporting}
                     onClick={() => handleReportCrowd(3)}
-                    className="p-3 bg-page hover:bg-danger/15 border border-line hover:border-danger rounded-card text-center transition flex flex-col items-center gap-1.5"
+                    className="p-3 bg-danger/10 hover:bg-danger/20 border border-danger/30 rounded-[16px] text-center transition flex flex-col items-center gap-1.5 active:scale-95"
                   >
                     <span className="text-xl">👥</span>
-                    <span className="text-xs font-bold text-ink">Packed</span>
+                    <span className="text-xs font-bold text-danger">Packed</span>
                   </button>
                 </div>
               )}

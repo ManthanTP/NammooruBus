@@ -1,15 +1,15 @@
-export default function Skeleton({ className = '', variant = 'rect' }) {
-  const variantStyles = {
-    rect: 'rounded-input',
-    circle: 'rounded-full',
-    card: 'rounded-card h-28',
-    text: 'rounded-md h-4 w-3/4',
-  }[variant] || 'rounded-input'
-
+/**
+ * Skeleton — shimmer placeholder using sky-100 + animate-pulse.
+ */
+export default function Skeleton({ className = '', height, width }) {
   return (
     <div
-      className={`animate-pulse bg-line/60 ${variantStyles} ${className}`}
+      className={`animate-pulse bg-sky-100 rounded-[12px] ${className}`}
       aria-hidden="true"
+      style={{
+        height: height ?? undefined,
+        width: width ?? undefined,
+      }}
     />
   )
 }

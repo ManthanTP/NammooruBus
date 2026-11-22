@@ -1,40 +1,51 @@
 :root {
-  /* Brand and UI Colors */
-  --color-ink: #0E1433;
-  --color-cobalt: #3451F2;
-  --color-cobalt-tint: #E6EAFF;
-  --color-page: #F1F4FA;
-  --color-surface: #FFFFFF;
-  --color-line: #E1E6F2;
-  --color-text-secondary: #6B7494;
-  
-  /* Status Colors */
-  --color-success: #12A676;
-  --color-warning: #F59E0B;
-  --color-danger: #E5484D;
-  
-  /* LED Route Badges */
-  --color-led-amber: #FFC24A;
-  --color-led-bg: #0A0F24;
-  
-  /* Route default colors */
-  --route-cobalt: #3451F2;
-  --route-coral: #F0643C;
-  --route-green: #12A676;
-  --route-violet: #8B5CF6;
-  
-  /* Radii */
-  --radius-card: 22px;
-  --radius-sheet: 30px;
-  --radius-input: 16px;
+  --cobalt-500: #0040FF;
+  --cobalt-600: #0033D6;
+  --royal-700: #0020A5;
+  --navy-900: #00136E;
+  --ink-950: #050F45;
+  --amber-500: #FFB400;
+  --amber-100: #FFF3D1;
+  --sky-50: #F2F6FF;
+  --sky-100: #E4ECFF;
+  --line: #D9E2F7;
+  --white: #FFFFFF;
+  --muted: #5B6591;
+
+  /* Status colours only for status */
+  --color-success: #12A150;
+  --color-warning: #FFB400;
+  --color-danger: #E5383B;
+
+  /* Aliases for smooth migration & existing classes */
+  --color-ink: var(--ink-950);
+  --color-cobalt: var(--cobalt-500);
+  --color-cobalt-tint: var(--sky-100);
+  --color-page: var(--sky-50);
+  --color-surface: var(--white);
+  --color-line: var(--line);
+  --color-text-secondary: var(--muted);
+  --color-led-amber: var(--amber-500);
+  --color-led-bg: var(--navy-900);
+
+  /* Radii scale: 12 (inputs, chips), 20 (cards), 28 (hero blocks, map card, sheets), full (pills) */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
   --radius-pill: 9999px;
-  
-  /* Shadows */
-  --shadow-soft: 0 8px 30px rgba(14, 20, 51, 0.08);
-  --shadow-float: 0 12px 36px rgba(14, 20, 51, 0.12);
-  
+  --radius-card: 20px;
+  --radius-sheet: 28px;
+  --radius-input: 12px;
+
+  /* Shadows: one soft shadow only */
+  --shadow-soft: 0 10px 30px rgba(0,32,165,0.10);
+  --shadow-float: 0 12px 36px rgba(0,32,165,0.14);
+
+  /* Signature gradient */
+  --gradient-brand: linear-gradient(135deg, #0040FF 0%, #0020A5 55%, #00136E 100%);
+
   /* Typography */
-  --font-heading: 'Bricolage Grotesque', 'Noto Sans Kannada', sans-serif;
+  --font-heading: 'Outfit', 'Noto Sans Kannada', sans-serif;
   --font-body: 'Figtree', 'Noto Sans Kannada', sans-serif;
   --font-led: 'DotGothic16', monospace;
   --font-kannada: 'Noto Sans Kannada', sans-serif;

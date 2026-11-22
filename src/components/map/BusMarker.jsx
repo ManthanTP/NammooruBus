@@ -1,37 +1,48 @@
-import { Marker, Popup } from 'react-leaflet'
+import { Marker } from 'react-leaflet'
 import L from 'leaflet'
-import { Bus, Clock } from 'lucide-react'
 
 /**
- * Creates custom HTML marker for a moving bus.
+ * Creates custom HTML marker for a moving bus according to Section 5:
+ * Rounded cobalt square with white bus-front icon, small amber destination board on top,
+ * route number in a tiny pill under it, heading rotates slightly.
+ * Stale buses (60s) turn grey; nearest bus gets amber ring.
  */
-function createBusDivIcon(trip, isSelected) {
-  const code = trip.route?.code || 'BUS'
-  const routeColor = trip.route?.color || '#3451F2'
+function createBusDivIcon(trip, isSelected, isNearest = false) {
+  const code = trip.route?.code || trip.route?.route_number || 'BUS'
+  const heading = trip.position?.heading || 0
 
   const now = Date.now()
   const updatedAt = trip.position?.updated_at ? new Date(trip.position.updated_at).getTime() : now
   const ageSeconds = Math.floor((now - updatedAt) / 1000)
   const isStale = ageSeconds > 60
 
-  const bgColor = isStale ? '#6B7494' : routeColor
-  const pulseHtml = isSelected
-    ? `<span style="position:absolute;inset:-6px;border-radius:9999px;border:3px solid ${bgColor};animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;opacity:0.75;"></span>`
-    : ''
-
-  const staleBadge = isStale
-    ? `<span style="position:absolute;-top:18px;left:50%;transform:translateX(-50%);background:#0E1433;color:#F1F4FA;font-size:9px;font-weight:600;padding:1px 4px;border-radius:4px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.3);">
-        ${Math.max(1, Math.floor(ageSeconds / 60))}m ago
-      </span>`
-    : ''
+  const mainColor = isStale ? '#5B6591' : '#0040FF'
+  const ringColor = isSelected ? '#FFB400' : isNearest ? '#FFB400' : 'transparent'
+  const ringStyle = isSelected || isNearest ? `box-shadow: 0 0 0 3px ${ringColor}, 0 4px 12px rgba(0,32,165,0.3);` : 'box-shadow: 0 3px 10px rgba(0,19,110,0.25);'
 
   const html = `
-    <div style="position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.2s;">
-      ${pulseHtml}
-      ${staleBadge}
-      <div style="background:${bgColor};color:#FFFFFF;border:2px solid #FFFFFF;box-shadow:0 3px 10px rgba(14,20,51,0.35);padding:2px 6px;border-radius:9999px;display:flex;align-items:center;gap:3px;font-family:'DotGothic16',monospace;font-weight:bold;font-size:11px;letter-spacing:0.5px;min-width:38px;justify-content:center;">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.2 6 18.2 6H5.8C4.8 6 3.9 6.8 3.6 7.8L2.2 12.8c-.1.4-.2.8-.2 1.2 0 .4.1.8.2 1.2.3 1.1.8 2.8.8 2.8h3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
-        <span>${code}</span>
+    <div style="position:relative;display:flex;flex-direction:column;align-items:center;cursor:pointer;">
+      <!-- Bus box with heading rotation -->
+      <div style="transform: rotate(${heading}deg); transition: transform 0.4s ease;">
+        <div style="width:30px;height:30px;background:${mainColor};border-radius:9px;border:2px solid #FFFFFF;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;${ringStyle}">
+          <!-- Small amber destination board on top of bus -->
+          <div style="position:absolute;top:2px;width:14px;height:3px;background:#FFB400;border-radius:1px;"></div>
+          <!-- White bus front icon -->
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-top:2px;">
+            <rect x="4" y="3" width="16" height="16" rx="3"/>
+            <path d="M4 11h16"/>
+            <path d="M8 7h.01"/>
+            <path d="M16 7h.01"/>
+            <circle cx="8" cy="15" r="1.5" fill="#FFFFFF"/>
+            <circle cx="16" cy="15" r="1.5" fill="#FFFFFF"/>
+            <path d="M6 19v2"/>
+            <path d="M18 19v2"/>
+          </svg>
+        </div>
+      </div>
+      <!-- Route number pill under bus -->
+      <div style="margin-top:2px;background:#00136E;color:#FFB400;font-family:'DotGothic16',monospace;font-size:9.5px;font-weight:bold;padding:1px 5px;border-radius:9999px;border:1px solid rgba(255,180,0,0.4);white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.3);line-height:1.2;">
+        ${code}
       </div>
     </div>
   `
@@ -39,15 +50,15 @@ function createBusDivIcon(trip, isSelected) {
   return L.divIcon({
     html,
     className: 'bus-live-marker',
-    iconSize: [44, 26],
-    iconAnchor: [22, 13],
+    iconSize: [36, 48],
+    iconAnchor: [18, 20],
   })
 }
 
-export default function BusMarker({ trip, isSelected, onClick }) {
+export default function BusMarker({ trip, isSelected, isNearest = false, onClick }) {
   if (!trip?.position?.lat || !trip?.position?.lng) return null
 
-  const icon = createBusDivIcon(trip, isSelected)
+  const icon = createBusDivIcon(trip, isSelected, isNearest)
 
   return (
     <Marker

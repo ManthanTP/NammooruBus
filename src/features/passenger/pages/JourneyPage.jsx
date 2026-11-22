@@ -491,113 +491,131 @@ export default function JourneyPage() {
         />
       )}
 
-      {/* Summary Tiles Row */}
+      {/* Summary Tiles Row (Gradient Style per Section 6) */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="p-3 bg-surface rounded-card border border-line shadow-soft text-center">
-          <span className="text-[10px] uppercase font-bold text-text-secondary block">
-            {t('passenger.total_time')}
+        <div
+          className="p-3.5 rounded-[20px] text-white shadow-soft text-center flex flex-col justify-between"
+          style={{ background: 'var(--gradient-brand)' }}
+        >
+          <span className="text-[10px] uppercase font-bold text-white/80 block">
+            {t('passenger.total_time') || 'Total time'}
           </span>
-          <span className="text-base font-extrabold text-ink font-heading">
-            {journey.totalMinutes} min
+          <span className="text-lg font-extrabold text-white font-heading mt-1">
+            {journey.totalMinutes} <span className="text-xs font-semibold text-white/70">min</span>
           </span>
         </div>
 
-        <div className="p-3 bg-surface rounded-card border border-line shadow-soft text-center">
-          <span className="text-[10px] uppercase font-bold text-text-secondary block">
-            {t('passenger.fare')}
+        <div
+          className="p-3.5 rounded-[20px] text-white shadow-soft text-center flex flex-col justify-between"
+          style={{ background: 'var(--gradient-brand)' }}
+        >
+          <span className="text-[10px] uppercase font-bold text-white/80 block">
+            {t('passenger.fare') || 'Fare'}
           </span>
-          <span className="text-base font-extrabold text-ink font-heading">
+          <span className="text-lg font-extrabold text-white font-heading mt-1">
             ₹{journey.totalFare}
           </span>
         </div>
 
-        <div className="p-3 bg-surface rounded-card border border-line shadow-soft text-center">
-          <div className="flex items-center justify-center gap-1 mb-0.5">
-            <span className="text-[10px] uppercase font-bold text-text-secondary">
+        <div
+          className="p-3.5 rounded-[20px] text-white shadow-soft text-center flex flex-col justify-between"
+          style={{ background: 'var(--gradient-brand)' }}
+        >
+          <div className="flex items-center justify-center gap-1">
+            <span className="text-[10px] uppercase font-bold text-white/80">
               Next Bus
             </span>
-            {liveEtaInfo ? (
-              <span className="text-[9px] font-bold uppercase tracking-wider text-success bg-success/15 px-1.5 py-0.2 rounded-pill flex items-center gap-0.5">
-                <span className="w-1 h-1 rounded-full bg-success animate-pulse" />
-                Live
-              </span>
-            ) : (
-              <span className="text-[9px] font-bold uppercase tracking-wider text-text-secondary bg-page px-1 rounded-pill">
-                Sched
-              </span>
+            {liveEtaInfo && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             )}
           </div>
-          <span className={`text-base font-extrabold font-heading ${liveEtaInfo ? 'text-success' : 'text-cobalt'}`}>
-            {liveEtaInfo ? liveEtaInfo.etaMin : journey.nextBusMin} min
+          <span className="text-lg font-extrabold text-amber-500 font-heading mt-1">
+            {liveEtaInfo ? liveEtaInfo.etaMin : journey.nextBusMin} <span className="text-xs font-semibold text-white/70">min</span>
           </span>
         </div>
       </div>
 
-      {/* Vertical Stepper Cards */}
-      <div className="p-4 bg-surface rounded-card border border-line shadow-soft space-y-4">
-        {/* Step 1: Walk to Origin Stop */}
-        <div className="flex gap-3 relative">
+      {/* Vertical Stepper with Signature Road Rail */}
+      <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft space-y-4">
+        {/* Step 1: Origin Stop */}
+        <div className="flex gap-3.5 relative">
           <div className="flex flex-col items-center">
-            <div className="w-7 h-7 rounded-full bg-success text-white flex items-center justify-center text-xs font-bold shrink-0">
+            <div className="w-7 h-7 rounded-full bg-cobalt-500 text-white flex items-center justify-center text-xs font-extrabold font-heading shrink-0 shadow-xs">
               A
             </div>
-            <div className="w-0.5 flex-1 bg-line my-1" />
+            {/* White road with dashed centre line on sky-100 rail */}
+            <div
+              className="w-1.5 flex-1 bg-sky-100 rounded-full my-1.5 relative overflow-hidden"
+              style={{
+                backgroundImage: 'repeating-linear-gradient(180deg, var(--cobalt-500) 0px, var(--cobalt-500) 4px, transparent 4px, transparent 8px)'
+              }}
+            />
           </div>
           <div className="pb-3 flex-1 min-w-0">
-            <h4 className="text-xs font-bold text-ink">
+            <span className="text-[10px] uppercase font-bold text-muted block tracking-wider">
+              Board Stop
+            </span>
+            <h4 className="text-sm font-bold text-ink-950 font-heading">
               {fromStop ? localName(fromStop, i18n.language) : 'Origin Stop'}
             </h4>
-            <p className="text-[11px] text-text-secondary">Board first transit vehicle here</p>
+            <p className="text-xs text-muted">Board your bus here</p>
           </div>
         </div>
 
-        {/* Step 2: Legs */}
+        {/* Step 2: Ride Legs */}
         {journey.legs.map((leg, idx) => {
           const isTransfer = idx > 0
           return (
-            <div key={idx} className="space-y-3">
+            <div key={idx} className="space-y-4">
               {isTransfer && (
-                <div className="flex gap-3 relative">
+                <div className="flex gap-3.5 relative">
                   <div className="flex flex-col items-center">
-                    <div className="w-7 h-7 rounded-full bg-warning text-white flex items-center justify-center text-xs font-bold shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-amber-500 text-navy-900 flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
                       ⇄
                     </div>
-                    <div className="w-0.5 flex-1 bg-line my-1" />
+                    <div
+                      className="w-1.5 flex-1 bg-sky-100 rounded-full my-1.5"
+                      style={{
+                        backgroundImage: 'repeating-linear-gradient(180deg, var(--cobalt-500) 0px, var(--cobalt-500) 4px, transparent 4px, transparent 8px)'
+                      }}
+                    />
                   </div>
                   <div className="pb-3 flex-1 min-w-0">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-warning">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 block">
                       Transfer Stop
                     </span>
-                    <h4 className="text-xs font-bold text-ink">
+                    <h4 className="text-sm font-bold text-ink-950 font-heading">
                       {localName(leg.fromStop, i18n.language)}
                     </h4>
-                    <p className="text-[11px] text-text-secondary">
-                      Change bus &bull; 6 min transfer buffer
+                    <p className="text-xs text-muted">
+                      Change bus &bull; 6 min buffer
                     </p>
                   </div>
                 </div>
               )}
 
               {/* Ride Leg Card */}
-              <div className="flex gap-3 relative">
+              <div className="flex gap-3.5 relative">
                 <div className="flex flex-col items-center">
-                  <div
-                    className="w-7 h-7 rounded-full text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs"
-                    style={{ backgroundColor: leg.route?.color || '#3451F2' }}
-                  >
+                  <div className="w-7 h-7 rounded-full bg-navy-900 text-amber-500 flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
                     <Bus className="w-3.5 h-3.5" />
                   </div>
-                  <div className="w-0.5 flex-1 bg-line my-1" />
+                  <div
+                    className="w-1.5 flex-1 bg-sky-100 rounded-full my-1.5"
+                    style={{
+                      backgroundImage: 'repeating-linear-gradient(180deg, var(--cobalt-500) 0px, var(--cobalt-500) 4px, transparent 4px, transparent 8px)'
+                    }}
+                  />
                 </div>
-                <div className="pb-3 flex-1 min-w-0 bg-page/70 p-3 rounded-input border border-line space-y-1.5">
+                <div className="pb-3 flex-1 min-w-0 bg-sky-50 p-3.5 rounded-[16px] border border-line space-y-2">
                   <div className="flex items-center justify-between">
-                    <RouteBadge code={leg.route?.code} color={leg.route?.color} size="sm" />
+                    <RouteBadge code={leg.route?.code} size="sm" />
                     <CrowdMeter level="moderate" />
                   </div>
-                  <p className="text-xs font-bold text-ink">
+                  <p className="text-xs font-bold text-ink-950 font-heading">
                     Board Route {leg.route?.code} ({localName(leg.route, i18n.language)})
                   </p>
-                  <p className="text-[11px] text-text-secondary">
+                  <p className="text-xs text-muted">
                     Ride {leg.stopsCount} stops &bull; {leg.durationMin} min &bull; ₹{leg.fare}
                   </p>
                 </div>
@@ -606,30 +624,58 @@ export default function JourneyPage() {
           )
         })}
 
-        {/* Final Step: Destination */}
-        <div className="flex gap-3">
+        {/* Final Step: Arrive Destination */}
+        <div className="flex gap-3.5">
           <div className="flex flex-col items-center">
-            <div className="w-7 h-7 rounded-full bg-danger text-white flex items-center justify-center text-xs font-bold shrink-0">
+            <div className="w-7 h-7 rounded-full bg-amber-500 text-navy-900 flex items-center justify-center text-xs font-extrabold font-heading shrink-0 shadow-xs">
               B
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="text-xs font-bold text-ink">
+            <span className="text-[10px] uppercase font-bold text-muted block tracking-wider">
+              Destination
+            </span>
+            <h4 className="text-sm font-bold text-ink-950 font-heading">
               {toStop ? localName(toStop, i18n.language) : 'Destination Stop'}
             </h4>
-            <p className="text-[11px] text-text-secondary">Arrive at destination</p>
+            <p className="text-xs text-muted">Arrive at destination</p>
           </div>
         </div>
       </div>
 
-      {/* Sticky Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-3 bg-surface/95 backdrop-blur-md border-t border-line z-30 flex items-center justify-center gap-2 max-w-lg mx-auto md:max-w-none">
+      {/* Sticky Bottom Action Bar above tab bar: Save, Share, Track Live, compact SOS */}
+      <div className="fixed bottom-16 md:bottom-4 left-0 right-0 p-3 bg-white/95 backdrop-blur-md border-t border-line z-30 flex items-center justify-center gap-2 max-w-lg mx-auto md:max-w-none shadow-float">
+        <button
+          type="button"
+          onClick={handleToggleSave}
+          className={`h-11 px-3.5 rounded-full border flex items-center gap-1.5 text-xs font-bold transition active:scale-95 ${
+            currentlySaved
+              ? 'bg-amber-500 border-amber-500 text-navy-900'
+              : 'bg-white border-line text-muted hover:text-ink-950'
+          }`}
+          title={currentlySaved ? 'Saved' : 'Save'}
+        >
+          <Bookmark className={`w-4 h-4 ${currentlySaved ? 'fill-current' : ''}`} />
+          <span className="hidden sm:inline">{currentlySaved ? 'Saved' : 'Save'}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleShare}
+          className="h-11 px-3.5 rounded-full bg-white border border-line text-muted hover:text-ink-950 flex items-center gap-1.5 text-xs font-bold transition active:scale-95"
+          title="Share"
+        >
+          <Share2 className="w-4 h-4" />
+          <span className="hidden sm:inline">Share</span>
+        </button>
+
         <Link
           to={`/live?route=${journey.legs[0]?.route?.code}`}
-          className="flex-1 py-2.5 bg-cobalt text-white text-xs font-bold rounded-pill shadow-soft flex items-center justify-center gap-2 hover:opacity-95 transition"
+          className="flex-1 h-11 text-white text-xs font-bold rounded-full shadow-soft flex items-center justify-center gap-2 active:scale-98 transition font-heading"
+          style={{ background: 'var(--gradient-brand)' }}
         >
-          <Radio className="w-4 h-4" />
-          <span>{t('passenger.track_live')}</span>
+          <Radio className="w-4 h-4 text-amber-500" />
+          <span>{t('passenger.track_live') || 'Track live'}</span>
         </Link>
 
         <SosButton

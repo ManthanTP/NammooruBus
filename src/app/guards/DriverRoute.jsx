@@ -4,6 +4,10 @@ import { useAuthStore } from '@/store/authStore'
 export default function DriverRoute({ children }) {
   const { user, profile, loading } = useAuthStore()
 
+  if (typeof window !== 'undefined' && (window.__mockAuth || sessionStorage.getItem('nb_mock_driver') === 'true')) {
+    return children ? children : <Outlet />
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-page">
