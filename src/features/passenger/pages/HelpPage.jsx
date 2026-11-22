@@ -85,7 +85,7 @@ export default function HelpPage() {
       <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft flex items-center justify-between gap-3">
         <div>
           <h3 className="text-xs font-bold font-heading text-ink-950">Have a grievance or complaint?</h3>
-          <p className="text-xs text-muted mt-0.5">Submit feedback directly to transport admins.</p>
+          <p className="text-xs text-muted mt-0.5">Submit feedback directly to transit support.</p>
         </div>
         <Link
           to="/complaints"

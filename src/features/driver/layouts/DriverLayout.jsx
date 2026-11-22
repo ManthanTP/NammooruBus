@@ -101,7 +101,7 @@ export default function DriverLayout() {
   const userInitials = (profile?.full_name || user?.email || 'D')[0].toUpperCase()
 
   return (
-    <div className="min-h-screen bg-bg font-body text-ink-950 flex flex-col select-none transition-colors">
+    <div className="min-h-screen bg-bg font-body text-text flex flex-col select-none transition-colors">
       {/* 1. Global Top App Bar: 56px height, solid surface matching passenger style */}
       <header className="sticky top-0 z-40 h-14 px-3 sm:px-5 flex items-center justify-between bg-surface border-b border-line shadow-xs transition-colors">
         {/* Left: Logo mark + "Nammooru Bus" + Driver tag */}
@@ -117,7 +117,7 @@ export default function DriverLayout() {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight whitespace-nowrap">
-                <span className="text-ink-950">Nammooru</span>
+                <span className="text-text">Nammooru</span>
                 <span className="text-brand ml-0.5">Bus</span>
               </span>
               <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-extrabold text-[10px] uppercase tracking-wider hidden xs:inline-block">
@@ -166,7 +166,7 @@ export default function DriverLayout() {
             {menuOpen && (
               <div className="absolute right-0 top-11 w-64 bg-surface border border-line rounded-[20px] p-2.5 shadow-float z-50 animate-scale-in space-y-2">
                 <div className="px-3 py-2 border-b border-line">
-                  <p className="font-heading font-bold text-xs text-ink-950 truncate">
+                  <p className="font-heading font-bold text-xs text-text truncate">
                     {profile?.full_name || 'Driver'}
                   </p>
                   <p className="text-[11px] text-muted truncate">{user?.email}</p>
@@ -176,9 +176,9 @@ export default function DriverLayout() {
                 <Link
                   to="/driver/profile"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-ink-950 hover:bg-sky-50 dark:hover:bg-surface-2 transition"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-text hover:bg-surface-2 transition"
                 >
-                  <User className="w-4 h-4 text-cobalt-500" />
+                  <User className="w-4 h-4 text-brand" />
                   <span>Driver Profile</span>
                 </Link>
 
@@ -191,22 +191,23 @@ export default function DriverLayout() {
                 {/* Theme Switch */}
                 <div className="px-3 py-1">
                   <span className="text-xs font-bold text-muted block mb-1">Theme</span>
-                  <div className="flex items-center p-0.5 bg-sky-50 dark:bg-navy-950/70 border border-line rounded-pill">
+                  <div className="grid grid-cols-4 gap-1 p-0.5 bg-surface-2 border border-line rounded-pill">
                     {[
-                      { key: 'light', label: 'Light', icon: Sun },
-                      { key: 'dark', label: 'Dark', icon: Moon },
-                      { key: 'system', label: 'Auto', icon: Laptop },
-                    ].map(({ key, label, icon: Icon }) => (
+                      { key: 'light', label: 'Light' },
+                      { key: 'dark', label: 'Dark' },
+                      { key: 'blue', label: 'Blue' },
+                      { key: 'system', label: 'Auto' },
+                    ].map(({ key, label }) => (
                       <button
                         key={key}
                         type="button"
                         onClick={() => setTheme(key)}
-                        className={`flex-1 py-1 rounded-pill text-[11px] font-bold flex items-center justify-center gap-1 transition ${theme === key
-                          ? 'bg-cobalt-500 text-white shadow-xs'
-                          : 'text-muted hover:text-ink-950'
+                        className={`py-1 rounded-pill text-[10px] font-bold flex items-center justify-center transition cursor-pointer ${theme === key
+                          ? 'on-brand shadow-xs font-extrabold'
+                          : 'text-muted hover:text-text'
                           }`}
+                        style={theme === key ? { background: 'var(--gradient-brand)', color: 'var(--on-brand)' } : {}}
                       >
-                        <Icon className="w-3 h-3" />
                         <span>{label}</span>
                       </button>
                     ))}
@@ -219,9 +220,9 @@ export default function DriverLayout() {
                 <Link
                   to="/"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-ink-950 hover:bg-sky-50 dark:hover:bg-surface-2 transition"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-text hover:bg-surface-2 transition"
                 >
-                  <Compass className="w-4 h-4 text-cobalt-500" />
+                  <Compass className="w-4 h-4 text-brand" />
                   <span>Switch to Passenger View</span>
                 </Link>
 
@@ -229,7 +230,7 @@ export default function DriverLayout() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-danger hover:bg-danger/10 transition"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-danger hover:bg-danger/10 transition cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>{t('auth.logout')}</span>

@@ -431,11 +431,11 @@ export default function AdminDashboardPage() {
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="capitalize text-xs font-bold text-cobalt-500 bg-sky-100 px-2 py-0.5 rounded-pill">
+                    <span className="capitalize text-xs font-bold text-brand bg-surface-2 px-2 py-0.5 rounded-pill">
                       {c.category}
                     </span>
                     {c.routes && (
-                      <span className="text-xs font-bold text-ink-950">
+                      <span className="text-xs font-bold text-text">
                         Route {c.routes.code}
                       </span>
                     )}

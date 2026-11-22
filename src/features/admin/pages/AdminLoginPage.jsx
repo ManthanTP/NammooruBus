@@ -104,7 +104,7 @@ export default function AdminLoginPage() {
   const isLocked = remainingSeconds > 0
 
   return (
-    <div className="min-h-screen bg-sky-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-bg text-text flex flex-col justify-between transition-colors">
       {/* 1. Top Section: Signature Gradient with Logo on White Plate */}
       <div
         className="pt-10 pb-16 px-6 on-brand flex flex-col items-center justify-center relative overflow-hidden"
@@ -138,12 +138,12 @@ export default function AdminLoginPage() {
         <RoadRibbon />
       </div>
 
-      {/* 2. Bottom Section: White Sheet Form */}
+      {/* 2. Bottom Section: Sheet Form */}
       <main className="flex-1 w-full max-w-md mx-auto -mt-8 relative z-10 px-4 pb-8">
-        <div className="bg-white p-6 rounded-[28px] border border-line shadow-soft space-y-4">
+        <div className="bg-surface p-6 rounded-[28px] border border-line shadow-soft space-y-4">
           <div className="space-y-1">
-            <h2 className="font-heading font-extrabold text-xl text-ink-950 flex items-center gap-2">
-              <Lock className="w-5 h-5 text-cobalt-500" />
+            <h2 className="font-heading font-extrabold text-xl text-text flex items-center gap-2">
+              <Lock className="w-5 h-5 text-brand" />
               <span>Admin Sign In</span>
             </h2>
             <p className="text-xs text-muted">
@@ -167,7 +167,7 @@ export default function AdminLoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>
-              <label className="block text-xs font-bold text-ink-950 mb-1">
+              <label className="block text-xs font-bold text-text mb-1">
                 {t('auth.email_label')}
               </label>
               <input
@@ -177,12 +177,12 @@ export default function AdminLoginPage() {
                 placeholder={t('auth.email_placeholder')}
                 required
                 disabled={isLocked}
-                className="w-full h-12 px-3.5 bg-sky-50 border border-line rounded-input text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 focus:bg-white transition disabled:opacity-50"
+                className="w-full h-12 px-3.5 bg-surface-2 border border-line rounded-input text-sm text-text placeholder:text-muted focus:outline-none focus:border-brand transition disabled:opacity-50"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-ink-950 mb-1">
+              <label className="block text-xs font-bold text-text mb-1">
                 {t('auth.password_label')}
               </label>
               <div className="relative">
@@ -193,12 +193,12 @@ export default function AdminLoginPage() {
                   placeholder="Admin password"
                   required
                   disabled={isLocked}
-                  className="w-full h-12 px-3.5 pr-11 bg-sky-50 border border-line rounded-input text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 focus:bg-white transition disabled:opacity-50"
+                  className="w-full h-12 px-3.5 pr-11 bg-surface-2 border border-line rounded-input text-sm text-text placeholder:text-muted focus:outline-none focus:border-brand transition disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink-950 transition p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text transition p-1"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -207,7 +207,7 @@ export default function AdminLoginPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-ink-950 mb-1 flex items-center gap-1.5">
+              <label className="block text-xs font-bold text-text mb-1 flex items-center gap-1.5">
                 <KeyRound className="w-3.5 h-3.5 text-muted" />
                 <span>{t('auth.admin_secret_label')}</span>
               </label>
@@ -218,7 +218,7 @@ export default function AdminLoginPage() {
                 placeholder={t('auth.admin_secret_placeholder')}
                 required
                 disabled={isLocked}
-                className="w-full h-12 px-3.5 bg-sky-50 border border-line rounded-input text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 focus:bg-white transition disabled:opacity-50"
+                className="w-full h-12 px-3.5 bg-surface-2 border border-line rounded-input text-sm text-text placeholder:text-muted focus:outline-none focus:border-brand transition disabled:opacity-50"
               />
             </div>
 

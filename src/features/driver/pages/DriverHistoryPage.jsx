@@ -208,13 +208,13 @@ export default function DriverHistoryPage() {
 
       {/* Header with Actions */}
       <div className="flex items-center justify-between pb-2 border-b border-line no-print">
-        <h1 className="font-extrabold text-base text-ink-950 font-heading">Driver History & Reports</h1>
+        <h1 className="font-extrabold text-base text-text font-heading">Driver History & Reports</h1>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleDownloadCsv}
             disabled={trips.length === 0}
-            className="px-3 py-1.5 rounded-pill bg-white border border-line text-ink-950 shadow-soft hover:bg-sky-50 disabled:opacity-40 transition text-xs font-bold flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-pill bg-surface border border-line text-text shadow-soft hover:bg-surface-2 disabled:opacity-40 transition text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             title="Download CSV"
           >
             <Download className="w-3.5 h-3.5" />
@@ -223,7 +223,7 @@ export default function DriverHistoryPage() {
           <button
             type="button"
             onClick={handlePrint}
-            className="px-3 py-1.5 rounded-pill bg-white border border-line text-ink-950 shadow-soft hover:bg-sky-50 transition text-xs font-bold flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-pill bg-surface border border-line text-text shadow-soft hover:bg-surface-2 transition text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             title="Print / Save PDF"
           >
             <Printer className="w-3.5 h-3.5" />
@@ -233,19 +233,19 @@ export default function DriverHistoryPage() {
       </div>
 
       {/* Driver Info Header Card */}
-      <div className="p-4 bg-white rounded-card border border-line shadow-soft flex items-center justify-between print-clean">
+      <div className="p-4 bg-surface rounded-card border border-line shadow-soft flex items-center justify-between print-clean">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-sky-100 text-cobalt-500 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-full bg-surface-2 text-brand flex items-center justify-center shrink-0">
             <Bus className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-sm font-extrabold text-ink-950 font-heading print-text-dark">{driverName}</h2>
-            <p className="text-xs text-muted font-mono print-text-dark">Assigned Bus: <strong className="text-ink-950">{busNumber}</strong></p>
+            <h2 className="text-sm font-extrabold text-text font-heading print-text-dark">{driverName}</h2>
+            <p className="text-xs text-muted font-mono print-text-dark">Assigned Bus: <strong className="text-text">{busNumber}</strong></p>
           </div>
         </div>
         <div className="text-right">
           <span className="text-[10px] uppercase font-bold text-muted block print-text-dark">Total Trips</span>
-          <span className="text-base font-extrabold text-ink-950 font-heading print-text-dark">{summary.totalTrips}</span>
+          <span className="text-base font-extrabold text-text font-heading print-text-dark">{summary.totalTrips}</span>
         </div>
       </div>
 
@@ -266,14 +266,14 @@ export default function DriverHistoryPage() {
         </div>
 
         {rangeType === 'custom' && (
-          <div className="grid grid-cols-2 gap-2 p-3 bg-white border border-line rounded-input shadow-soft animate-fadeIn">
+          <div className="grid grid-cols-2 gap-2 p-3 bg-surface border border-line rounded-input shadow-soft animate-fadeIn">
             <div>
               <label className="block text-[10px] uppercase font-bold text-muted mb-1">From Date</label>
               <input
                 type="date"
                 value={customFrom}
                 onChange={(e) => setCustomFrom(e.target.value)}
-                className="w-full h-10 px-2 bg-sky-50 border border-line rounded-input text-xs text-ink-950 focus:outline-none focus:border-cobalt-500"
+                className="w-full h-10 px-2 bg-surface-2 border border-line rounded-input text-xs text-text focus:outline-none focus:border-brand"
               />
             </div>
             <div>
@@ -282,7 +282,7 @@ export default function DriverHistoryPage() {
                 type="date"
                 value={customTo}
                 onChange={(e) => setCustomTo(e.target.value)}
-                className="w-full h-10 px-2 bg-sky-50 border border-line rounded-input text-xs text-ink-950 focus:outline-none focus:border-cobalt-500"
+                className="w-full h-10 px-2 bg-surface-2 border border-line rounded-input text-xs text-text focus:outline-none focus:border-brand"
               />
             </div>
           </div>
@@ -299,8 +299,8 @@ export default function DriverHistoryPage() {
 
       {/* Daily Aggregation Table (from driver_report RPC) */}
       {dailyReport && dailyReport.length > 0 && (
-        <div className="p-4 bg-white border border-line rounded-card space-y-3 shadow-soft print-clean">
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-ink-950 print-text-dark">
+        <div className="p-4 bg-surface border border-line rounded-card space-y-3 shadow-soft print-clean">
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-text print-text-dark">
             Daily Shift Summary
           </h3>
           <div className="overflow-x-auto">
@@ -316,12 +316,12 @@ export default function DriverHistoryPage() {
               </thead>
               <tbody className="divide-y divide-line">
                 {dailyReport.map((row, idx) => (
-                  <tr key={idx} className={idx % 2 === 1 ? 'bg-sky-50/50 print-clean' : 'print-clean'}>
-                    <td className="py-2.5 pr-3 font-mono font-bold text-ink-950 print-text-dark">
+                  <tr key={idx} className={idx % 2 === 1 ? 'bg-surface-2/40 print-clean' : 'print-clean'}>
+                    <td className="py-2.5 pr-3 font-mono font-bold text-text print-text-dark">
                       {row.report_date}
                     </td>
-                    <td className="py-2.5 px-3 text-ink-950 print-text-dark font-medium">{row.trips_count}</td>
-                    <td className="py-2.5 px-3 text-ink-950 print-text-dark font-medium">
+                    <td className="py-2.5 px-3 text-text print-text-dark font-medium">{row.trips_count}</td>
+                    <td className="py-2.5 px-3 text-text print-text-dark font-medium">
                       {Math.round(row.total_minutes / 60)}h {row.total_minutes % 60}m
                     </td>
                     <td className="py-2.5 px-3 text-amber-600 font-bold print-text-dark">{row.delayed_count}</td>
@@ -337,14 +337,14 @@ export default function DriverHistoryPage() {
       {/* Detailed Trip List */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-ink-950 print-text-dark">
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-text print-text-dark">
             Trip Logs ({trips.length})
           </h3>
           <button
             type="button"
             onClick={handleDownloadCsv}
             disabled={trips.length === 0}
-            className="text-[11px] font-bold text-cobalt-500 hover:underline flex items-center gap-1 no-print disabled:opacity-50"
+            className="text-[11px] font-bold text-brand hover:underline flex items-center gap-1 no-print disabled:opacity-50 cursor-pointer"
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
             <span>Download CSV</span>
@@ -353,30 +353,30 @@ export default function DriverHistoryPage() {
 
         {loading ? (
           <div className="flex items-center justify-center p-8">
-            <div className="w-8 h-8 border-4 border-cobalt-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
           </div>
         ) : trips.length > 0 ? (
           <div className="space-y-2.5">
             {trips.map((t) => (
               <div
                 key={t.id}
-                className="p-3.5 bg-white border border-line rounded-card shadow-soft space-y-2 text-left print-clean"
+                className="p-3.5 bg-surface border border-line rounded-card shadow-soft space-y-2 text-left print-clean"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <RouteBadge code={t.route?.code} color={t.route?.color} size="sm" />
-                    <span className="text-xs font-bold text-ink-950 truncate max-w-[160px] print-text-dark">
+                    <span className="text-xs font-bold text-text truncate max-w-[160px] print-text-dark">
                       {t.route?.name_en}
                     </span>
                   </div>
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-pill capitalize ${t.status === 'ended'
-                      ? 'bg-sky-100 text-muted'
+                      ? 'bg-surface-2 text-muted'
                       : t.status === 'delayed'
-                        ? 'bg-amber-100 text-amber-800'
+                        ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
                         : t.status === 'breakdown'
                           ? 'bg-danger/10 text-danger'
-                          : 'bg-emerald-50 text-emerald-700'
+                          : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                       }`}
                   >
                     {t.status}
@@ -386,25 +386,25 @@ export default function DriverHistoryPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-line text-[11px] text-muted print-text-dark">
                   <div>
                     <span className="block text-[9px] uppercase font-bold text-muted">Direction</span>
-                    <span className="font-bold text-ink-950 print-text-dark">
+                    <span className="font-bold text-text print-text-dark">
                       {t.direction === 1 ? 'Return (1)' : 'Forward (0)'}
                     </span>
                   </div>
                   <div>
                     <span className="block text-[9px] uppercase font-bold text-muted">Bus</span>
-                    <span className="font-mono font-bold text-ink-950 print-text-dark">
+                    <span className="font-mono font-bold text-text print-text-dark">
                       {t.bus?.reg_no || '---'}
                     </span>
                   </div>
                   <div>
                     <span className="block text-[9px] uppercase font-bold text-muted">Start Time</span>
-                    <span className="font-mono text-ink-950 print-text-dark">
+                    <span className="font-mono text-text print-text-dark">
                       {t.started_at ? new Date(t.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--'}
                     </span>
                   </div>
                   <div>
                     <span className="block text-[9px] uppercase font-bold text-muted">Duration</span>
-                    <span className="font-mono font-bold text-cobalt-500 print-text-dark">
+                    <span className="font-mono font-bold text-brand print-text-dark">
                       {formatDuration(t.started_at, t.ended_at)}
                     </span>
                   </div>
@@ -413,7 +413,7 @@ export default function DriverHistoryPage() {
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center bg-white border border-line rounded-card shadow-soft print-clean">
+          <div className="p-8 text-center bg-surface border border-line rounded-card shadow-soft print-clean">
             <Calendar className="w-8 h-8 text-muted/40 mx-auto mb-2" />
             <p className="text-xs text-muted print-text-dark">No trips found in this date range.</p>
           </div>

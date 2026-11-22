@@ -293,12 +293,12 @@ export default function DriverStartPage() {
                   value={newBusReg}
                   onChange={(e) => setNewBusReg(e.target.value.toUpperCase())}
                   placeholder="e.g. KA25 F 1234"
-                  className="w-full h-11 px-3.5 bg-white border border-line rounded-[12px] text-xs font-mono uppercase font-bold text-ink-950"
+                  className="w-full h-11 px-3.5 bg-surface-2 border border-line rounded-[12px] text-xs font-mono uppercase font-bold text-text"
                 />
                 <select
                   value={newBusRoute}
                   onChange={(e) => setNewBusRoute(e.target.value)}
-                  className="w-full h-11 px-3 bg-white border border-line rounded-[12px] text-xs font-bold text-ink-950"
+                  className="w-full h-11 px-3 bg-surface-2 border border-line rounded-[12px] text-xs font-bold text-text"
                 >
                   {routes.map((r) => (
                     <option key={r.id} value={r.id}>
@@ -321,13 +321,13 @@ export default function DriverStartPage() {
 
           {/* Route Selector */}
           <div>
-            <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
+            <label className="block text-xs font-bold text-text mb-1.5 font-heading">
               Select Route
             </label>
             <select
               value={selectedRouteId}
               onChange={(e) => setSelectedRouteId(e.target.value)}
-              className="w-full h-12 px-3.5 bg-sky-50 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500"
+              className="w-full h-12 px-3.5 bg-surface-2 border border-line rounded-[12px] text-xs font-bold text-text focus:outline-none focus:border-brand"
             >
               {routes.map((r) => (
                 <option key={r.id} value={r.id}>

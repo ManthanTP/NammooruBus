@@ -79,22 +79,24 @@ export default function AdminLayout() {
     .toUpperCase()
 
   return (
-    <div className="min-h-screen font-body flex bg-bg text-ink-950 select-none transition-colors">
+    <div className="min-h-screen font-body flex bg-bg text-text select-none transition-colors">
       {/* 1. Fixed Sidebar (Desktop: 240px wide = w-60) */}
-      <aside className="hidden md:flex w-60 flex-col shrink-0 fixed inset-y-0 left-0 z-30 bg-navy-900 text-white">
-        {/* Brand header */}
-        <div className="p-4 flex items-center gap-3 border-b border-white/10">
-          <img
-            src="/brand/logo-mark.png"
-            alt="Nammooru Logo"
-            className="w-8 h-8 object-contain"
-          />
+      <aside className="hidden md:flex w-60 flex-col shrink-0 fixed inset-y-0 left-0 z-30 bg-surface border-r border-line text-text transition-colors">
+        {/* Single Brand Header */}
+        <div className="p-4 flex items-center gap-3 border-b border-line">
+          <div className="w-10 h-10 rounded-[12px] bg-white overflow-hidden p-0.5 flex items-center justify-center shadow-xs shrink-0">
+            <img
+              src="/brand/logo-mark.png"
+              alt="Nammooru Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
           <div>
-            <h1 className="text-sm font-extrabold font-heading leading-tight text-white">
-              Nammooru Bus
+            <h1 className="text-sm font-extrabold font-heading leading-tight text-text">
+              Nammooru <span className="text-brand">Admin</span>
             </h1>
-            <span className="text-[10px] font-mono text-sky-100">
-              Admin Control
+            <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">
+              Control Panel
             </span>
           </div>
         </div>
@@ -109,11 +111,14 @@ export default function AdminLayout() {
                 to={item.path}
                 end={item.path === '/12345678/admin/dashboard'}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3.5 py-2.5 text-xs transition-all ${
+                  `flex items-center gap-3 px-3.5 py-2.5 text-xs rounded-pill transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-white text-cobalt-500 rounded-pill font-extrabold shadow-soft'
-                      : 'text-sky-100 hover:text-white hover:bg-white/10 rounded-pill font-medium'
+                      ? 'on-brand font-bold shadow-soft'
+                      : 'text-muted hover:text-text hover:bg-surface-2 font-semibold'
                   }`
+                }
+                style={({ isActive }) =>
+                  isActive ? { background: 'var(--gradient-brand)', color: 'var(--on-brand)' } : {}
                 }
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -124,12 +129,12 @@ export default function AdminLayout() {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-3 border-t border-white/10">
+        <div className="p-3 border-t border-line">
           <Link
             to="/"
             target="_blank"
             rel="noreferrer"
-            className="w-full py-2 px-3 rounded-pill text-xs font-bold flex items-center justify-center transition text-sky-100 bg-white/10 hover:bg-white/20"
+            className="w-full py-2.5 px-3 rounded-pill text-xs font-bold flex items-center justify-center transition text-text bg-surface-2 hover:bg-line border border-line"
           >
             Open Passenger View →
           </Link>
@@ -143,16 +148,20 @@ export default function AdminLayout() {
             className="fixed inset-0 bg-black/60 backdrop-blur-xs"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative z-10 bg-navy-900 text-white rounded-t-sheet max-h-[85vh] flex flex-col p-4 shadow-2xl animate-sheet-up">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-2">
+          <div className="relative z-10 bg-surface text-text border-t border-line rounded-t-sheet max-h-[85vh] flex flex-col p-4 shadow-2xl animate-sheet-up">
+            <div className="flex items-center justify-between pb-3 border-b border-line mb-2">
               <div className="flex items-center gap-2">
-                <img src="/brand/logo-mark.png" alt="Logo" className="w-7 h-7" />
-                <span className="text-sm font-extrabold font-heading text-white">Admin Navigation</span>
+                <div className="w-8 h-8 rounded-[10px] bg-white overflow-hidden p-0.5 flex items-center justify-center shadow-xs">
+                  <img src="/brand/logo-mark.png" alt="Logo" className="w-full h-full object-contain" />
+                </div>
+                <span className="text-sm font-extrabold font-heading text-text">
+                  Nammooru <span className="text-brand">Admin</span>
+                </span>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1 rounded-full text-white/70 hover:text-white"
+                className="p-1 rounded-full text-muted hover:text-text"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -167,11 +176,14 @@ export default function AdminLayout() {
                     end={item.path === '/12345678/admin/dashboard'}
                     onClick={() => setMobileMenuOpen(false)}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 px-3.5 py-2.5 text-xs transition-all ${
+                      `flex items-center gap-3 px-3.5 py-2.5 text-xs rounded-pill transition-all ${
                         isActive
-                          ? 'bg-white text-cobalt-500 rounded-pill font-extrabold shadow-soft'
-                          : 'text-sky-100 hover:text-white rounded-pill font-medium'
+                          ? 'on-brand font-bold shadow-soft'
+                          : 'text-muted hover:text-text hover:bg-surface-2 font-semibold'
                       }`
+                    }
+                    style={({ isActive }) =>
+                      isActive ? { background: 'var(--gradient-brand)', color: 'var(--on-brand)' } : {}
                     }
                   >
                     <Icon className="w-4 h-4 shrink-0" />
@@ -186,39 +198,47 @@ export default function AdminLayout() {
 
       {/* 2. Main Content Area */}
       <div className="flex-1 md:ml-60 flex flex-col min-w-0 bg-bg transition-colors">
-        {/* Top bar: 56px height, solid surface, brand logo, theme toggle, profile menu */}
+        {/* Top bar: 56px height, solid surface, no duplicate branding on desktop */}
         <header className="h-14 bg-surface px-4 sm:px-6 flex items-center justify-between sticky top-0 z-20 border-b border-line shadow-xs transition-colors">
           <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-2 text-ink-950 hover:bg-sky-50 dark:hover:bg-surface-2 rounded-pill transition"
-              aria-label="Open menu"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-[12px] bg-white overflow-hidden p-0.5 flex items-center justify-center shadow-xs shrink-0">
+            {/* Mobile-only toggle and brand mark */}
+            <div className="flex md:hidden items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="p-2 text-text hover:bg-surface-2 rounded-pill transition cursor-pointer"
+                aria-label="Open menu"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div className="w-8 h-8 rounded-[10px] bg-white overflow-hidden p-0.5 flex items-center justify-center shadow-xs">
                 <img
                   src="/brand/logo-mark.png"
                   alt="Logo"
                   className="w-full h-full object-contain"
                 />
               </div>
-              <h1 className="font-heading text-lg font-extrabold tracking-tight text-ink-950">
-                Nammooru <span className="text-cobalt-500 dark:text-[#6E94FF]">Admin</span>
-              </h1>
+              <span className="font-heading text-sm font-extrabold text-text">
+                Nammooru <span className="text-brand">Admin</span>
+              </span>
             </div>
-            <div className="hidden lg:flex items-center gap-1.5 ml-3 px-2.5 py-1 rounded-pill bg-sky-50 dark:bg-surface-2 border border-line">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold text-ink-950">Operational</span>
+
+            {/* Desktop-only operational tag & section label (No duplicate logo mark) */}
+            <div className="hidden md:flex items-center gap-3">
+              <span className="font-heading text-sm font-extrabold text-text">
+                Admin Panel
+              </span>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-pill bg-surface-2 border border-line">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold text-text">Operational</span>
+              </div>
             </div>
           </div>
 
           {/* Admin User Info, Theme Toggle & Avatar Menu */}
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="text-right hidden sm:block">
-              <span className="text-xs font-bold text-ink-950 block">
+              <span className="text-xs font-bold text-text block">
                 {profile?.full_name || 'Administrator'}
               </span>
               <span className="text-[10px] text-muted font-mono">
@@ -234,7 +254,7 @@ export default function AdminLayout() {
               <button
                 type="button"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="w-9 h-9 rounded-full bg-navy-900 text-white border-2 border-cobalt-500 font-heading font-extrabold text-xs flex items-center justify-center shadow-soft cursor-pointer active:scale-95 transition"
+                className="w-9 h-9 rounded-full bg-surface-2 text-brand border-2 border-brand font-heading font-extrabold text-xs flex items-center justify-center shadow-soft cursor-pointer active:scale-95 transition"
                 aria-label="Admin account menu"
               >
                 {userInitials}
@@ -243,7 +263,7 @@ export default function AdminLayout() {
               {userMenuOpen && (
                 <div className="absolute right-0 top-11 w-56 bg-surface border border-line rounded-[20px] p-2 shadow-float z-50 animate-scale-in space-y-1">
                   <div className="px-3 py-2 border-b border-line">
-                    <p className="font-heading font-bold text-xs text-ink-950 truncate">
+                    <p className="font-heading font-bold text-xs text-text truncate">
                       {profile?.full_name || 'Admin'}
                     </p>
                     <p className="text-[10px] text-muted font-mono truncate">{user?.email}</p>
@@ -252,16 +272,16 @@ export default function AdminLayout() {
                   <Link
                     to="/"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-ink-950 hover:bg-sky-50 dark:hover:bg-surface-2 transition"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-text hover:bg-surface-2 transition"
                   >
-                    <Compass className="w-4 h-4 text-cobalt-500" />
+                    <Compass className="w-4 h-4 text-brand" />
                     <span>Open Passenger View</span>
                   </Link>
 
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-danger hover:bg-danger/10 transition"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-danger hover:bg-danger/10 transition cursor-pointer"
                   >
                     <LogOut className="w-4 h-4" />
                     <span>{t('auth.logout')}</span>

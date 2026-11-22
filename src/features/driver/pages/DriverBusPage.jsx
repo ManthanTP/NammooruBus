@@ -140,7 +140,7 @@ export default function DriverBusPage() {
                   <span className="text-[10px] uppercase font-bold text-muted block">
                     Bus Number
                   </span>
-                  <p className="font-mono font-extrabold text-base text-ink-950">
+                  <p className="font-mono font-extrabold text-base text-text">
                     {driverRecord.bus.reg_no}
                   </p>
                 </div>
@@ -151,14 +151,14 @@ export default function DriverBusPage() {
             </div>
 
             {assignedRoute && (
-              <div className="flex items-center justify-between p-3.5 bg-sky-50 dark:bg-surface-2 rounded-[16px] border border-line">
+              <div className="flex items-center justify-between p-3.5 bg-surface-2 rounded-[16px] border border-line">
                 <div className="flex items-center gap-3">
                   <RouteBadge code={assignedRoute.code} color={assignedRoute.color} size="md" />
                   <div>
                     <span className="text-[10px] uppercase font-bold text-muted block">
                       Assigned Route
                     </span>
-                    <p className="font-heading font-bold text-sm text-ink-950">
+                    <p className="font-heading font-bold text-sm text-text">
                       {assignedRoute.name_en}
                     </p>
                   </div>
@@ -196,7 +196,7 @@ export default function DriverBusPage() {
 
         <form onSubmit={handleSaveBus} className="space-y-3 pt-1">
           <div>
-            <label className="text-xs font-bold text-ink-950 block mb-1">
+            <label className="text-xs font-bold text-text block mb-1">
               Bus Registration Number
             </label>
             <input
@@ -204,7 +204,7 @@ export default function DriverBusPage() {
               value={busReg}
               onChange={(e) => setBusReg(e.target.value.toUpperCase())}
               placeholder="e.g. KA25 F 1234"
-              className="w-full h-11 px-3.5 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-sm font-mono font-bold text-ink-950 uppercase focus:outline-none focus:border-cobalt-500"
+              className="w-full h-11 px-3.5 bg-surface-2 border border-line rounded-[12px] text-sm font-mono font-bold text-text uppercase focus:outline-none focus:border-brand"
             />
             <span className="text-[10px] text-muted mt-1 block">
               Format: Karnataka RTO registration number
@@ -212,13 +212,13 @@ export default function DriverBusPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-ink-950 block mb-1">
+            <label className="text-xs font-bold text-text block mb-1">
               Operating Route
             </label>
             <select
               value={selectedRouteId}
               onChange={(e) => setSelectedRouteId(e.target.value)}
-              className="w-full h-11 px-3 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500"
+              className="w-full h-11 px-3 bg-surface-2 border border-line rounded-[12px] text-xs font-bold text-text focus:outline-none focus:border-brand"
             >
               {routes.map((r) => (
                 <option key={r.id} value={r.id}>

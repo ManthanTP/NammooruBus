@@ -957,11 +957,11 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* 6. Roles Section (Passengers / Drivers / Admins) */}
+          {/* 6. Roles Section (Passengers & Drivers) */}
           <section
             id="roles"
             aria-labelledby="roles-heading"
-            className="scroll-mt-20 md:scroll-mt-24 py-16 px-4 sm:px-6 md:px-8 max-w-6xl mx-auto"
+            className="scroll-mt-20 md:scroll-mt-24 py-16 px-4 sm:px-6 md:px-8 max-w-5xl mx-auto"
           >
             <motion.div
               initial={prefersReduced ? {} : { opacity: 0, y: 24 }}
@@ -975,7 +975,7 @@ export default function LandingPage() {
               </h2>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
               {/* Passengers */}
               <motion.div
                 initial={prefersReduced ? {} : { opacity: 0, y: 24 }}
@@ -1032,35 +1032,6 @@ export default function LandingPage() {
                 >
                   <span style={{ color: 'var(--on-brand)' }}>{t('landing.role_driver_btn', 'Sign up as driver')}</span>
                   <ArrowRight className="w-3.5 h-3.5" style={{ color: 'var(--on-brand)' }} />
-                </Link>
-              </motion.div>
-
-              {/* Transit Admins */}
-              <motion.div
-                initial={prefersReduced ? {} : { opacity: 0, y: 24 }}
-                whileInView={prefersReduced ? {} : { opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: 0.16, duration: 0.5 }}
-                whileHover={prefersReduced ? {} : { y: -4 }}
-                className="p-6 bg-surface rounded-[24px] border border-line shadow-card flex flex-col justify-between gap-6"
-              >
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted px-2.5 py-1 rounded-full bg-surface-2 border border-line">
-                    Transit Admins
-                  </span>
-                  <h3 className="font-heading font-extrabold text-lg text-text mt-3">
-                    {t('landing.role_admin_title', 'For Transit Admins')}
-                  </h3>
-                  <p className="text-xs text-muted mt-2 leading-relaxed">
-                    {t('landing.role_admin_desc', 'Manage routes, timetables, fleet, fares and rider alerts.')}
-                  </p>
-                </div>
-                <Link
-                  to="/admin/login"
-                  className="min-h-[44px] px-4 py-2 rounded-full border border-line bg-surface-2 hover:border-brand text-xs font-bold text-text flex items-center justify-center gap-1.5 transition active:scale-95"
-                >
-                  <span>Admin portal</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </motion.div>
             </div>

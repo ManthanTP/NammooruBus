@@ -207,18 +207,18 @@ export default function DriverTripPage() {
       )}
 
       {/* Top Header Card */}
-      <div className="p-4 bg-white rounded-card border border-line shadow-soft flex items-center justify-between">
+      <div className="p-4 bg-surface rounded-card border border-line shadow-soft flex items-center justify-between">
         <div className="flex items-center gap-3">
           <RouteBadge code={trip.route?.code} color={trip.route?.color} size="lg" />
           <div>
-            <h2 className="text-base font-extrabold text-ink-950 font-heading leading-tight">
+            <h2 className="text-base font-extrabold text-text font-heading leading-tight">
               {trip.route?.name_en}
             </h2>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-xs font-mono font-bold text-muted">
                 {trip.bus?.reg_no || 'KA-25-1001'}
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-pill bg-sky-100 text-royal-700 font-bold uppercase tracking-wider">
+              <span className="text-[10px] px-2 py-0.5 rounded-pill bg-surface-2 text-brand font-bold uppercase tracking-wider">
                 {trip.direction === 0 ? 'Forward' : 'Return'}
               </span>
             </div>
@@ -226,9 +226,9 @@ export default function DriverTripPage() {
         </div>
 
         {/* Live GPS Status */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 border border-line rounded-pill">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 border border-line rounded-pill">
           <LiveDot />
-          <span className="text-xs font-bold text-ink-950">
+          <span className="text-xs font-bold text-text">
             {networkStatus === 'reconnecting' ? 'Reconnecting' : 'GPS Live'}
           </span>
         </div>
@@ -236,23 +236,23 @@ export default function DriverTripPage() {
 
       {/* Live Distance & Next Stop Metrics */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="p-4 bg-white rounded-card border border-line shadow-soft flex flex-col justify-between">
+        <div className="p-4 bg-surface rounded-card border border-line shadow-soft flex flex-col justify-between">
           <span className="text-[11px] font-bold text-muted uppercase tracking-wider block">
             Next Stop
           </span>
-          <p className="text-base font-extrabold text-ink-950 font-heading truncate my-1">
+          <p className="text-base font-extrabold text-text font-heading truncate my-1">
             {nextStop?.stop?.name_en || 'En route'}
           </p>
-          <span className="text-xs font-bold text-cobalt-500">
+          <span className="text-xs font-bold text-brand">
             {remainingKm} km away
           </span>
         </div>
 
-        <div className="p-4 bg-white rounded-card border border-line shadow-soft flex flex-col justify-between">
+        <div className="p-4 bg-surface rounded-card border border-line shadow-soft flex flex-col justify-between">
           <span className="text-[11px] font-bold text-muted uppercase tracking-wider block">
             Trip Duration
           </span>
-          <p className="text-xl font-extrabold text-ink-950 font-heading my-1">
+          <p className="text-xl font-extrabold text-text font-heading my-1">
             {formatTimer(elapsedSeconds)}
           </p>
           <span className="text-xs text-muted">
@@ -270,10 +270,10 @@ export default function DriverTripPage() {
           <button
             type="button"
             onClick={() => handleStatusChange('active')}
-            className={`min-h-[64px] rounded-input font-extrabold text-sm border flex flex-col items-center justify-center gap-1 active:scale-98 transition ${
+            className={`min-h-[64px] rounded-input font-extrabold text-sm border flex flex-col items-center justify-center gap-1 active:scale-98 transition cursor-pointer ${
               currentStatus === 'active'
                 ? 'bg-success text-white border-success shadow-soft'
-                : 'bg-white text-muted border-line hover:border-cobalt-500'
+                : 'bg-surface text-text border-line hover:border-brand'
             }`}
           >
             <CheckCircle2 className="w-5 h-5" />
@@ -283,11 +283,12 @@ export default function DriverTripPage() {
           <button
             type="button"
             onClick={() => handleStatusChange('delayed')}
-            className={`min-h-[64px] rounded-input font-extrabold text-sm border flex flex-col items-center justify-center gap-1 active:scale-98 transition ${
+            className={`min-h-[64px] rounded-input font-extrabold text-sm border flex flex-col items-center justify-center gap-1 active:scale-98 transition cursor-pointer ${
               currentStatus === 'delayed'
-                ? 'bg-amber-500 text-ink-950 border-amber-500 shadow-soft'
-                : 'bg-white text-muted border-line hover:border-amber-500'
+                ? 'bg-amber-500 text-navy-900 border-amber-500 shadow-soft on-amber font-bold'
+                : 'bg-surface text-text border-line hover:border-amber-500'
             }`}
+            style={currentStatus === 'delayed' ? { color: 'var(--on-amber)' } : {}}
           >
             <AlertTriangle className="w-5 h-5" />
             <span>Delayed</span>
@@ -296,10 +297,10 @@ export default function DriverTripPage() {
           <button
             type="button"
             onClick={() => handleStatusChange('breakdown')}
-            className={`min-h-[64px] rounded-input font-extrabold text-sm border flex flex-col items-center justify-center gap-1 active:scale-98 transition ${
+            className={`min-h-[64px] rounded-input font-extrabold text-sm border flex flex-col items-center justify-center gap-1 active:scale-98 transition cursor-pointer ${
               currentStatus === 'breakdown'
                 ? 'bg-danger text-white border-danger shadow-soft'
-                : 'bg-white text-muted border-line hover:border-danger'
+                : 'bg-surface text-text border-line hover:border-danger'
             }`}
           >
             <ShieldAlert className="w-5 h-5" />
@@ -317,11 +318,12 @@ export default function DriverTripPage() {
           <button
             type="button"
             onClick={() => handleCrowdChange('empty')}
-            className={`min-h-[56px] rounded-input font-bold text-xs border flex flex-col items-center justify-center gap-1 active:scale-98 transition ${
+            className={`min-h-[56px] rounded-input font-bold text-xs border flex flex-col items-center justify-center gap-1 active:scale-98 transition cursor-pointer ${
               crowdLevel === 'empty'
-                ? 'bg-cobalt-500 text-white border-cobalt-500 shadow-soft'
-                : 'bg-white text-muted border-line hover:border-cobalt-500'
+                ? 'on-brand border-transparent shadow-soft font-extrabold'
+                : 'bg-surface text-text border-line hover:border-brand'
             }`}
+            style={crowdLevel === 'empty' ? { background: 'var(--gradient-brand)', color: 'var(--on-brand)' } : {}}
           >
             <Users className="w-4 h-4" />
             <span>Seats Free</span>
@@ -330,11 +332,12 @@ export default function DriverTripPage() {
           <button
             type="button"
             onClick={() => handleCrowdChange('moderate')}
-            className={`min-h-[56px] rounded-input font-bold text-xs border flex flex-col items-center justify-center gap-1 active:scale-98 transition ${
+            className={`min-h-[56px] rounded-input font-bold text-xs border flex flex-col items-center justify-center gap-1 active:scale-98 transition cursor-pointer ${
               crowdLevel === 'moderate'
-                ? 'bg-amber-500 text-ink-950 border-amber-500 shadow-soft'
-                : 'bg-white text-muted border-line hover:border-amber-500'
+                ? 'bg-amber-500 text-navy-900 border-amber-500 shadow-soft on-amber font-extrabold'
+                : 'bg-surface text-text border-line hover:border-amber-500'
             }`}
+            style={crowdLevel === 'moderate' ? { color: 'var(--on-amber)' } : {}}
           >
             <Users className="w-4 h-4" />
             <span>Filling Up</span>
@@ -343,11 +346,17 @@ export default function DriverTripPage() {
           <button
             type="button"
             onClick={() => handleCrowdChange('full')}
-            className={`min-h-[56px] rounded-input font-bold text-xs border flex flex-col items-center justify-center gap-1 active:scale-98 transition ${
+            className={`min-h-[56px] rounded-input font-bold text-xs border flex flex-col items-center justify-center gap-1 active:scale-98 transition cursor-pointer ${
               crowdLevel === 'full'
-                ? 'bg-danger text-white border-danger shadow-soft'
-                : 'bg-white text-muted border-line hover:border-danger'
+                ? 'bg-danger text-white border-danger shadow-soft font-extrabold'
+                : 'bg-surface text-text border-line hover:border-danger'
             }`}
+          >
+            <Users className="w-4 h-4" />
+            <span>Packed</span>
+          </button>
+        </div>
+      </div>
           >
             <Users className="w-4 h-4" />
             <span>Packed</span>
@@ -370,11 +379,11 @@ export default function DriverTripPage() {
       {/* Confirm End Trip Dialog */}
       {showEndConfirm && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-5 animate-fade-in">
-          <div className="w-full max-w-sm bg-white rounded-sheet p-6 text-center space-y-4 shadow-xl border border-line">
+          <div className="w-full max-w-sm bg-surface rounded-sheet p-6 text-center space-y-4 shadow-xl border border-line">
             <div className="w-12 h-12 rounded-full bg-danger/10 text-danger flex items-center justify-center mx-auto">
               <Power className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-extrabold text-ink-950 font-heading">End Current Trip?</h3>
+            <h3 className="text-lg font-extrabold text-text font-heading">End Current Trip?</h3>
             <p className="text-xs text-muted leading-relaxed">
               This will stop GPS broadcasting and remove your bus from passenger live tracking.
             </p>
@@ -382,7 +391,7 @@ export default function DriverTripPage() {
               <button
                 type="button"
                 onClick={() => setShowEndConfirm(false)}
-                className="flex-1 py-3 bg-sky-100 text-ink-950 font-bold text-xs rounded-pill hover:bg-sky-200 transition"
+                className="flex-1 py-3 bg-surface-2 text-text font-bold text-xs rounded-pill hover:bg-line transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -390,7 +399,7 @@ export default function DriverTripPage() {
                 type="button"
                 disabled={isEnding}
                 onClick={handleEndTrip}
-                className="flex-1 py-3 bg-danger text-white font-bold text-xs rounded-pill hover:opacity-90 active:scale-98 transition"
+                className="flex-1 py-3 bg-danger text-white font-bold text-xs rounded-pill hover:opacity-90 active:scale-98 transition cursor-pointer"
               >
                 {isEnding ? 'Ending...' : 'Yes, End Trip'}
               </button>

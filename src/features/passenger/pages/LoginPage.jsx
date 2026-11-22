@@ -39,14 +39,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [formError, setFormError] = useState(null)
-  const [adminNotice, setAdminNotice] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (submitting) return
     setFormError(null)
-    setAdminNotice(false)
 
     if (!email || !password) {
       setFormError('Please enter both email and password.')
@@ -64,8 +62,7 @@ export default function LoginPage() {
       }
 
       if (profile?.role === 'admin') {
-        setAdminNotice(true)
-        setSubmitting(false)
+        navigate('/12345678/admin/dashboard')
       } else if (profile?.role === 'driver') {
         navigate('/driver')
       } else {
@@ -122,21 +119,6 @@ export default function LoginPage() {
               Access your saved trips and personalized alerts
             </p>
           </div>
-
-          {adminNotice && (
-            <div className="p-3.5 bg-amber-100 dark:bg-amber-950/50 border border-amber-500/30 rounded-[16px] text-xs text-navy-900 dark:text-amber-200 flex flex-col gap-2">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <span>{t('auth.admin_login_notice')}</span>
-              </div>
-              <Link
-                to="/12345678/admin/login"
-                className="text-xs font-bold text-brand hover:underline flex items-center gap-1 self-end"
-              >
-                {t('auth.admin_portal_link')} <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          )}
 
           {formError && (
             <div className="p-3.5 bg-danger/10 border border-danger/30 rounded-[16px] text-xs text-danger font-semibold flex items-center gap-2">
