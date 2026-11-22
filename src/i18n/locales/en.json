@@ -25,7 +25,17 @@
   },
   "auth": {
     "login": "Log in",
+    "login_btn": "Sign in",
+    "signing_in": "Signing in...",
     "register": "Create account",
+    "register_btn": "Sign up",
+    "creating_account": "Creating account...",
+    "no_account": "Create account",
+    "new_to_app": "New to Nammooru Bus?",
+    "already_have_account": "Already have an account?",
+    "sign_in": "Sign in",
+    "sign_up": "Sign up",
+    "logout": "Log out",
     "forgot_password": "Forgot password",
     "reset_password": "Reset password",
     "email_label": "Email address",
@@ -36,13 +46,12 @@
     "name_label": "Full name",
     "name_placeholder": "Your name",
     "preferred_lang_label": "Preferred language",
-    "login_action": "Log in",
+    "login_action": "Sign in",
     "register_action": "Sign up",
     "send_reset_action": "Send reset link",
     "update_password_action": "Update password",
-    "dont_have_account": "Don't have an account?",
-    "already_have_account": "Already have an account?",
-    "back_to_login": "Back to login",
+    "dont_have_account": "New to Nammooru Bus?",
+    "back_to_login": "Back to sign in",
     "admin_login_notice": "Please use the designated administrator login portal.",
     "admin_portal_link": "Administrator Login",
     "login_failed": "Invalid email or password",
@@ -52,6 +61,10 @@
     "admin_secret_placeholder": "Enter admin secret key",
     "admin_locked_out": "Too many failed attempts. Locked out for {{seconds}}s.",
     "admin_login_title": "Admin Access Portal"
+  },
+  "settings": {
+    "preferences": "Preferences & Appearance",
+    "theme": "Theme"
   },
   "nav": {
     "explore": "Explore",
@@ -85,6 +98,7 @@
     "cheapest": "Cheapest",
     "no_results": "No buses found for this trip",
     "no_results_sub": "Try picking a major junction or another nearby stop.",
+    "no_routes": "No routes available",
     "outside_hours": "Outside service hours",
     "total_time": "Total time",
     "fare": "Fare",
@@ -106,7 +120,8 @@
     "last_bus": "Last bus",
     "headway": "Every {{min}} min",
     "copied": "Trip copied to clipboard",
-    "sos_message": "I am traveling on Nammooru Bus. Track my journey here:"
+    "sos_message": "I am traveling on Nammooru Bus. Track my journey here:",
+    "crowd_reported_success": "Thank you for reporting crowd level!"
   },
   "driver": {
     "portal_title": "Driver Portal",

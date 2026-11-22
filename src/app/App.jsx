@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom'
 import { MotionConfig } from 'framer-motion'
 import { router } from './routes'
 import { useAuthStore } from '@/store/authStore'
+import { useThemeStore } from '@/store/themeStore'
 import OfflineBanner from '@/components/ui/OfflineBanner'
 import SplashScreen from '@/components/splash/SplashScreen'
 
@@ -15,6 +16,7 @@ export default function App() {
 
   useEffect(() => {
     init()
+    useThemeStore.getState().initTheme()
   }, [init])
 
   const handleSplashFinish = () => {

@@ -51,9 +51,8 @@ export default function FloatingTabBar() {
               className={`transition-colors ${active ? 'text-white' : 'text-muted hover:text-ink-950'}`}
             />
             <span
-              className={`text-[10.5px] font-semibold leading-tight tracking-tight truncate max-w-[62px] ${
-                active ? 'text-white font-bold' : 'text-muted'
-              }`}
+              className={`text-[10.5px] font-semibold leading-tight tracking-tight truncate max-w-[62px] ${active ? 'text-white font-bold' : 'text-muted'
+                }`}
             >
               {tab.label}
             </span>

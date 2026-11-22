@@ -5,6 +5,7 @@ import { User, LogIn, RefreshCw, Compass, Radio, MapPin, Route, Bookmark } from 
 import MapView from '@/components/map/MapView'
 import FloatingTabBar from '@/components/ui/FloatingTabBar'
 import LanguageToggle from '@/components/ui/LanguageToggle'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 import LiveDot from '@/components/ui/LiveDot'
 import { ToastContainer } from '@/components/ui/Toast'
 import { useAuthStore } from '@/store/authStore'
@@ -41,56 +42,30 @@ export default function PassengerLayout() {
   ]
 
   return (
-    <div className="relative w-full min-h-screen bg-sky-50 font-body text-ink-950 flex flex-col md:flex-row overflow-x-hidden">
-      {/* 1. Global Top App Bar */}
+    <div className="relative w-full min-h-screen bg-bg font-body text-ink-950 flex flex-col md:flex-row overflow-x-hidden">
+      {/* 1. Global Top App Bar: 56px height, solid surface on all pages, line border */}
       <header
-        className={`fixed top-0 left-0 right-0 z-40 px-4 md:px-6 py-2.5 flex items-center justify-between transition-all duration-300 ${
-          isHomePage
-            ? 'bg-transparent border-b-0 text-white'
-            : 'bg-white/95 backdrop-blur-md border-b text-ink-950 shadow-xs'
-        }`}
-        style={{ borderColor: 'var(--line)' }}
+        className="fixed top-0 left-0 right-0 z-40 h-14 px-2.5 sm:px-4 md:px-6 flex items-center justify-between bg-surface border-b border-line shadow-xs transition-colors"
       >
-        <div className="flex items-center gap-3">
-          <Link to="/" className="flex items-center gap-2 select-none group">
-            <img
-              src="/brand/logo-mark-transparent.png"
-              alt="Logo"
-              className="h-9 w-9 object-contain"
-            />
-            <span className="font-heading text-base font-extrabold tracking-tight">
-              <span className={isHomePage ? 'text-white' : 'text-ink-950'}>Nammooru</span>
-              <span className="text-cobalt-500 ml-0.5">Bus</span>
+        <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+          <Link to="/" className="flex items-center gap-2 select-none shrink-0 group">
+            {/* Logo mark: 36px, in dark mode wrapped in white plate so navy bus is not lost */}
+            <div className="w-9 h-9 rounded-[12px] p-0.5 flex items-center justify-center dark:bg-white transition-colors shrink-0">
+              <img
+                src="/brand/logo-mark-transparent.png"
+                alt="Nammooru Logo"
+                className="h-8 w-8 object-contain"
+              />
+            </div>
+            <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight whitespace-nowrap">
+              <span className="text-ink-950">Nammooru</span>
+              <span className="text-cobalt-500 dark:text-[#6E94FF] ml-0.5">Bus</span>
             </span>
-          </Link>
-
-          {/* Live Bus Count Pill */}
-          <div className="h-4 w-[1px] bg-line/60 mx-1 hidden sm:block" />
-          <Link
-            to="/live"
-            className="flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-pill transition-transform active:scale-95 shadow-xs"
-            style={
-              isReconnecting
-                ? { backgroundColor: 'var(--sky-100)', color: 'var(--color-warning)' }
-                : { backgroundColor: 'var(--amber-500)', color: 'var(--navy-900)' }
-            }
-          >
-            {isReconnecting ? (
-              <>
-                <RefreshCw className="w-3 h-3 animate-spin text-amber-600" />
-                <span>Reconnecting</span>
-              </>
-            ) : (
-              <>
-                <span className="w-2 h-2 rounded-full bg-navy-900 animate-pulse" />
-                <span>{liveCount} live</span>
-              </>
-            )}
           </Link>
         </div>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1 bg-white/80 backdrop-blur-sm p-1 rounded-pill border border-line shadow-xs">
+        <nav className="hidden md:flex items-center gap-1 bg-surface-2 p-1 rounded-pill border border-line shadow-xs">
           {navLinks.map((item) => {
             const active = item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
             const Icon = item.icon
@@ -101,7 +76,7 @@ export default function PassengerLayout() {
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-pill text-xs font-bold transition ${
                   active
                     ? 'text-white shadow-xs'
-                    : 'text-muted hover:text-ink-950 hover:bg-sky-50'
+                    : 'text-muted hover:text-ink-950 hover:bg-sky-50 dark:hover:bg-surface'
                 }`}
                 style={active ? { background: 'var(--gradient-brand)' } : {}}
               >
@@ -112,13 +87,45 @@ export default function PassengerLayout() {
           })}
         </nav>
 
-        {/* Right side actions (Language & Profile) */}
-        <div className="flex items-center gap-2">
-          <LanguageToggle />
+        {/* Right side actions (Live pill, Theme, Language on Desktop, Profile) */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Live Bus Count Pill */}
+          <Link
+            to="/live"
+            className="flex items-center gap-1.5 text-xs font-bold px-2 sm:px-2.5 py-1 rounded-pill transition-transform active:scale-95 shadow-xs shrink-0"
+            style={
+              isReconnecting
+                ? { backgroundColor: 'var(--sky-100)', color: 'var(--color-warning)' }
+                : { backgroundColor: 'var(--amber-500)', color: 'var(--navy-900)' }
+            }
+          >
+            {isReconnecting ? (
+              <>
+                <RefreshCw className="w-3 h-3 animate-spin text-amber-900 shrink-0" />
+                <span className="hidden min-[400px]:inline">Reconnecting</span>
+              </>
+            ) : (
+              <>
+                <span className="w-2 h-2 rounded-full bg-navy-900 animate-pulse shrink-0" />
+                <span>{liveCount}</span>
+                <span className="hidden min-[360px]:inline">live</span>
+              </>
+            )}
+          </Link>
+
+          {/* Language toggle: DESKTOP ONLY (hidden on mobile under 768px) */}
+          <div className="hidden md:block">
+            <LanguageToggle />
+          </div>
+
+          {/* Theme toggle (44x44 icon button) */}
+          <ThemeToggle />
+
+          {/* Profile avatar (36px circle) */}
           {user ? (
             <Link
               to="/profile"
-              className="rounded-full w-8 h-8 bg-sky-100 border-2 border-cobalt-500 text-cobalt-500 flex items-center justify-center transition active:scale-95 shadow-xs"
+              className="rounded-full w-9 h-9 bg-sky-100 dark:bg-surface-2 border-2 border-cobalt-500 text-cobalt-500 flex items-center justify-center transition active:scale-95 shadow-xs shrink-0"
               title={user.email}
             >
               <User className="w-4 h-4" />
@@ -126,8 +133,8 @@ export default function PassengerLayout() {
           ) : (
             <Link
               to="/login"
-              className="rounded-full w-8 h-8 bg-white border border-line text-muted hover:text-cobalt-500 flex items-center justify-center transition active:scale-95 shadow-xs"
-              title={t('auth.login')}
+              className="rounded-full w-9 h-9 bg-surface border border-line text-muted hover:text-cobalt-500 flex items-center justify-center transition active:scale-95 shadow-xs shrink-0"
+              title={t('auth.sign_in')}
             >
               <LogIn className="w-4 h-4" />
             </Link>
@@ -139,13 +146,11 @@ export default function PassengerLayout() {
       <ToastContainer />
 
       {/* 3. Main Content Area */}
-      {/* Mobile: Normal scrolling container with in-page map cards */}
-      {/* Desktop (768px+): Left column 440px white panel with radius 28 inside sky-50 page + Right column large map */}
-      <div className="flex-1 w-full flex flex-col md:flex-row min-h-screen pt-14 md:pt-16">
+      <div className="flex-1 w-full flex flex-col md:flex-row min-h-screen pt-14">
         {/* Left Column (Content) */}
         <main
-          className={`flex-1 md:w-[460px] md:max-w-[460px] md:flex-none min-h-screen pb-24 md:pb-8 px-4 md:px-5 overflow-y-auto md:border-r md:border-line md:bg-white md:m-3 md:rounded-[28px] md:shadow-soft transition-all ${
-            isSearchPage ? 'bg-white' : ''
+          className={`flex-1 md:w-[460px] md:max-w-[460px] md:flex-none min-h-screen pb-24 md:pb-8 px-4 md:px-5 overflow-y-auto md:border-r md:border-line md:bg-surface md:m-3 md:rounded-[28px] md:shadow-soft transition-all ${
+            isSearchPage ? 'bg-surface' : ''
           }`}
           style={{
             paddingBottom: 'calc(96px + env(safe-area-inset-bottom))',
@@ -157,7 +162,7 @@ export default function PassengerLayout() {
         </main>
 
         {/* Right Column (Desktop Large Map View) */}
-        <aside className="hidden md:block flex-1 h-[calc(100vh-64px)] sticky top-16 relative bg-white overflow-hidden md:m-3 md:ml-0 md:rounded-[28px] md:shadow-soft border border-line">
+        <aside className="hidden md:block flex-1 h-[calc(100vh-64px)] sticky top-16 relative bg-surface overflow-hidden md:m-3 md:ml-0 md:rounded-[28px] md:shadow-soft border border-line">
           <MapView />
         </aside>
       </div>

@@ -2,9 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/icons/icon-32.png" />
-    <link rel="apple-touch-icon" href="/icons/icon-180.png" />
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('nb-theme') || 'system';
+          var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var theme = isDark ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch(e) {}
+      })();
+    </script>
+
+    <!-- Favicon & Touch Icons on White Rounded Square -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png" />
     <link rel="manifest" href="/manifest.json" />
+
+    <!-- Preload Logo for Splash Screen -->
+    <link rel="preload" as="image" href="/brand/logo-full.png" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Our town. Our bus. ನಮ್ಮೂರು. ನಮ್ಮ ಬಸ್." />
     <meta name="theme-color" content="#0040FF" />

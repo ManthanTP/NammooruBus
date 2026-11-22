@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint src",
-    "icons": "npx @capacitor/assets generate"
+    "i18n:check": "node ./scripts/check_i18n.js",
+    "icons": "powershell -ExecutionPolicy Bypass -File ./scripts/generate_icons.ps1"
   },
   "dependencies": {
     "@fontsource/dotgothic16": "^5.0.0",

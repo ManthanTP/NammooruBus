@@ -1,17 +1,38 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertCircle, KeyRound, Bus, Eye, EyeOff } from 'lucide-react'
+import { AlertCircle, KeyRound, Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
 import LanguageToggle from '@/components/ui/LanguageToggle'
-import Button from '@/components/ui/Button'
+import RoadRibbon from '@/components/ui/RoadRibbon'
+import AuthSwitch from '@/components/ui/AuthSwitch'
+
+function formatAuthError(error) {
+  if (!error) return null
+  const msg = typeof error === 'string' ? error : (error.message || '')
+  const lower = msg.toLowerCase()
+
+  if (lower.includes('already registered') || lower.includes('already in use') || lower.includes('already exists') || lower.includes('user already registered')) {
+    return 'An account with this email already exists. Please sign in.'
+  }
+  if (lower.includes('password') && (lower.includes('least') || lower.includes('short') || lower.includes('weak'))) {
+    return 'Password must be at least 8 characters long.'
+  }
+  if (lower.includes('rate limit') || lower.includes('too many requests')) {
+    return 'Too many attempts. Please wait a few minutes before trying again.'
+  }
+  if (lower.includes('network') || lower.includes('fetch')) {
+    return 'Network connection issue. Please check your internet connection.'
+  }
+  return msg || 'Registration failed. Please try again.'
+}
 
 export default function RegisterPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { signUp, claimDriverRole, loading } = useAuthStore()
+  const { signUp, claimDriverRole } = useAuthStore()
   const { routes, initData } = useDataStore()
 
   const [fullName, setFullName] = useState('')
@@ -25,6 +46,7 @@ export default function RegisterPage() {
   const [selectedRouteId, setSelectedRouteId] = useState('')
   const [formError, setFormError] = useState(null)
   const [noticeMessage, setNoticeMessage] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     initData()
@@ -38,6 +60,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (submitting) return
     setFormError(null)
     setNoticeMessage(null)
 
@@ -57,83 +80,106 @@ export default function RegisterPage() {
       }
     }
 
+    setSubmitting(true)
     const submittedKey = driverKey
     const submittedBus = busRegNo.trim().toUpperCase()
     const submittedRoute = selectedRouteId
     setDriverKey('')
 
-    const { data, error } = await signUp(email, password, fullName, preferredLang)
+    try {
+      const { error } = await signUp(email, password, fullName, preferredLang)
 
-    if (error) {
-      setFormError(error.message || t('auth.register_failed'))
-      return
-    }
-
-    if (isDriver) {
-      const { status } = await claimDriverRole(submittedKey, submittedBus, submittedRoute)
-
-      if (status === 'ok') {
-        navigate('/driver')
-        return
-      } else if (status === 'invalid') {
-        setNoticeMessage({
-          type: 'warning',
-          text: 'That driver key is not correct. Your account was created as a passenger. You can try the key again anytime on your Profile page.',
-        })
-        return
-      } else if (status === 'locked') {
-        setFormError('Too many wrong keys. Try again in 15 minutes.')
-        return
-      } else if (status === 'not_configured') {
-        setFormError('Driver sign-up is not set up yet. Ask the admin.')
-        return
-      } else if (status === 'bus_taken') {
-        setFormError('This bus is already assigned to another driver. Please contact admin.')
-        return
-      } else if (status === 'bus_required') {
-        setFormError('Please enter your bus registration number.')
-        return
-      } else if (status === 'login_required') {
-        setFormError('Account created. Please log in and claim driver role on your profile.')
+      if (error) {
+        setFormError(formatAuthError(error))
+        setSubmitting(false)
         return
       }
-    }
 
-    navigate('/')
+      if (isDriver) {
+        const { status } = await claimDriverRole(submittedKey, submittedBus, submittedRoute)
+
+        if (status === 'ok') {
+          navigate('/driver')
+          return
+        } else if (status === 'invalid') {
+          setNoticeMessage({
+            type: 'warning',
+            text: 'That driver key is not correct. Your account was created as a passenger. You can try the key again anytime on your Profile page.',
+          })
+          setSubmitting(false)
+          return
+        } else if (status === 'locked') {
+          setFormError('Too many wrong keys. Try again in 15 minutes.')
+          setSubmitting(false)
+          return
+        } else if (status === 'not_configured') {
+          setFormError('Driver sign-up is not set up yet. Ask the admin.')
+          setSubmitting(false)
+          return
+        } else if (status === 'bus_taken') {
+          setFormError('This bus is already assigned to another driver. Please contact admin.')
+          setSubmitting(false)
+          return
+        } else if (status === 'bus_required') {
+          setFormError('Please enter your bus registration number.')
+          setSubmitting(false)
+          return
+        } else if (status === 'login_required') {
+          setFormError('Account created. Please log in and claim driver role on your profile.')
+          setSubmitting(false)
+          return
+        }
+      }
+
+      navigate('/')
+    } catch (err) {
+      setFormError(formatAuthError(err))
+      setSubmitting(false)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-sky-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-bg flex flex-col justify-between font-body text-ink-950 transition-colors">
       {/* 1. Top Half: Signature Gradient with logo-full */}
       <div
-        className="pt-8 pb-14 px-6 text-white flex flex-col items-center justify-center relative overflow-hidden"
+        className="pt-10 pb-16 px-6 text-white flex flex-col items-center justify-center relative overflow-hidden shrink-0"
         style={{ background: 'var(--gradient-brand)' }}
       >
         <div className="absolute top-4 right-4 z-10">
           <LanguageToggle />
         </div>
 
-        <div className="bg-white rounded-[20px] p-3.5 shadow-float mb-3 flex items-center justify-center max-w-[180px]">
+        <div className="bg-white rounded-[20px] p-4 shadow-float mb-4 flex items-center justify-center max-w-[200px]">
           <img
             src="/brand/logo-full.png"
             alt="Nammooru Bus"
-            className="w-32 h-auto object-contain"
+            className="w-36 h-auto object-contain"
           />
         </div>
 
         <h1 className="font-heading font-extrabold text-2xl text-white tracking-tight">
-          Join Nammooru Bus
+          {t('auth.register')}
         </h1>
-        <p className="text-xs text-white/75 font-medium mt-0.5">
-          {t('app.tagline') || 'Our town. Our bus.'}
+        <p className="text-xs text-white/75 font-medium mt-1">
+          {t('app.tagline')}
         </p>
 
-        <div className="absolute bottom-0 left-0 right-0 h-2.5 road-ribbon opacity-80" />
+        {/* Road ribbon at bottom of top section */}
+        <RoadRibbon />
       </div>
 
-      {/* 2. Bottom Half: White Sheet Form */}
+      {/* 2. Bottom Half: Form Card */}
       <main className="flex-1 w-full max-w-md mx-auto -mt-8 relative z-10 px-4 pb-8">
-        <div className="bg-white p-6 rounded-[28px] border border-line shadow-soft space-y-4">
+        <div className="bg-surface p-6 rounded-[28px] border border-line shadow-soft space-y-4">
+          <div className="space-y-1">
+            <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-ink-950">
+              {t('auth.register')}
+            </h2>
+            <p className="text-xs text-muted">
+              Create an account to track buses and plan your trips
+            </p>
+          </div>
+
           {formError && (
             <div className="p-3.5 bg-danger/10 border border-danger/30 rounded-[16px] text-xs text-danger font-semibold flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -142,7 +188,7 @@ export default function RegisterPage() {
           )}
 
           {noticeMessage && (
-            <div className="p-3.5 bg-amber-100 border border-amber-500/30 rounded-[16px] text-xs text-navy-900 font-medium">
+            <div className="p-3.5 bg-amber-100 dark:bg-amber-950/50 border border-amber-500/30 rounded-[16px] text-xs text-navy-900 dark:text-amber-200 font-medium">
               {noticeMessage.text}
             </div>
           )}
@@ -150,78 +196,83 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-3.5">
             <div>
               <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
-                {t('auth.name_label') || 'Full Name'}
+                {t('auth.name_label')}
               </label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Basavaraj"
+                placeholder={t('auth.name_placeholder') || 'Basavaraj'}
                 required
-                className="w-full h-12 px-4 bg-sky-50 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition"
+                disabled={submitting}
+                className="w-full h-14 px-4 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition disabled:opacity-50"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
-                {t('auth.email_label') || 'Email Address'}
+                {t('auth.email_label')}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
+                placeholder={t('auth.email_placeholder') || 'name@example.com'}
                 required
-                className="w-full h-12 px-4 bg-sky-50 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition"
+                disabled={submitting}
+                className="w-full h-14 px-4 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition disabled:opacity-50"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
-                {t('auth.password_label') || 'Password'}
+                {t('auth.password_label')}
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
+                  placeholder={t('auth.password_placeholder')}
                   required
                   minLength={8}
-                  className="w-full h-12 px-4 pr-11 bg-sky-50 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition"
+                  disabled={submitting}
+                  className="w-full h-14 px-4 pr-11 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-sm text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500 transition disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink-950"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink-950 p-1"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              <p className="text-[11px] text-muted mt-1">
+                {t('auth.password_hint')}
+              </p>
             </div>
 
             {/* Account Role Selector / Driver Switch */}
             <div className="pt-1">
-              <div className="flex items-center justify-between p-1 bg-sky-50 rounded-full border border-line">
+              <div className="flex items-center justify-between p-1 bg-sky-50 dark:bg-surface-2 rounded-full border border-line">
                 <button
                   type="button"
                   onClick={() => setIsDriver(false)}
-                  className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    !isDriver
-                      ? 'bg-cobalt-500 text-white shadow-xs'
-                      : 'text-muted hover:text-ink-950'
-                  }`}
+                  className={`flex-1 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${!isDriver
+                    ? 'bg-cobalt-500 text-white shadow-xs'
+                    : 'text-muted hover:text-ink-950'
+                    }`}
                 >
                   Passenger
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsDriver(true)}
-                  className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all ${
-                    isDriver
-                      ? 'bg-amber-500 text-navy-900 shadow-xs'
-                      : 'text-muted hover:text-ink-950'
-                  }`}
+                  className={`flex-1 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${isDriver
+                    ? 'bg-amber-500 text-navy-900 shadow-xs'
+                    : 'text-muted hover:text-ink-950'
+                    }`}
                 >
                   Driver 🚌
                 </button>
@@ -238,7 +289,7 @@ export default function RegisterPage() {
                   transition={{ duration: 0.25, ease: 'easeInOut' }}
                   className="space-y-3 pt-2 overflow-hidden"
                 >
-                  <div className="p-3 bg-amber-100/60 rounded-[16px] border border-amber-500/30 text-xs text-navy-900 font-medium flex items-start gap-2">
+                  <div className="p-3 bg-amber-100/60 dark:bg-amber-950/40 rounded-[16px] border border-amber-500/30 text-xs text-navy-900 dark:text-amber-200 font-medium flex items-start gap-2">
                     <KeyRound className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     <span>Enter your driver credentials assigned by the depot supervisor.</span>
                   </div>
@@ -253,7 +304,8 @@ export default function RegisterPage() {
                       onChange={(e) => setDriverKey(e.target.value)}
                       placeholder="Enter depot key"
                       required={isDriver}
-                      className="w-full h-11 px-4 bg-sky-50 border border-line rounded-[12px] text-xs font-mono text-ink-950 focus:outline-none focus:border-cobalt-500"
+                      disabled={submitting}
+                      className="w-full h-12 px-4 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-xs font-mono text-ink-950 focus:outline-none focus:border-cobalt-500 transition disabled:opacity-50"
                     />
                   </div>
 
@@ -267,7 +319,8 @@ export default function RegisterPage() {
                       onChange={(e) => setBusRegNo(e.target.value.toUpperCase())}
                       placeholder="e.g. KA25 F 1234"
                       required={isDriver}
-                      className="w-full h-11 px-4 bg-sky-50 border border-line rounded-[12px] text-xs font-mono font-bold text-ink-950 uppercase focus:outline-none focus:border-cobalt-500"
+                      disabled={submitting}
+                      className="w-full h-12 px-4 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-xs font-mono font-bold text-ink-950 uppercase focus:outline-none focus:border-cobalt-500 transition disabled:opacity-50"
                     />
                   </div>
 
@@ -278,7 +331,8 @@ export default function RegisterPage() {
                     <select
                       value={selectedRouteId}
                       onChange={(e) => setSelectedRouteId(e.target.value)}
-                      className="w-full h-11 px-3 bg-sky-50 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500"
+                      disabled={submitting}
+                      className="w-full h-12 px-3 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500 transition disabled:opacity-50"
                     >
                       {routes.map((r) => (
                         <option key={r.id} value={r.id}>
@@ -291,26 +345,22 @@ export default function RegisterPage() {
               )}
             </AnimatePresence>
 
-            <Button
+            {/* Primary button: 52px height, full width, gradient background */}
+            <button
               type="submit"
-              variant="primary"
-              size="md"
-              loading={loading}
-              className="w-full h-12 text-sm font-bold font-heading tracking-tight mt-2"
+              disabled={submitting}
+              className="w-full h-[52px] rounded-full text-white font-heading font-bold text-sm tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-soft disabled:opacity-60 cursor-pointer mt-2"
+              style={{ background: 'var(--gradient-brand)' }}
             >
-              <span>{t('auth.register_btn') || 'Create Account'}</span>
-            </Button>
+              {submitting && (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              )}
+              <span>{submitting ? t('auth.creating_account') : t('auth.register_btn')}</span>
+            </button>
           </form>
 
-          <div className="text-center pt-2">
-            <span className="text-xs text-muted">Already have an account? </span>
-            <Link
-              to="/login"
-              className="text-xs font-bold text-cobalt-500 hover:underline"
-            >
-              Sign in
-            </Link>
-          </div>
+          {/* Unified Bottom Block */}
+          <AuthSwitch mode="register" />
         </div>
       </main>
     </div>

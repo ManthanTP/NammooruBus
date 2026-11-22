@@ -5,6 +5,7 @@ import { ShieldAlert, Lock, AlertCircle, KeyRound, Eye, EyeOff } from 'lucide-re
 import { useAuthStore } from '@/store/authStore'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import Button from '@/components/ui/Button'
+import RoadRibbon from '@/components/ui/RoadRibbon'
 
 const MAX_ATTEMPTS = 3
 const LOCKOUT_DURATION_MS = 60 * 1000
@@ -131,7 +132,7 @@ export default function AdminLoginPage() {
         </p>
 
         {/* Road ribbon at bottom of top section */}
-        <div className="absolute bottom-0 left-0 right-0 h-2.5 road-ribbon opacity-80" />
+        <RoadRibbon />
       </div>
 
       {/* 2. Bottom Section: White Sheet Form */}

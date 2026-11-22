@@ -1,12 +1,36 @@
 {
   "name": "Nammooru Bus",
   "short_name": "NammooruBus",
-  "description": "Our town. Our bus.",
+  "description": "Our town. Our bus. ನಮ್ಮೂರು. ನಮ್ಮ ಬಸ್.",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#0040FF",
-  "background_color": "#0040FF",
+  "background_color": "#FFFFFF",
   "icons": [
+    {
+      "src": "/icons/icon-16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",

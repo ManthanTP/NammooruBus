@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard,
   MapPin,
@@ -18,18 +19,36 @@ import {
   LogOut,
   Menu,
   X,
+  Compass,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { ToastContainer, useToastStore } from '@/components/ui/Toast'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 
 export default function AdminLayout() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { user, profile, signOut } = useAuthStore()
   const { addToast } = useToastStore()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = useRef(null)
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false)
+      }
+    }
+    if (userMenuOpen) {
+      document.addEventListener('mousedown', handleOutsideClick)
+    }
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [userMenuOpen])
 
   const handleLogout = async () => {
+    setUserMenuOpen(false)
     await signOut()
     addToast({ message: 'Logged out from Admin portal', type: 'info' })
     navigate('/12345678/admin/login')
@@ -60,7 +79,7 @@ export default function AdminLayout() {
     .toUpperCase()
 
   return (
-    <div className="min-h-screen font-body flex bg-sky-50 text-ink-950 select-none">
+    <div className="min-h-screen font-body flex bg-bg text-ink-950 select-none transition-colors">
       {/* 1. Fixed Sidebar (Desktop: 240px wide = w-60) */}
       <aside className="hidden md:flex w-60 flex-col shrink-0 fixed inset-y-0 left-0 z-30 bg-navy-900 text-white">
         {/* Brand header */}
@@ -166,31 +185,38 @@ export default function AdminLayout() {
       )}
 
       {/* 2. Main Content Area */}
-      <div className="flex-1 md:ml-60 flex flex-col min-w-0">
-        {/* Top bar: simple white bar, title in Outfit 700, quick stats, admin avatar */}
-        <header className="h-16 bg-white px-5 sm:px-6 flex items-center justify-between sticky top-0 z-20 border-b border-line shadow-xs">
-          <div className="flex items-center gap-3">
+      <div className="flex-1 md:ml-60 flex flex-col min-w-0 bg-bg transition-colors">
+        {/* Top bar: 56px height, solid surface, brand logo, theme toggle, profile menu */}
+        <header className="h-14 bg-surface px-4 sm:px-6 flex items-center justify-between sticky top-0 z-20 border-b border-line shadow-xs transition-colors">
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden p-2 text-ink-950 hover:bg-sky-50 rounded-pill"
+              className="md:hidden p-2 text-ink-950 hover:bg-sky-50 dark:hover:bg-surface-2 rounded-pill transition"
               aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <h1 className="font-heading text-base font-bold text-ink-950">
-                Nammooru <span className="text-cobalt-500">Admin</span>
-              </h1>
-              <div className="hidden sm:flex items-center gap-2 ml-3 px-2.5 py-1 rounded-pill bg-sky-50 border border-line">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-bold text-ink-950">System Operational</span>
+              <div className="w-9 h-9 rounded-[12px] p-0.5 flex items-center justify-center dark:bg-white transition-colors shrink-0">
+                <img
+                  src="/brand/logo-mark-transparent.png"
+                  alt="Logo"
+                  className="h-8 w-8 object-contain"
+                />
               </div>
+              <h1 className="font-heading text-lg font-extrabold tracking-tight text-ink-950">
+                Nammooru <span className="text-cobalt-500 dark:text-[#6E94FF]">Admin</span>
+              </h1>
+            </div>
+            <div className="hidden lg:flex items-center gap-1.5 ml-3 px-2.5 py-1 rounded-pill bg-sky-50 dark:bg-surface-2 border border-line">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-bold text-ink-950">Operational</span>
             </div>
           </div>
 
-          {/* Admin User Info, Avatar & Logout */}
-          <div className="flex items-center gap-3">
+          {/* Admin User Info, Theme Toggle & Avatar Menu */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="text-right hidden sm:block">
               <span className="text-xs font-bold text-ink-950 block">
                 {profile?.full_name || 'Administrator'}
@@ -200,25 +226,54 @@ export default function AdminLayout() {
               </span>
             </div>
 
-            {/* Admin Avatar Circle */}
-            <div className="w-9 h-9 rounded-full bg-navy-900 text-white font-heading font-extrabold text-xs flex items-center justify-center shadow-soft">
-              {userInitials}
-            </div>
+            {/* Theme Toggle Button */}
+            <ThemeToggle />
 
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="p-2 rounded-pill bg-danger/10 text-danger border border-danger/20 hover:bg-danger hover:text-white transition flex items-center gap-1.5 text-xs font-bold"
-              title="Log out"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden md:inline">Log out</span>
-            </button>
+            {/* Admin Avatar Circle with Dropdown Menu */}
+            <div className="relative" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="w-9 h-9 rounded-full bg-navy-900 text-white border-2 border-cobalt-500 font-heading font-extrabold text-xs flex items-center justify-center shadow-soft cursor-pointer active:scale-95 transition"
+                aria-label="Admin account menu"
+              >
+                {userInitials}
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 top-11 w-56 bg-surface border border-line rounded-[20px] p-2 shadow-float z-50 animate-scale-in space-y-1">
+                  <div className="px-3 py-2 border-b border-line">
+                    <p className="font-heading font-bold text-xs text-ink-950 truncate">
+                      {profile?.full_name || 'Admin'}
+                    </p>
+                    <p className="text-[10px] text-muted font-mono truncate">{user?.email}</p>
+                  </div>
+
+                  <Link
+                    to="/"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-ink-950 hover:bg-sky-50 dark:hover:bg-surface-2 transition"
+                  >
+                    <Compass className="w-4 h-4 text-cobalt-500" />
+                    <span>Open Passenger View</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-danger hover:bg-danger/10 transition"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>{t('auth.logout')}</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 overflow-y-auto bg-bg">
           <div key={location.pathname} className="page-enter">
             <Outlet />
           </div>

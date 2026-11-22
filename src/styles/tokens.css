@@ -1,4 +1,17 @@
 :root {
+  /* Light Tokens */
+  --bg: #F2F6FF;
+  --surface: #FFFFFF;
+  --surface-2: #E4ECFF;
+  --line: #D9E2F7;
+  --text: #050F45;
+  --muted: #5B6591;
+  --brand: #0040FF;
+  --brand-strong: #0040FF;
+  --amber: #FFB400;
+  --amber-soft: #FFF3D1;
+  --shadow: 0 10px 30px rgba(0, 32, 165, 0.10);
+
   --cobalt-500: #0040FF;
   --cobalt-600: #0033D6;
   --royal-700: #0020A5;
@@ -8,9 +21,7 @@
   --amber-100: #FFF3D1;
   --sky-50: #F2F6FF;
   --sky-100: #E4ECFF;
-  --line: #D9E2F7;
   --white: #FFFFFF;
-  --muted: #5B6591;
 
   /* Status colours only for status */
   --color-success: #12A150;
@@ -38,8 +49,8 @@
   --radius-input: 12px;
 
   /* Shadows: one soft shadow only */
-  --shadow-soft: 0 10px 30px rgba(0,32,165,0.10);
-  --shadow-float: 0 12px 36px rgba(0,32,165,0.14);
+  --shadow-soft: 0 10px 30px rgba(0, 32, 165, 0.10);
+  --shadow-float: 0 12px 36px rgba(0, 32, 165, 0.14);
 
   /* Signature gradient */
   --gradient-brand: linear-gradient(135deg, #0040FF 0%, #0020A5 55%, #00136E 100%);
@@ -49,4 +60,44 @@
   --font-body: 'Figtree', 'Noto Sans Kannada', sans-serif;
   --font-led: 'DotGothic16', monospace;
   --font-kannada: 'Noto Sans Kannada', sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg: #050B2E;
+  --surface: #0B1450;
+  --surface-2: #101C66;
+  --line: #22308A;
+  --text: #EEF2FF;
+  --muted: #A9B4E8;
+  --brand: #4C7DFF;
+  --brand-strong: #0040FF;
+  --amber: #FFB400;
+  --amber-soft: rgba(255, 180, 0, 0.14);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --color-success: #3DDC97;
+  --color-danger: #FF6B6E;
+  --color-warning: #FFB400;
+
+  /* Map palette overrides for automatic dark theme adaptation */
+  --cobalt-500: #4C7DFF;
+  --cobalt-600: #336BFF;
+  --royal-700: #101C66;
+  --navy-900: #0B1450;
+  --ink-950: #EEF2FF;
+  --sky-50: #050B2E;
+  --sky-100: #101C66;
+  --white: #0B1450;
+
+  --color-ink: var(--text);
+  --color-cobalt: var(--brand);
+  --color-cobalt-tint: var(--surface-2);
+  --color-page: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-text-secondary: var(--muted);
+  --color-led-amber: var(--amber);
+  --color-led-bg: #050B2E;
+
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-float: 0 12px 36px rgba(0, 0, 0, 0.55);
 }

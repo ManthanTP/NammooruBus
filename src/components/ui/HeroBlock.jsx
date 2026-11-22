@@ -1,8 +1,8 @@
-import { motion } from 'framer-motion'
+import RoadRibbon from './RoadRibbon'
 
 /**
  * HeroBlock — gradient block with radius 28, overlapping rounded slabs echoing the N,
- * and signature road ribbon at the bottom.
+ * and signature RoadRibbon SVG at the bottom.
  */
 export default function HeroBlock({
   greeting = 'Namaskara 👋',
@@ -43,8 +43,8 @@ export default function HeroBlock({
 
       {children && <div className="relative z-10 mt-4">{children}</div>}
 
-      {/* Road ribbon motif at bottom edge */}
-      <div className="absolute bottom-0 left-0 right-0 h-3 road-ribbon opacity-90" />
+      {/* Signature smooth RoadRibbon SVG */}
+      <RoadRibbon />
     </div>
   )
 }

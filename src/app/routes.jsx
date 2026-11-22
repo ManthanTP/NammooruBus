@@ -39,6 +39,7 @@ const DriverLayout = lazy(() => import('@/features/driver/layouts/DriverLayout')
 const DriverStartPage = lazy(() => import('@/features/driver/pages/DriverStartPage'))
 const DriverTripPage = lazy(() => import('@/features/driver/pages/DriverTripPage'))
 const DriverHistoryPage = lazy(() => import('@/features/driver/pages/DriverHistoryPage'))
+const DriverBusPage = lazy(() => import('@/features/driver/pages/DriverBusPage'))
 
 // Lazy loaded admin layout & pages
 const AdminLayout = lazy(() => import('@/features/admin/layouts/AdminLayout'))
@@ -187,6 +188,10 @@ export const router = createBrowserRouter([
       {
         path: 'history',
         element: <DriverHistoryPage />,
+      },
+      {
+        path: 'bus',
+        element: <DriverBusPage />,
       },
     ],
   },

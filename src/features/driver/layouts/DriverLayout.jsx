@@ -1,86 +1,296 @@
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
-import { LogOut, History, Play, ChevronLeft } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Outlet, Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { motion, LayoutGroup } from 'framer-motion'
+import {
+  Play,
+  Radio,
+  FileText,
+  Bus,
+  User,
+  LogOut,
+  Compass,
+  Sun,
+  Moon,
+  Laptop,
+  Check,
+} from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import { useThemeStore } from '@/store/themeStore'
+import ThemeToggle from '@/components/ui/ThemeToggle'
+import LanguageToggle from '@/components/ui/LanguageToggle'
 import { ToastContainer } from '@/components/ui/Toast'
 
 export default function DriverLayout() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, signOut } = useAuthStore()
+  const { user, profile, signOut } = useAuthStore()
+  const { theme, setTheme } = useThemeStore()
+
+  const [hasActiveTrip, setHasActiveTrip] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+
+  // Check if driver has an ongoing trip
+  useEffect(() => {
+    let isMounted = true
+
+    const checkActiveTrip = async () => {
+      if (!user) return
+      try {
+        const { data: dRow } = await supabase
+          .from('drivers')
+          .select('id')
+          .eq('profile_id', user.id)
+          .maybeSingle()
+
+        if (dRow && isMounted) {
+          const { data: trip } = await supabase
+            .from('trips')
+            .select('id')
+            .eq('driver_id', dRow.id)
+            .neq('status', 'ended')
+            .maybeSingle()
+
+          if (isMounted) {
+            setHasActiveTrip(Boolean(trip))
+          }
+        }
+      } catch (err) {
+        // Fallback for mock or network error
+      }
+    }
+
+    checkActiveTrip()
+    const interval = setInterval(checkActiveTrip, 10000)
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+    }
+  }, [user, location.pathname])
+
+  // Close dropdown menu on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false)
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleOutsideClick)
+    }
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [menuOpen])
 
   const handleLogout = async () => {
+    setMenuOpen(false)
     await signOut()
     navigate('/login')
   }
 
-  const isRoot = location.pathname === '/driver'
+  const driverTabs = [
+    { key: 'trip', label: 'Trip', path: '/driver', icon: Play, exact: true },
+    { key: 'live', label: 'Live', path: '/driver/trip', icon: Radio },
+    { key: 'reports', label: 'Reports', path: '/driver/history', icon: FileText },
+    { key: 'bus', label: 'Bus', path: '/driver/bus', icon: Bus },
+    { key: 'profile', label: 'Profile', path: '/profile', icon: User },
+  ]
+
+  const userInitials = (profile?.full_name || user?.email || 'D')[0].toUpperCase()
 
   return (
-    <div className="min-h-screen font-body flex flex-col select-none" style={{ backgroundColor: 'var(--sky-50)', color: 'var(--ink-950)' }}>
-      {/* Driver Header — gradient brand bar */}
-      <header
-        className="px-5 py-4 flex items-center justify-between sticky top-0 z-40"
-        style={{ background: 'var(--gradient-brand)' }}
-      >
-        <div className="flex items-center gap-3">
-          {/* Large back button when not on root */}
-          {!isRoot && (
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="p-2 rounded-full bg-white/15 text-white hover:bg-white/25 transition mr-1"
-              aria-label="Go back"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-          )}
-          <div>
-            <h1 className="text-base font-extrabold tracking-tight text-white font-heading leading-none">
-              Nammooru Driver
-            </h1>
-            <p className="text-[11px] text-white/60 mt-0.5">{user?.email}</p>
-          </div>
+    <div className="min-h-screen bg-bg font-body text-ink-950 flex flex-col select-none transition-colors">
+      {/* 1. Global Top App Bar: 56px height, solid surface matching passenger style */}
+      <header className="sticky top-0 z-40 h-14 px-3 sm:px-5 flex items-center justify-between bg-surface border-b border-line shadow-xs transition-colors">
+        {/* Left: Logo mark + "Nammooru Bus" + Driver tag */}
+        <div className="flex items-center gap-2 min-w-0">
+          <Link to="/driver" className="flex items-center gap-2 select-none shrink-0 group">
+            <div className="w-9 h-9 rounded-[12px] p-0.5 flex items-center justify-center dark:bg-white transition-colors shrink-0">
+              <img
+                src="/brand/logo-mark-transparent.png"
+                alt="Nammooru Logo"
+                className="h-8 w-8 object-contain"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight whitespace-nowrap">
+                <span className="text-ink-950">Nammooru</span>
+                <span className="text-cobalt-500 dark:text-[#6E94FF] ml-0.5">Bus</span>
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-extrabold text-[10px] uppercase tracking-wider hidden xs:inline-block">
+                Driver
+              </span>
+            </div>
+          </Link>
         </div>
 
-        <div className="flex items-center gap-2">
-          {!isRoot && (
-            <Link
-              to="/driver"
-              className="p-2.5 rounded-full bg-white/15 text-white hover:bg-white/25 transition"
-              title="Start / Active Trip"
-            >
-              <Play className="w-5 h-5" />
-            </Link>
-          )}
-
+        {/* Right Actions: Status pill, Theme toggle, Profile avatar with menu */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          {/* Status Pill: "On trip" amber pulsing OR "Off duty" grey */}
           <Link
-            to="/driver/history"
-            className="p-2.5 rounded-full bg-white/15 text-white hover:bg-white/25 transition"
-            title="Trip History"
+            to={hasActiveTrip ? '/driver/trip' : '/driver'}
+            className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-pill transition-transform active:scale-95 shadow-xs shrink-0"
+            style={
+              hasActiveTrip
+                ? { backgroundColor: 'var(--amber-500)', color: 'var(--navy-900)' }
+                : { backgroundColor: 'var(--sky-100)', color: 'var(--text-muted)' }
+            }
           >
-            <History className="w-5 h-5" />
+            <span
+              className={`w-2 h-2 rounded-full ${hasActiveTrip ? 'bg-navy-900 animate-pulse' : 'bg-muted'
+                }`}
+            />
+            <span className="whitespace-nowrap">
+              {hasActiveTrip ? 'On trip' : 'Off duty'}
+            </span>
           </Link>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="p-2.5 rounded-full transition"
-            style={{
-              backgroundColor: 'rgba(229,72,77,0.18)',
-              color: '#fca5a5',
-              border: '1px solid rgba(229,72,77,0.3)',
-            }}
-            title="Log out"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+          {/* Theme toggle: 44px min tap target */}
+          <ThemeToggle />
+
+          {/* Profile Avatar Button with Dropdown */}
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="rounded-full w-9 h-9 bg-sky-100 dark:bg-surface-2 border-2 border-cobalt-500 text-cobalt-500 font-heading font-extrabold text-xs flex items-center justify-center transition active:scale-95 shadow-xs shrink-0 cursor-pointer"
+              aria-label="Driver account menu"
+            >
+              {userInitials}
+            </button>
+
+            {/* Dropdown Menu */}
+            {menuOpen && (
+              <div className="absolute right-0 top-11 w-64 bg-surface border border-line rounded-[20px] p-2.5 shadow-float z-50 animate-scale-in space-y-2">
+                <div className="px-3 py-2 border-b border-line">
+                  <p className="font-heading font-bold text-xs text-ink-950 truncate">
+                    {profile?.full_name || 'Driver'}
+                  </p>
+                  <p className="text-[11px] text-muted truncate">{user?.email}</p>
+                </div>
+
+                {/* Profile Link */}
+                <Link
+                  to="/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-ink-950 hover:bg-sky-50 dark:hover:bg-surface-2 transition"
+                >
+                  <User className="w-4 h-4 text-cobalt-500" />
+                  <span>Driver Profile</span>
+                </Link>
+
+                {/* Language Switch */}
+                <div className="px-3 py-1 flex items-center justify-between">
+                  <span className="text-xs font-bold text-muted">Language</span>
+                  <LanguageToggle />
+                </div>
+
+                {/* Theme Switch */}
+                <div className="px-3 py-1">
+                  <span className="text-xs font-bold text-muted block mb-1">Theme</span>
+                  <div className="flex items-center p-0.5 bg-sky-50 dark:bg-navy-950/70 border border-line rounded-pill">
+                    {[
+                      { key: 'light', label: 'Light', icon: Sun },
+                      { key: 'dark', label: 'Dark', icon: Moon },
+                      { key: 'system', label: 'Auto', icon: Laptop },
+                    ].map(({ key, label, icon: Icon }) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setTheme(key)}
+                        className={`flex-1 py-1 rounded-pill text-[11px] font-bold flex items-center justify-center gap-1 transition ${theme === key
+                          ? 'bg-cobalt-500 text-white shadow-xs'
+                          : 'text-muted hover:text-ink-950'
+                          }`}
+                      >
+                        <Icon className="w-3 h-3" />
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="h-[1px] bg-line/60" />
+
+                {/* Switch to Passenger View */}
+                <Link
+                  to="/"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-ink-950 hover:bg-sky-50 dark:hover:bg-surface-2 transition"
+                >
+                  <Compass className="w-4 h-4 text-cobalt-500" />
+                  <span>Switch to Passenger View</span>
+                </Link>
+
+                {/* Log Out */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-danger hover:bg-danger/10 transition"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>{t('auth.logout')}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Main Driver Content */}
-      <main key={location.pathname} className="flex-1 max-w-md w-full mx-auto p-5 flex flex-col page-enter">
+      {/* 2. Main Driver Content */}
+      <main
+        key={location.pathname}
+        className="flex-1 max-w-lg w-full mx-auto p-4 sm:p-5 flex flex-col page-enter"
+        style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}
+      >
         <Outlet />
       </main>
+
+      {/* 3. Mobile Floating Tab Bar (5 tabs max: Trip, Live, Reports, Bus, Profile) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none flex justify-center pb-3 px-3">
+        <LayoutGroup id="driver-tab-bar">
+          <nav
+            role="navigation"
+            aria-label="Driver Navigation"
+            className="w-full max-w-md pointer-events-auto bg-surface/95 backdrop-blur-md border border-line rounded-pill p-1.5 shadow-float flex items-center justify-around"
+          >
+            {driverTabs.map((tab) => {
+              const active = tab.exact
+                ? location.pathname === tab.path
+                : location.pathname.startsWith(tab.path)
+              const Icon = tab.icon
+
+              return (
+                <NavLink
+                  key={tab.key}
+                  to={tab.path}
+                  end={tab.exact}
+                  className={`relative flex flex-col items-center justify-center py-1.5 px-2.5 rounded-pill transition-colors flex-1 min-w-0 ${active ? 'text-white' : 'text-muted hover:text-ink-950'
+                    }`}
+                  aria-label={tab.label}
+                >
+                  {active && (
+                    <motion.div
+                      layoutId="driver-tab-pill"
+                      className="absolute inset-0 rounded-pill shadow-xs"
+                      style={{ background: 'var(--gradient-brand)' }}
+                      transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex flex-col items-center">
+                    <Icon className="w-5 h-5 mb-0.5" strokeWidth={active ? 2.5 : 2} />
+                    <span className="text-[10px] font-heading font-extrabold tracking-tight">
+                      {tab.label}
+                    </span>
+                  </span>
+                </NavLink>
+              )
+            })}
+          </nav>
+        </LayoutGroup>
+      </div>
 
       <ToastContainer />
     </div>

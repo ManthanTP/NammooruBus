@@ -215,8 +215,6 @@ export default function DriverStartPage() {
             No Bus Assigned
           </div>
         )}
-
-        <div className="absolute bottom-0 left-0 right-0 h-2 road-ribbon opacity-70" />
       </div>
 
       {/* 2. Active Trip Notification (if already ongoing) */}

@@ -13,6 +13,7 @@ import RouteBadge from '@/components/ui/RouteBadge'
 import AlertBanner from '@/features/passenger/components/AlertBanner'
 import MapCard from '@/components/map/MapCard'
 import LocationBanner from '@/components/ui/LocationBanner'
+import HeroBlock from '@/components/ui/HeroBlock'
 
 export default function HomePage() {
   const { t, i18n } = useTranslation()
@@ -92,36 +93,15 @@ export default function HomePage() {
     <div className="space-y-4 pb-4">
 
       {/* 1. Hero Block */}
-      <div
-        className="rounded-[28px] py-8 px-5 relative overflow-hidden"
-        style={{ background: 'var(--gradient-brand)' }}
-      >
-        <p className="text-white/60 text-xs font-body mb-1">ನಮಸ್ಕಾರ 👋</p>
-        <h1 className="font-heading font-extrabold text-2xl text-white leading-tight">
-          Nammooru Bus
-        </h1>
-        <p className="text-white/70 text-sm font-body mt-1">Our town. Our bus.</p>
-        {/* Road ribbon strip */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-8"
-          style={{
-            background:
-              'repeating-linear-gradient(90deg, #fff 0px, #fff 18px, transparent 18px, transparent 32px)',
-            opacity: 0.18,
-          }}
-        />
-        <div
-          className="absolute bottom-3.5 left-0 right-0 h-0.5"
-          style={{
-            background:
-              'repeating-linear-gradient(90deg, #FFB400 0px, #FFB400 14px, transparent 14px, transparent 28px)',
-          }}
-        />
-      </div>
+      <HeroBlock
+        greeting="ನಮಸ್ಕಾರ 👋"
+        title="Nammooru Bus"
+        subtitle="Our town. Our bus. • Hubballi-Dharwad"
+      />
 
       {/* 2. Search Card */}
       <div
-        className="bg-white rounded-[20px] p-5 -mt-5 relative z-10"
+        className="bg-surface rounded-[20px] p-5 -mt-5 relative z-10 border border-line"
         style={{ boxShadow: 'var(--shadow-soft)' }}
       >
         <div className="relative space-y-2">
@@ -130,7 +110,7 @@ export default function HomePage() {
             onClick={() => navigate('/search')}
             role="button"
             tabIndex={0}
-            className="flex items-center gap-2.5 px-4 py-3 bg-sky-50 rounded-[12px] border border-line hover:border-cobalt-500 transition cursor-pointer"
+            className="flex items-center gap-2.5 px-4 py-3 bg-sky-50 dark:bg-surface-2 rounded-[12px] border border-line hover:border-cobalt-500 transition cursor-pointer"
           >
             <div className="w-2.5 h-2.5 rounded-full bg-cobalt-500 shrink-0" />
             <div className="flex-1 min-w-0">
@@ -148,7 +128,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={handleSwap}
-              className="w-8 h-8 rounded-full bg-white border-2 border-cobalt-500 text-cobalt-500 flex items-center justify-center hover:bg-sky-50 active:rotate-180 transition-all"
+              className="w-8 h-8 rounded-full bg-surface border-2 border-cobalt-500 text-cobalt-500 flex items-center justify-center hover:bg-sky-50 dark:hover:bg-surface-2 active:rotate-180 transition-all"
               style={{ boxShadow: 'var(--shadow-soft)' }}
               title="Swap From and To"
             >
@@ -161,7 +141,7 @@ export default function HomePage() {
             onClick={() => navigate('/search')}
             role="button"
             tabIndex={0}
-            className="flex items-center gap-2.5 px-4 py-3 bg-sky-50 rounded-[12px] border border-line hover:border-cobalt-500 transition cursor-pointer"
+            className="flex items-center gap-2.5 px-4 py-3 bg-sky-50 dark:bg-surface-2 rounded-[12px] border border-line hover:border-cobalt-500 transition cursor-pointer"
           >
             <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
             <div className="flex-1 min-w-0">
@@ -198,7 +178,7 @@ export default function HomePage() {
         {/* Live */}
         <Link
           to="/live"
-          className="p-4 bg-white rounded-[20px] border border-line flex flex-col justify-between hover:border-cobalt-500 transition"
+          className="p-4 bg-surface rounded-[20px] border border-line flex flex-col justify-between hover:border-cobalt-500 transition"
           style={{ boxShadow: 'var(--shadow-soft)' }}
         >
           <div
@@ -225,10 +205,10 @@ export default function HomePage() {
         {/* Nearby */}
         <Link
           to="/nearby"
-          className="p-4 bg-white rounded-[20px] border border-line flex flex-col justify-between hover:border-cobalt-500 transition"
+          className="p-4 bg-surface rounded-[20px] border border-line flex flex-col justify-between hover:border-cobalt-500 transition"
           style={{ boxShadow: 'var(--shadow-soft)' }}
         >
-          <div className="w-9 h-9 rounded-full bg-sky-100 flex items-center justify-center mb-2.5">
+          <div className="w-9 h-9 rounded-full bg-sky-100 dark:bg-surface-2 flex items-center justify-center mb-2.5">
             <MapPin className="w-4 h-4 text-cobalt-500" />
           </div>
           <div>
@@ -240,10 +220,10 @@ export default function HomePage() {
         {/* Routes */}
         <Link
           to="/routes"
-          className="p-4 bg-white rounded-[20px] border border-line flex flex-col justify-between hover:border-cobalt-500 transition"
+          className="p-4 bg-surface rounded-[20px] border border-line flex flex-col justify-between hover:border-cobalt-500 transition"
           style={{ boxShadow: 'var(--shadow-soft)' }}
         >
-          <div className="w-9 h-9 rounded-full bg-sky-100 flex items-center justify-center mb-2.5">
+          <div className="w-9 h-9 rounded-full bg-sky-100 dark:bg-surface-2 flex items-center justify-center mb-2.5">
             <Route className="w-4 h-4 text-cobalt-500" />
           </div>
           <div>
@@ -255,10 +235,10 @@ export default function HomePage() {
         {/* Saved */}
         <Link
           to="/saved"
-          className="p-4 bg-white rounded-[20px] border border-line flex flex-col justify-between hover:border-cobalt-500 transition"
+          className="p-4 bg-surface rounded-[20px] border border-line flex flex-col justify-between hover:border-cobalt-500 transition"
           style={{ boxShadow: 'var(--shadow-soft)' }}
         >
-          <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center mb-2.5">
+          <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center mb-2.5">
             <Bookmark className="w-4 h-4 text-amber-500" />
           </div>
           <div>
@@ -281,7 +261,7 @@ export default function HomePage() {
               <Link
                 key={stop.id}
                 to={`/stops/${stop.id}`}
-                className="min-w-[170px] max-w-[190px] p-3 bg-white rounded-[20px] border border-line flex flex-col justify-between shrink-0 text-left hover:border-cobalt-500 transition"
+                className="min-w-[170px] max-w-[190px] p-3 bg-surface rounded-[20px] border border-line flex flex-col justify-between shrink-0 text-left hover:border-cobalt-500 transition"
                 style={{ boxShadow: 'var(--shadow-soft)' }}
               >
                 <div>

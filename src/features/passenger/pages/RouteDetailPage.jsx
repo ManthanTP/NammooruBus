@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion } from 'framer-motion'
+import { motion, LayoutGroup } from 'framer-motion'
 import { ArrowLeft, Clock, Calendar, MapPin } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
 import { useMapStore } from '@/store/mapStore'
@@ -142,32 +142,33 @@ export default function RouteDetailPage() {
       <MapCard height={240} />
 
       {/* 3. Weekday / Weekend Segmented Pill */}
-      <div className="flex p-1 bg-white rounded-full border border-line shadow-xs">
-        {['weekday', 'weekend'].map((dt) => {
-          const isSelected = dayType === dt
-          return (
-            <button
-              key={dt}
-              type="button"
-              onClick={() => setDayType(dt)}
-              className={`relative flex-1 py-1.5 text-xs font-bold rounded-full capitalize transition-colors flex items-center justify-center gap-1.5 select-none ${
-                isSelected ? 'text-white' : 'text-muted hover:text-ink-950'
-              }`}
-            >
-              {isSelected && (
-                <motion.div
-                  layoutId="dayTypePill"
-                  className="absolute inset-0 rounded-full -z-10 shadow-xs"
-                  style={{ background: 'var(--gradient-brand)' }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                />
-              )}
-              <Calendar size={14} strokeWidth={2} />
-              <span>{t(`passenger.${dt}`) || dt}</span>
-            </button>
-          )
-        })}
-      </div>
+      <LayoutGroup id="day-type-group">
+        <div className="flex p-1 bg-white rounded-full border border-line shadow-xs">
+          {['weekday', 'weekend'].map((dt) => {
+            const isSelected = dayType === dt
+            return (
+              <button
+                key={dt}
+                type="button"
+                onClick={() => setDayType(dt)}
+                className={`relative flex-1 py-1.5 text-xs font-bold rounded-full capitalize transition-colors flex items-center justify-center gap-1.5 select-none ${isSelected ? 'text-white' : 'text-muted hover:text-ink-950'
+                  }`}
+              >
+                {isSelected && (
+                  <motion.div
+                    layoutId="dayTypePill"
+                    className="absolute inset-0 rounded-full -z-10 shadow-xs"
+                    style={{ background: 'var(--gradient-brand)' }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  />
+                )}
+                <Calendar size={14} strokeWidth={2} />
+                <span>{t(`passenger.${dt}`) || dt}</span>
+              </button>
+            )
+          })}
+        </div>
+      </LayoutGroup>
 
       {/* 4. Schedule Summary Stat Row */}
       <div className="grid grid-cols-3 gap-2 p-3.5 bg-white rounded-[20px] border border-line shadow-soft text-center text-xs">

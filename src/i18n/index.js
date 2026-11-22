@@ -17,10 +17,21 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+    saveMissing: true,
     missingKeyHandler: (lngs, ns, key) => {
-      if (import.meta.env.DEV) {
-        console.warn(`[i18n] Missing translation key: "${key}" for lng: ${lngs}`)
+      if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
+        console.warn(`[i18n] Missing translation key: "${key}" for languages: ${Array.isArray(lngs) ? lngs.join(', ') : lngs}`)
       }
+    },
+    parseMissingKeyHandler: (key) => {
+      if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
+        console.warn(`[i18n] Missing translation fallback triggered for key: "${key}"`)
+      }
+      // Never show raw key in production: format last part with spaces and capitalization
+      const lastPart = (key && key.includes('.')) ? key.split('.').pop() : key
+      return (lastPart || '')
+        .replace(/[_-]/g, ' ')
+        .replace(/\b\w/g, (char) => char.toUpperCase())
     },
   })
 

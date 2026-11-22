@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion } from 'framer-motion'
+import { motion, LayoutGroup } from 'framer-motion'
 import { ArrowLeft, ArrowUpDown, Zap, Shuffle, IndianRupee, AlertCircle, RotateCcw } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
 import { useMapStore } from '@/store/mapStore'
@@ -192,33 +192,35 @@ export default function ResultsPage() {
 
       {/* 4. Sort Chips */}
       {results.length > 0 && !loading && !errorMessage && (
-        <div className="flex p-1 bg-white rounded-full border border-line shadow-xs gap-1">
-          {sortTabs.map((tab) => {
-            const Icon = tab.icon
-            const isCurrent = activeSort === tab.key
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveSort(tab.key)}
-                className={`relative flex-1 py-1.5 px-2 text-xs font-bold rounded-full transition-colors flex items-center justify-center gap-1 select-none ${
-                  isCurrent ? 'text-white' : 'text-muted hover:text-ink-950'
-                }`}
-              >
-                {isCurrent && (
-                  <motion.div
-                    layoutId="resultsSortPill"
-                    className="absolute inset-0 rounded-full -z-10 shadow-xs"
-                    style={{ background: 'var(--gradient-brand)' }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                  />
-                )}
-                <Icon size={14} strokeWidth={2} />
-                <span className="truncate">{tab.label}</span>
-              </button>
-            )
-          })}
-        </div>
+        <LayoutGroup id="results-sort-group">
+          <div className="flex p-1 bg-white rounded-full border border-line shadow-xs gap-1">
+            {sortTabs.map((tab) => {
+              const Icon = tab.icon
+              const isCurrent = activeSort === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveSort(tab.key)}
+                  className={`relative flex-1 py-1.5 px-2 text-xs font-bold rounded-full transition-colors flex items-center justify-center gap-1 select-none ${
+                    isCurrent ? 'text-white' : 'text-muted hover:text-ink-950'
+                  }`}
+                >
+                  {isCurrent && (
+                    <motion.div
+                      layoutId="resultsSortPill"
+                      className="absolute inset-0 rounded-full -z-10 shadow-xs"
+                      style={{ background: 'var(--gradient-brand)' }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <Icon size={14} strokeWidth={2} />
+                  <span className="truncate">{tab.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        </LayoutGroup>
       )}
 
       {/* 5. Skeleton Loading State */}

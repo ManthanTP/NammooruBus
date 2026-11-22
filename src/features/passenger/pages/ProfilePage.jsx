@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2, Bus } from 'lucide-react'
+import { motion, LayoutGroup } from 'framer-motion'
+import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2, Bus, Sun, Moon, Laptop } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
+import { useThemeStore } from '@/store/themeStore'
 import { useToastStore } from '@/components/ui/Toast'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import Button from '@/components/ui/Button'
@@ -13,6 +15,7 @@ export default function ProfilePage() {
   const navigate = useNavigate()
   const { user, profile, signOut, claimDriverRole } = useAuthStore()
   const { routes, initData } = useDataStore()
+  const { theme, setTheme } = useThemeStore()
   const { addToast } = useToastStore()
 
   const [driverKey, setDriverKey] = useState('')
@@ -130,9 +133,68 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* 2. Driver Quick Switch if already a driver */}
+      {/* 2. Preferences & Appearance (Language & 3-way Theme) */}
+      <div className="p-4 bg-surface rounded-[20px] border border-line shadow-soft space-y-3.5">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted font-heading">
+          {t('settings.preferences') || 'Preferences & Appearance'}
+        </h3>
+
+        {/* Language switch */}
+        <div className="flex items-center justify-between pt-0.5">
+          <span className="text-xs font-bold text-ink-950">
+            {t('common.switch_lang') || 'Language'}
+          </span>
+          <LanguageToggle />
+        </div>
+
+        <div className="h-[1px] bg-line/60" />
+
+        {/* 3-way theme segmented control */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-ink-950">
+            {t('settings.theme') || 'Theme'}
+          </span>
+          <LayoutGroup id="profile-theme-group">
+            <div className="flex items-center p-1 bg-sky-50 dark:bg-navy-950/70 border border-line rounded-pill">
+              {[
+                { key: 'light', label: 'Light', icon: Sun },
+                { key: 'dark', label: 'Dark', icon: Moon },
+                { key: 'system', label: 'System', icon: Laptop },
+              ].map(({ key, label, icon: Icon }) => {
+                const isActive = theme === key
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setTheme(key)}
+                    className={`relative px-2.5 py-1 rounded-pill text-xs font-bold flex items-center gap-1.5 transition select-none ${
+                      isActive
+                        ? 'text-white'
+                        : 'text-muted hover:text-ink-950'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="profile-theme-pill"
+                        className="absolute inset-0 rounded-pill bg-cobalt-500 shadow-xs"
+                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-1">
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{label}</span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </LayoutGroup>
+        </div>
+      </div>
+
+      {/* 3. Driver Quick Switch if already a driver */}
       {profile?.role === 'driver' && (
-        <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft flex items-center justify-between">
+        <div className="p-4 bg-surface rounded-[20px] border border-line shadow-soft flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-amber-100 text-navy-900 flex items-center justify-center">
               <Bus className="w-5 h-5 text-amber-600" />
@@ -154,9 +216,9 @@ export default function ProfilePage() {
 
       {/* 3. Become a Driver Card (for passengers) */}
       {isPassenger && (
-        <div className="p-5 bg-white rounded-[20px] border border-line shadow-soft space-y-3">
+        <div className="p-5 bg-surface rounded-[20px] border border-line shadow-soft space-y-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-sky-100 text-cobalt-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-surface-2 text-cobalt-500 flex items-center justify-center">
               <KeyRound className="w-4 h-4" />
             </div>
             <div>
@@ -180,19 +242,19 @@ export default function ProfilePage() {
               value={driverKey}
               onChange={(e) => setDriverKey(e.target.value)}
               placeholder="Enter driver secret key"
-              className="w-full h-11 px-3.5 bg-sky-50 border border-line rounded-[12px] text-xs font-mono text-ink-950 focus:outline-none focus:border-cobalt-500"
+              className="w-full h-11 px-3.5 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-xs font-mono text-ink-950 focus:outline-none focus:border-cobalt-500"
             />
             <input
               type="text"
               value={busRegNo}
               onChange={(e) => setBusRegNo(e.target.value.toUpperCase())}
               placeholder="Bus Registration Number (e.g. KA25 F 1234)"
-              className="w-full h-11 px-3.5 bg-sky-50 border border-line rounded-[12px] text-xs font-mono font-bold text-ink-950 uppercase focus:outline-none focus:border-cobalt-500"
+              className="w-full h-11 px-3.5 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-xs font-mono font-bold text-ink-950 uppercase focus:outline-none focus:border-cobalt-500"
             />
             <select
               value={selectedRouteId}
               onChange={(e) => setSelectedRouteId(e.target.value)}
-              className="w-full h-11 px-3 bg-sky-50 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500"
+              className="w-full h-11 px-3 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500"
             >
               {routes.map((r) => (
                 <option key={r.id} value={r.id}>
@@ -214,10 +276,10 @@ export default function ProfilePage() {
       )}
 
       {/* 4. Menu Links */}
-      <div className="bg-white rounded-[20px] border border-line shadow-soft divide-y divide-line overflow-hidden">
+      <div className="bg-surface rounded-[20px] border border-line shadow-soft divide-y divide-line overflow-hidden">
         <Link
           to="/complaints"
-          className="p-4 flex items-center justify-between hover:bg-sky-50 transition"
+          className="p-4 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-surface-2 transition"
         >
           <div className="flex items-center gap-3">
             <MessageSquare className="w-4 h-4 text-cobalt-500" />
@@ -228,7 +290,7 @@ export default function ProfilePage() {
 
         <Link
           to="/help"
-          className="p-4 flex items-center justify-between hover:bg-sky-50 transition"
+          className="p-4 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-surface-2 transition"
         >
           <div className="flex items-center gap-3">
             <HelpCircle className="w-4 h-4 text-cobalt-500" />
@@ -238,13 +300,7 @@ export default function ProfilePage() {
         </Link>
       </div>
 
-      {/* 5. Language toggle card */}
-      <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft flex items-center justify-between">
-        <span className="text-xs font-bold text-ink-950 font-heading">{t('common.switch_lang') || 'Language'}</span>
-        <LanguageToggle />
-      </div>
-
-      {/* 6. Logout Button */}
+      {/* 5. Logout Button */}
       <Button
         variant="danger"
         size="md"
@@ -252,7 +308,7 @@ export default function ProfilePage() {
         className="w-full h-12 text-sm font-bold font-heading shadow-soft"
       >
         <LogOut className="w-4 h-4 mr-1" />
-        <span>{t('auth.logout') || 'Log Out'}</span>
+        <span>{t('auth.logout') || 'Log out'}</span>
       </Button>
     </div>
   )

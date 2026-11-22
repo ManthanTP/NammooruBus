@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft,
   Calendar,
   Download,
   Printer,
@@ -206,17 +205,9 @@ export default function DriverHistoryPage() {
         }
       `}</style>
 
-      {/* Header with Secondary Pills */}
+      {/* Header with Actions */}
       <div className="flex items-center justify-between pb-2 border-b border-line no-print">
-        <button
-          type="button"
-          onClick={() => navigate('/driver')}
-          className="flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-ink-950 transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back</span>
-        </button>
-        <span className="font-extrabold text-sm text-ink-950 font-heading">Driver History & Reports</span>
+        <h1 className="font-extrabold text-base text-ink-950 font-heading">Driver History & Reports</h1>
         <div className="flex items-center gap-2">
           <button
             type="button"

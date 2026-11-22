@@ -61,7 +61,7 @@ export default function SavedPage() {
             to="/login"
             className="px-4 py-2 bg-white text-cobalt-500 text-xs font-bold rounded-full shadow-xs hover:bg-sky-50 transition shrink-0 active:scale-95"
           >
-            {t('auth.login') || 'Log in'}
+            {t('auth.sign_in') || 'Sign in'}
           </Link>
         </div>
       ) : (
@@ -164,12 +164,6 @@ export default function SavedPage() {
           }}
         />
       )}
-
-      {/* 4. Language Quick Setting */}
-      <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft flex items-center justify-between">
-        <span className="text-xs font-bold text-ink-950 font-heading">{t('common.switch_lang') || 'Language'}</span>
-        <LanguageToggle />
-      </div>
     </div>
   )
 }

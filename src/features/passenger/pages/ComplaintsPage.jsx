@@ -179,7 +179,7 @@ export default function ComplaintsPage() {
             className="w-full h-11 text-white rounded-full text-xs font-bold shadow-soft flex items-center justify-center gap-2 transition active:scale-98 font-heading"
             style={{ background: 'var(--gradient-brand)' }}
           >
-            <span>{t('auth.login') || 'Log in'}</span>
+            <span>{t('auth.sign_in') || 'Sign in'}</span>
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
@@ -228,11 +228,10 @@ export default function ComplaintsPage() {
                     key={cat.value}
                     type="button"
                     onClick={() => setCategory(cat.value)}
-                    className={`py-2 px-3 rounded-full text-xs font-semibold border transition text-center active:scale-95 ${
-                      category === cat.value
-                        ? 'bg-cobalt-500 border-cobalt-500 text-white font-bold shadow-xs'
-                        : 'bg-sky-50 border-line text-ink-950 hover:bg-sky-100'
-                    }`}
+                    className={`py-2 px-3 rounded-full text-xs font-semibold border transition text-center active:scale-95 ${category === cat.value
+                      ? 'bg-cobalt-500 border-cobalt-500 text-white font-bold shadow-xs'
+                      : 'bg-sky-50 border-line text-ink-950 hover:bg-sky-100'
+                      }`}
                   >
                     {t(cat.key)}
                   </button>
@@ -255,11 +254,10 @@ export default function ComplaintsPage() {
                     title={`${star} star`}
                   >
                     <Star
-                      className={`w-5 h-5 ${
-                        star <= rating
-                          ? 'fill-amber-500 text-amber-500'
-                          : 'text-line hover:text-amber-500'
-                      }`}
+                      className={`w-5 h-5 ${star <= rating
+                        ? 'fill-amber-500 text-amber-500'
+                        : 'text-line hover:text-amber-500'
+                        }`}
                     />
                   </button>
                 ))}

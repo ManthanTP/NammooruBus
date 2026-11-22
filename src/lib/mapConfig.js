@@ -1,10 +1,12 @@
-// Map configuration - OpenStreetMap Humanitarian (HOT) tiles
-// Free, fast raster tiles with no API key or token required, per PRD Section 16 line 477.
+// Map configuration - OpenStreetMap Humanitarian (HOT) tiles & Carto Dark tiles
 export const OSM_HOT_TILE_URL = 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
+export const CARTO_DARK_TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
 
-export function getTileUrl() {
+export function getTileUrl(isDark = false) {
+  if (isDark) {
+    return import.meta.env.VITE_TILE_URL_DARK || CARTO_DARK_TILE_URL
+  }
   const envUrl = import.meta.env.VITE_TILE_URL
-  // If an explicit non-cartocdn URL is set in env, use it; otherwise default to OSM HOT
   if (envUrl && !envUrl.includes('cartocdn')) {
     return envUrl
   }
@@ -13,4 +15,4 @@ export function getTileUrl() {
 
 export const TILE_ATTRIBUTION =
   import.meta.env.VITE_TILE_ATTRIBUTION ||
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank" rel="noreferrer">Humanitarian OpenStreetMap Team</a>'
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
