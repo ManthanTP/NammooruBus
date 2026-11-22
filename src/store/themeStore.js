@@ -1,8 +1,10 @@
 import { create } from 'zustand'
+import { appStorage } from '@/lib/storage'
+import { setStatusBarTheme } from '@/lib/platform'
 
 function getInitialTheme() {
   if (typeof window === 'undefined') return 'system'
-  const saved = localStorage.getItem('nb-theme')
+  const saved = appStorage.getItem('nb-theme')
   if (saved === 'dark' || saved === 'blue' || saved === 'light') {
     return saved
   }
@@ -32,19 +34,8 @@ function applyTheme(theme) {
     meta.setAttribute('content', color)
   }
 
-  // Capacitor StatusBar update if running in native app
-  if (window.Capacitor?.Plugins?.StatusBar) {
-    try {
-      window.Capacitor.Plugins.StatusBar.setStyle({
-        style: resolved === 'light' ? 'LIGHT' : 'DARK',
-      })
-      window.Capacitor.Plugins.StatusBar.setBackgroundColor({
-        color: resolved === 'dark' ? '#0A0B10' : (resolved === 'blue' ? '#050B2E' : '#0040FF'),
-      })
-    } catch (e) {
-      // Ignore if unavailable
-    }
-  }
+  // Update native status bar
+  setStatusBarTheme(resolved)
 
   return resolved
 }
@@ -54,7 +45,7 @@ export const useThemeStore = create((set, get) => ({
   resolvedTheme: resolveTheme(getInitialTheme()),
 
   setTheme: (newTheme) => {
-    localStorage.setItem('nb-theme', newTheme)
+    appStorage.setItem('nb-theme', newTheme)
     const resolved = applyTheme(newTheme)
     set({ theme: newTheme, resolvedTheme: resolved })
   },

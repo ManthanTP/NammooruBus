@@ -105,3 +105,62 @@ npm run preview
    - The system locks out with a 60-second countdown timer.
 6. **Production Build**:
    - Run `npm run build` to confirm zero errors and verified lazy-loaded bundles.
+
+---
+
+## 5. Building the Android App (Capacitor)
+
+Nammooru Bus includes a complete, production-grade Android native project powered by **Capacitor 8**.
+
+### Prerequisites
+- **Node.js 18+** & npm 9+
+- **Java Development Kit (JDK) 17** (e.g. Eclipse Temurin 17, Oracle JDK 17, or OpenJDK 17)
+- **Android Studio** (Hedgehog 2023.1.1 or newer) with:
+  - Android SDK Platform 34 / 35
+  - Android SDK Build-Tools 34.0.0+
+  - Android Virtual Device (AVD) running Android 12+ (API 31+) or physical device with USB debugging enabled
+
+### Build Steps
+
+1. **Generate Adaptive Icons & Notification Assets**:
+   ```bash
+   npm run icons:android
+   ```
+   *Generates foreground/background adaptive icons (with safe-zone margins), legacy icons, monochrome layers, and `ic_stat_nammooru` notification drawables across `mipmap-mdpi` to `xxxhdpi`.*
+
+2. **Compile Web Bundle & Sync Native Android Project**:
+   ```bash
+   npm run build:android
+   ```
+   *Runs `npm run build` to create `dist/` and runs `npx cap sync android` to copy assets and register native Capacitor plugins.*
+
+3. **Open Project in Android Studio**:
+   ```bash
+   npm run open:android
+   ```
+   *(Or open the `android/` directory directly in Android Studio).*
+
+4. **Build APK**:
+   - In Android Studio, go to menu: **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
+   - Or build directly via Gradle wrapper:
+     ```bash
+     cd android
+     ./gradlew assembleDebug
+     ```
+   - The compiled debug APK will be created at:
+     ```
+     android/app/build/outputs/apk/debug/app-debug.apk
+     ```
+
+### Testing on Device / Emulator
+
+- **USB Debugging**: Connect your Android phone with Developer Mode & USB Debugging enabled, select your device in Android Studio, and click **Run 'app'** (`Shift + F10`).
+- **Display Cutout / Camera Hole Emulation**:
+  - In your AVD or device, open **Settings > System > Developer options > Display cutout**.
+  - Choose **Punch Hole Cutout** or **Corner Cutout**.
+  - Verify that the status bar renders seamlessly edge-to-edge and headers respect `--safe-top`.
+- **Hardware Back Button Gestures**:
+  - Tapping hardware back closes open sheets, modals, and drawers first.
+  - On the Explore screen (`/explore`), pressing back displays a "Press back again to exit" toast, exiting on the second press within 2 seconds.
+  - When a driver is actively broadcasting a live trip (`/driver/trip`), pressing back minimizes the app via `App.minimizeApp()` to keep GPS background tracking alive.
+

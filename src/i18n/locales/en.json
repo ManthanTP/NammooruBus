@@ -21,7 +21,8 @@
     "from": "From",
     "to": "To",
     "switch_lang": "Language",
-    "logout": "Log out"
+    "logout": "Log out",
+    "skip": "Skip"
   },
   "auth": {
     "login": "Log in",

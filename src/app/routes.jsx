@@ -1,6 +1,9 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import ErrorBoundary from '@/components/ui/ErrorBoundary'
+import { isNative } from '@/lib/platform'
+import { appStorage } from '@/lib/storage'
+import { useAuthStore } from '@/store/authStore'
 
 // Layouts
 import PassengerLayout from '@/features/passenger/layouts/PassengerLayout'
@@ -20,6 +23,12 @@ import ProfilePage from '@/features/passenger/pages/ProfilePage'
 import HelpPage from '@/features/passenger/pages/HelpPage'
 import ComplaintsPage from '@/features/passenger/pages/ComplaintsPage'
 import AlertsPage from '@/features/passenger/pages/AlertsPage'
+
+// Native Onboarding & Welcome
+import WelcomePage from '@/features/passenger/pages/WelcomePage'
+import GetStartedPage from '@/features/passenger/pages/GetStartedPage'
+import TermsPage from '@/features/passenger/pages/TermsPage'
+import PrivacyPage from '@/features/passenger/pages/PrivacyPage'
 
 // Auth pages
 import LoginPage from '@/features/passenger/pages/LoginPage'
@@ -76,11 +85,59 @@ const withBoundary = (element) => (
   </ErrorBoundary>
 )
 
+function RootEntry() {
+  const { user, profile, loading, initialized } = useAuthStore()
+
+  if (isNative()) {
+    if (loading || !initialized) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-bg">
+          <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
+        </div>
+      )
+    }
+
+    if (user) {
+      if (profile?.role === 'driver') {
+        return <Navigate to="/driver" replace />
+      }
+      return <Navigate to="/explore" replace />
+    }
+
+    const isOnboarded = appStorage.getItem('nb-onboarded') === 'true'
+    if (isOnboarded) {
+      return <Navigate to="/explore" replace />
+    }
+
+    return <Navigate to="/welcome" replace />
+  }
+
+  return <LandingPage />
+}
+
 export const router = createBrowserRouter([
-  // Public Landing Page
+  // Public Root (Landing page on web, Native Onboarding / Explore on Android)
   {
     path: '/',
-    element: withBoundary(<LandingPage />),
+    element: withBoundary(<RootEntry />),
+  },
+
+  // Mobile Onboarding & Get Started (Native flows)
+  {
+    path: '/welcome',
+    element: withBoundary(<WelcomePage />),
+  },
+  {
+    path: '/get-started',
+    element: withBoundary(<GetStartedPage />),
+  },
+  {
+    path: '/terms',
+    element: withBoundary(<TermsPage />),
+  },
+  {
+    path: '/privacy',
+    element: withBoundary(<PrivacyPage />),
   },
 
   // Passenger Portal Layout

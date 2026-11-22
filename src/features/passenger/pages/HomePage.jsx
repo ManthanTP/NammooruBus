@@ -14,6 +14,7 @@ import AlertBanner from '@/features/passenger/components/AlertBanner'
 import MapCard from '@/components/map/MapCard'
 import LocationBanner from '@/components/ui/LocationBanner'
 import HeroBlock from '@/components/ui/HeroBlock'
+import { hapticTick } from '@/lib/platform'
 
 export default function HomePage() {
   const { t, i18n } = useTranslation()
@@ -74,6 +75,7 @@ export default function HomePage() {
 
   const handleSwap = (e) => {
     e.stopPropagation()
+    hapticTick()
     const temp = fromStop
     setFromStop(toStop)
     setToStop(temp)

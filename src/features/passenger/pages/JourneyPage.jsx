@@ -29,6 +29,7 @@ import SosButton from '@/components/ui/SosButton'
 import MapCard from '@/components/map/MapCard'
 import Skeleton from '@/components/ui/Skeleton'
 import UserBusComparison from '@/features/passenger/components/UserBusComparison'
+import { hapticTick, nativeShare } from '@/lib/platform'
 
 export default function JourneyPage() {
   const { t, i18n } = useTranslation()
@@ -361,6 +362,7 @@ export default function JourneyPage() {
 
   const handleToggleSave = () => {
     if (!journey) return
+    hapticTick()
 
     // If guest, show login prompt sheet/modal and toast with action
     if (!user) {
@@ -384,23 +386,19 @@ export default function JourneyPage() {
   }
 
   const handleShare = async () => {
+    hapticTick()
     const text = `Bus journey: ${localName(fromStop, i18n.language)} to ${localName(toStop, i18n.language)} on Nammooru Bus. Fare: ₹${journey?.totalFare}, Time: ${journey?.totalMinutes} min.`
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Nammooru Bus Journey',
-          text,
-          url: window.location.href,
-        })
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          navigator.clipboard.writeText(`${text} ${window.location.href}`)
-          toast.info('toast.journey_copied')
-        }
+    try {
+      await nativeShare({
+        title: 'Nammooru Bus Journey',
+        text,
+        url: window.location.href,
+      })
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        navigator.clipboard.writeText(`${text} ${window.location.href}`)
+        toast.info('toast.journey_copied')
       }
-    } else {
-      navigator.clipboard.writeText(`${text} ${window.location.href}`)
-      toast.info('toast.link_copied')
     }
   }
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, LayoutGroup } from 'framer-motion'
-import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2, Bus, Sun, Moon, Laptop } from 'lucide-react'
+import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2, Bus, Sun, Moon, Laptop, Smartphone, Vibrate } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
@@ -10,6 +10,8 @@ import { useThemeStore } from '@/store/themeStore'
 import { useToastStore, toast } from '@/components/ui/Toast'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import Button from '@/components/ui/Button'
+import { appStorage } from '@/lib/storage'
+import { hapticTick } from '@/lib/platform'
 
 export default function ProfilePage() {
   const { t } = useTranslation()
@@ -27,6 +29,7 @@ export default function ProfilePage() {
   const [claimLoading, setClaimLoading] = useState(false)
   const [claimError, setClaimError] = useState(null)
   const [driverBus, setDriverBus] = useState(null)
+  const [vibrationEnabled, setVibrationEnabled] = useState(() => appStorage.getItem('nb-vibration') !== 'false')
 
   useEffect(() => {
     initData()
@@ -238,6 +241,47 @@ export default function ProfilePage() {
               })}
             </div>
           </LayoutGroup>
+        </div>
+
+        {/* Vibration switch */}
+        <div className="h-[1px] bg-line/60" />
+        <div className="flex items-center justify-between pt-0.5">
+          <div className="flex items-center gap-2">
+            <Vibrate className="w-4 h-4 text-muted" />
+            <span className="text-xs font-bold text-text">Haptic Vibration</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const next = !vibrationEnabled
+              setVibrationEnabled(next)
+              appStorage.setItem('nb-vibration', next ? 'true' : 'false')
+              if (next) hapticTick()
+            }}
+            className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
+              vibrationEnabled ? 'bg-brand' : 'bg-line'
+            }`}
+            aria-label="Toggle haptic vibration"
+          >
+            <div
+              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                vibrationEnabled ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Show intro again (Native & onboarding walkthrough) */}
+        <div className="h-[1px] bg-line/60" />
+        <div className="pt-0.5">
+          <button
+            type="button"
+            onClick={() => navigate('/welcome')}
+            className="w-full py-2.5 px-3 rounded-pill text-xs font-bold text-text bg-surface-2 hover:bg-line border border-line transition text-center flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Smartphone className="w-3.5 h-3.5 text-brand" />
+            <span>Show intro walkthrough again</span>
+          </button>
         </div>
       </div>
 

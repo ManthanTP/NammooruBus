@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ShieldAlert, Check } from 'lucide-react'
 import { useToastStore } from '@/components/ui/Toast'
+import { hapticMedium, nativeShare } from '@/lib/platform'
 
 export default function SosButton({
   routeCode = '',
@@ -20,6 +21,7 @@ export default function SosButton({
   const HOLD_DURATION_MS = 1000 // 1 second
 
   const triggerSos = () => {
+    hapticMedium()
     if (navigator.vibrate) {
       try {
         navigator.vibrate([100, 50, 100])
@@ -35,21 +37,13 @@ export default function SosButton({
     const routeDesc = routeCode ? `Route ${routeCode}` : 'our local bus'
     const shareText = `I am on bus ${routeDesc}${busDesc}. Track me: ${trackingUrl}`
 
-    if (navigator.share) {
-      navigator
-        .share({
-          title: 'Nammooru Bus SOS Emergency Tracker',
-          text: shareText,
-          url: trackingUrl,
-        })
-        .catch((err) => {
-          if (err.name !== 'AbortError') {
-            fallbackShare(shareText, trackingUrl)
-          }
-        })
-    } else {
+    nativeShare({
+      title: 'Nammooru Bus SOS Emergency Tracker',
+      text: shareText,
+      url: trackingUrl,
+    }).catch(() => {
       fallbackShare(shareText, trackingUrl)
-    }
+    })
   }
 
   const fallbackShare = (text, url) => {

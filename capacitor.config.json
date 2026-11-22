@@ -1,0 +1,19 @@
+{
+  "appId": "com.nammooru.bus",
+  "appName": "Nammooru Bus",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": false,
+      "backgroundColor": "#FFFFFF",
+      "androidScaleType": "CENTER"
+    },
+    "StatusBar": {
+      "overlaysWebView": true
+    }
+  }
+}

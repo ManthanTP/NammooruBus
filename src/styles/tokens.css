@@ -32,6 +32,12 @@
   --color-warning: #FFB400;
   --color-danger: #C92A2A;
 
+  /* Safe Area Inset Tokens (Display Cutout & Gesture Bar) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
   /* Aliases for smooth migration & existing classes */
   --color-ink: var(--ink-950);
   --color-cobalt: var(--cobalt-500);

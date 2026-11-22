@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nammooru Bus</string>
+    <string name="title_activity_main">Nammooru Bus</string>
+    <string name="package_name">com.nammooru.bus</string>
+    <string name="custom_url_scheme">com.nammooru.bus</string>
+</resources>
