@@ -30,6 +30,7 @@ import { useLiveStore } from '@/store/liveStore'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import LiveDot from '@/components/ui/LiveDot'
+import RoadRibbon from '@/components/ui/RoadRibbon'
 import { PORTFOLIO_URL, GITHUB_URL, APK_URL, APK_VERSION, APK_SIZE } from '@/config/links'
 
 export default function LandingPage() {
@@ -298,24 +299,29 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* 2. Hero Section */}
-        <section className="relative overflow-hidden pt-8 pb-16 md:pt-16 md:pb-24 px-4 sm:px-6 md:px-8">
-          {/* Signature Brand Gradient & Rounded N Slabs background */}
+        <section
+          className="relative overflow-hidden pt-8 pb-20 md:pt-16 md:pb-28 px-4 sm:px-6 md:px-8 on-brand"
+          style={{ background: 'var(--grad-brand)', color: 'var(--on-brand)' }}
+        >
+          {/* Subtle Decorative N Slabs: two soft rounded "N" slabs at 8 percent white */}
           <div
-            className="absolute inset-0 -z-10 opacity-95"
-            style={{
-              background: 'linear-gradient(135deg, var(--navy-900) 0%, var(--royal-700) 50%, var(--cobalt-500) 100%)',
-            }}
+            className="absolute top-10 left-10 w-72 h-72 rounded-[40px] pointer-events-none"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)', transform: 'rotate(-12deg)' }}
           />
-          {/* Subtle Decorative Slabs */}
-          <div className="absolute top-10 left-10 w-72 h-72 rounded-[40px] bg-white/5 -rotate-12 pointer-events-none -z-10" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 rounded-[56px] bg-white/5 rotate-6 pointer-events-none -z-10" />
+          <div
+            className="absolute bottom-10 right-10 w-96 h-96 rounded-[56px] pointer-events-none"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)', transform: 'rotate(6deg)' }}
+          />
 
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
             {/* Left Column: Headings & CTAs */}
             <div className="lg:col-span-7 flex flex-col items-start text-left text-white">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-4 select-none">
-                <span className="w-2 h-2 rounded-full bg-amber animate-pulse" />
-                <span className="text-xs font-extrabold uppercase tracking-wider text-amber font-heading">
+              <div
+                className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full mb-4 select-none"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }}
+              >
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--amber)' }} />
+                <span className="text-xs font-extrabold uppercase tracking-wider font-heading" style={{ color: 'var(--amber)' }}>
                   {t('landing.city_tag', 'Hubballi-Dharwad')}
                 </span>
               </div>
@@ -324,7 +330,7 @@ export default function LandingPage() {
                 {t('landing.hero_title', 'Our town. Our bus.')}
               </h1>
 
-              <p className="text-base sm:text-lg text-white/85 max-w-xl leading-relaxed mb-8">
+              <p className="text-base sm:text-lg max-w-xl leading-relaxed mb-8" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
                 {t('landing.hero_subtitle', 'Live bus locations, smart routes and fares for your city. Free.')}
               </p>
 
@@ -332,84 +338,100 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                 <Link
                   to="/explore"
-                  className="min-h-[48px] px-6 py-3 rounded-full bg-white text-navy-900 hover:bg-white/90 font-heading font-extrabold text-sm shadow-soft flex items-center justify-center gap-2 transition active:scale-95 select-none"
+                  className="min-h-[48px] px-6 py-3 rounded-full font-heading font-extrabold text-sm shadow-soft flex items-center justify-center gap-2 transition active:scale-95 select-none"
+                  style={{ backgroundColor: '#FFFFFF', color: '#00136E' }}
                 >
-                  <Compass className="w-4 h-4 text-brand" />
-                  <span>{t('landing.continue_guest', 'Continue as guest')}</span>
+                  <Compass className="w-4 h-4" style={{ color: '#0040FF' }} />
+                  <span style={{ color: '#00136E' }}>{t('landing.continue_guest', 'Continue as guest')}</span>
                 </Link>
 
                 <Link
                   to="/login"
-                  className="min-h-[48px] px-5 py-3 rounded-full border-2 border-white/60 text-white hover:bg-white/10 font-heading font-bold text-sm flex items-center justify-center transition active:scale-95 select-none"
+                  className="min-h-[48px] px-5 py-3 rounded-full border-2 text-white font-heading font-bold text-sm flex items-center justify-center transition active:scale-95 select-none hover:bg-white/12"
+                  style={{ borderColor: '#FFFFFF', color: '#FFFFFF' }}
                 >
-                  <span>{t('auth.sign_in', 'Sign in')}</span>
+                  <span style={{ color: '#FFFFFF' }}>{t('auth.sign_in', 'Sign in')}</span>
                 </Link>
 
                 <Link
                   to="/register"
-                  className="min-h-[48px] px-5 py-3 rounded-full border-2 border-white/60 text-white hover:bg-white/10 font-heading font-bold text-sm flex items-center justify-center transition active:scale-95 select-none"
+                  className="min-h-[48px] px-5 py-3 rounded-full border-2 text-white font-heading font-bold text-sm flex items-center justify-center transition active:scale-95 select-none hover:bg-white/12"
+                  style={{ borderColor: '#FFFFFF', color: '#FFFFFF' }}
                 >
-                  <span>{t('auth.sign_up', 'Create account')}</span>
+                  <span style={{ color: '#FFFFFF' }}>{t('auth.sign_up', 'Create account')}</span>
                 </Link>
               </div>
 
-              <p className="text-xs text-white/70 mt-3 flex items-center gap-1.5 select-none">
-                <CheckCircle2 className="w-3.5 h-3.5 text-amber" />
+              <p className="text-xs mt-3 flex items-center gap-1.5 select-none" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
+                <CheckCircle2 className="w-3.5 h-3.5" style={{ color: 'rgba(255, 255, 255, 0.85)' }} />
                 <span>{t('landing.no_signup_needed', 'No sign up needed to look up buses')}</span>
               </p>
             </div>
 
-            {/* Right Column: Phone Frame App Preview */}
+            {/* Right Column: Phone Frame App Preview - Fixed Light Colors in All Themes */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-[320px] rounded-[36px] bg-surface p-3.5 shadow-2xl border-4 border-white/20 select-none">
-                <div className="w-full rounded-[24px] bg-bg overflow-hidden border border-line p-3 flex flex-col gap-3">
+              <div
+                className="relative w-full max-w-[320px] rounded-[36px] p-3.5 shadow-2xl border-4 select-none"
+                style={{ backgroundColor: '#FFFFFF', borderColor: 'rgba(255, 255, 255, 0.35)' }}
+              >
+                <div
+                  className="w-full rounded-[24px] overflow-hidden border p-3 flex flex-col gap-3"
+                  style={{ backgroundColor: '#F2F6FF', borderColor: '#D9E2F7' }}
+                >
                   {/* Top Bar Preview */}
-                  <div className="flex items-center justify-between pb-2 border-b border-line">
+                  <div className="flex items-center justify-between pb-2" style={{ borderBottom: '1px solid #D9E2F7' }}>
                     <div className="flex items-center gap-1.5">
                       <div className="w-6 h-6 rounded-md bg-white p-0.5 shadow-xs flex items-center justify-center">
                         <img src="/brand/logo-mark.png" alt="Logo" className="w-full h-full object-contain" />
                       </div>
-                      <span className="font-heading font-bold text-xs text-text">Nammooru Bus</span>
+                      <span className="font-heading font-bold text-xs" style={{ color: '#050F45' }}>Nammooru Bus</span>
                     </div>
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-amber px-2 py-0.5 rounded-full bg-amber/15">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse" />
-                      <span>LIVE</span>
+                    <div className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(255, 180, 0, 0.18)', color: '#00136E' }}>
+                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#FFB400' }} />
+                      <span style={{ color: '#00136E' }}>LIVE</span>
                     </div>
                   </div>
 
                   {/* Search Card Mini */}
-                  <div className="p-3 bg-surface rounded-[16px] border border-line shadow-xs flex flex-col gap-2">
+                  <div
+                    className="p-3 rounded-[16px] border shadow-xs flex flex-col gap-2"
+                    style={{ backgroundColor: '#FFFFFF', borderColor: '#D9E2F7' }}
+                  >
                     <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2.5 h-2.5 rounded-full bg-success" />
-                      <span className="font-semibold text-text truncate">CBT Hubballi</span>
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#12A150' }} />
+                      <span className="font-semibold truncate" style={{ color: '#050F45' }}>CBT Hubballi</span>
                     </div>
-                    <div className="w-0.5 h-2 bg-line ml-1" />
+                    <div className="w-0.5 h-2 ml-1" style={{ backgroundColor: '#D9E2F7' }} />
                     <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2.5 h-2.5 rounded-full bg-brand" />
-                      <span className="font-semibold text-text truncate">Dharwad Old Bus Stand</span>
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#0040FF' }} />
+                      <span className="font-semibold truncate" style={{ color: '#050F45' }}>Dharwad Old Bus Stand</span>
                     </div>
                   </div>
 
                   {/* Route Card Mini */}
-                  <div className="p-3 bg-surface rounded-[16px] border border-line shadow-xs flex items-center justify-between">
+                  <div
+                    className="p-3 rounded-[16px] border shadow-xs flex items-center justify-between"
+                    style={{ backgroundColor: '#FFFFFF', borderColor: '#D9E2F7' }}
+                  >
                     <div>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-brand text-white">
+                      <span
+                        className="px-2 py-0.5 rounded-full text-[10px] font-extrabold"
+                        style={{ backgroundColor: '#0040FF', color: '#FFFFFF' }}
+                      >
                         200A
                       </span>
-                      <p className="text-[11px] font-bold text-text mt-1">Direct via BRTS Corridor</p>
-                      <p className="text-[10px] text-muted">Next bus in 4 min &bull; ₹28</p>
+                      <p className="text-[11px] font-bold mt-1" style={{ color: '#050F45' }}>Direct via BRTS Corridor</p>
+                      <p className="text-[10px]" style={{ color: '#5B6591' }}>Next bus in 4 min • ₹28</p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-brand" />
+                    <ArrowRight className="w-4 h-4" style={{ color: '#0040FF' }} />
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Signature Road Divider Motif */}
-          <div className="absolute bottom-0 left-0 right-0 h-4 bg-surface/20 flex items-center justify-center overflow-hidden">
-            <div className="w-full border-t-2 border-dashed border-white/40" />
-          </div>
+          {/* Signature smooth RoadRibbon SVG at bottom */}
+          <RoadRibbon />
         </section>
 
         {/* 3. Live Stats Strip */}

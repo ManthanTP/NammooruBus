@@ -370,15 +370,14 @@ export default function DriverHistoryPage() {
                     </span>
                   </div>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-pill capitalize ${
-                      t.status === 'ended'
-                        ? 'bg-sky-100 text-muted'
-                        : t.status === 'delayed'
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-pill capitalize ${t.status === 'ended'
+                      ? 'bg-sky-100 text-muted'
+                      : t.status === 'delayed'
                         ? 'bg-amber-100 text-amber-800'
                         : t.status === 'breakdown'
-                        ? 'bg-danger/10 text-danger'
-                        : 'bg-emerald-50 text-emerald-700'
-                    }`}
+                          ? 'bg-danger/10 text-danger'
+                          : 'bg-emerald-50 text-emerald-700'
+                      }`}
                   >
                     {t.status}
                   </span>

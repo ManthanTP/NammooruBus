@@ -56,8 +56,9 @@
   --shadow-soft: 0 10px 30px rgba(0, 32, 165, 0.10);
   --shadow-float: 0 12px 36px rgba(0, 32, 165, 0.14);
 
-  /* Signature gradient */
-  --gradient-brand: linear-gradient(135deg, #0040FF 0%, #0020A5 55%, #00136E 100%);
+  /* Signature constant brand gradient (Never changes with theme) */
+  --grad-brand: linear-gradient(135deg, #0040FF 0%, #0020A5 55%, #00136E 100%);
+  --gradient-brand: var(--grad-brand);
 
   /* Typography */
   --font-heading: 'Outfit', 'Noto Sans Kannada', sans-serif;

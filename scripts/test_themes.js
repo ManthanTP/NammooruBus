@@ -21,6 +21,7 @@ const VIEWPORTS = [
 ]
 
 const PAGES = [
+  { key: 'landing', path: '/' },
   { key: 'home', path: '/explore' },
   { key: 'results', path: '/results?from=stop_cbt&to=stop_dharwad_old' },
   { key: 'journey', path: '/journey' },
@@ -174,6 +175,19 @@ async function run() {
                   issues.push({ type: 'active-nav-item', tag: navEl.tagName, text: navEl.textContent.trim().slice(0, 30), color })
                 }
               })
+
+              // 4. Phase 5.12: Hero computed background check (must not be transparent/empty)
+              if (window.location.pathname === '/' || window.location.pathname === '') {
+                const heroSection = document.querySelector('section.on-brand, main section:first-of-type')
+                if (heroSection) {
+                  const style = window.getComputedStyle(heroSection)
+                  const bg = style.backgroundImage || style.background
+                  const bgColor = style.backgroundColor
+                  if ((!bg || bg === 'none') && (!bgColor || bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent')) {
+                    issues.push({ type: 'hero-background-transparent', tag: heroSection.tagName, text: 'Landing hero background is transparent', color: bgColor })
+                  }
+                }
+              }
 
               return issues
             })
