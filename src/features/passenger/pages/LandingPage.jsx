@@ -46,11 +46,12 @@ import { PORTFOLIO_URL, GITHUB_URL, APK_URL, APK_VERSION, APK_SIZE } from '@/con
  * AnimatedNumber — counts up from 0 to target when in view
  */
 function AnimatedNumber({ value, duration = 1200, enabled = true }) {
-  const [count, setCount] = useState(enabled ? 0 : value)
-  const prefersReduced = useReducedMotion()
+  const prefersReducedHook = useReducedMotion()
+  const isReducedMotion = prefersReducedHook || (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+  const [count, setCount] = useState(isReducedMotion ? value : (enabled ? 0 : value))
 
   useEffect(() => {
-    if (prefersReduced || !enabled) {
+    if (isReducedMotion || !enabled) {
       setCount(value)
       return
     }

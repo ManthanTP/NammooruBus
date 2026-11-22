@@ -179,7 +179,7 @@ export default function ProfilePage() {
 
         {/* Language switch */}
         <div className="flex items-center justify-between pt-0.5">
-          <span className="text-xs font-bold text-ink-950">
+          <span className="text-xs font-bold text-text">
             {t('common.switch_lang') || 'Language'}
           </span>
           <LanguageToggle />
@@ -189,7 +189,7 @@ export default function ProfilePage() {
 
         {/* 4-way theme segmented control: Light, Dark, Blue, System */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <span className="text-xs font-bold text-ink-950">
+          <span className="text-xs font-bold text-text">
             {t('settings.theme') || 'Theme'}
           </span>
           <LayoutGroup id="profile-theme-group">
@@ -243,14 +243,14 @@ export default function ProfilePage() {
       </div>
 
       {/* 3. Driver Vehicle & Shift Status if already a driver */}
-      {profile?.role === 'driver' && (
+      {(profile?.role === 'driver' || isDriverRoute) && (
         <div className="p-4 bg-surface rounded-[20px] border border-line shadow-soft flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-amber-100 text-navy-900 flex items-center justify-center">
               <Bus className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <h3 className="font-heading font-bold text-sm text-ink-950">
+              <h3 className="font-heading font-bold text-sm text-text">
                 {driverBus ? `Assigned Bus: ${driverBus.reg_no}` : 'Driver Console'}
               </h3>
               <p className="text-xs text-muted">
@@ -276,7 +276,7 @@ export default function ProfilePage() {
               <KeyRound className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-heading font-bold text-sm text-ink-950">
+              <h3 className="font-heading font-bold text-sm text-text">
                 Are you a NWKRTC Driver?
               </h3>
               <p className="text-xs text-muted">Claim driver role with your depot secret key</p>
@@ -296,19 +296,19 @@ export default function ProfilePage() {
               value={driverKey}
               onChange={(e) => setDriverKey(e.target.value)}
               placeholder="Enter driver secret key"
-              className="w-full h-11 px-3.5 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-xs font-mono text-ink-950 focus:outline-none focus:border-cobalt-500"
+              className="w-full h-11 px-3.5 bg-surface-2 border border-line rounded-[12px] text-xs font-mono text-text focus:outline-none focus:border-brand"
             />
             <input
               type="text"
               value={busRegNo}
               onChange={(e) => setBusRegNo(e.target.value.toUpperCase())}
               placeholder="Bus Registration Number (e.g. KA25 F 1234)"
-              className="w-full h-11 px-3.5 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-xs font-mono font-bold text-ink-950 uppercase focus:outline-none focus:border-cobalt-500"
+              className="w-full h-11 px-3.5 bg-surface-2 border border-line rounded-[12px] text-xs font-mono font-bold text-text uppercase focus:outline-none focus:border-brand"
             />
             <select
               value={selectedRouteId}
               onChange={(e) => setSelectedRouteId(e.target.value)}
-              className="w-full h-11 px-3 bg-sky-50 dark:bg-surface-2 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500"
+              className="w-full h-11 px-3 bg-surface-2 border border-line rounded-[12px] text-xs font-bold text-text focus:outline-none focus:border-brand"
             >
               {routes.map((r) => (
                 <option key={r.id} value={r.id}>
@@ -333,22 +333,22 @@ export default function ProfilePage() {
       <div className="bg-surface rounded-[20px] border border-line shadow-soft divide-y divide-line overflow-hidden">
         <Link
           to="/complaints"
-          className="p-4 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-surface-2 transition"
+          className="p-4 flex items-center justify-between hover:bg-surface-2 transition"
         >
           <div className="flex items-center gap-3">
             <MessageSquare className="w-4 h-4 text-cobalt-500" />
-            <span className="text-xs font-bold text-ink-950">{t('nav.complaints') || 'Feedback & Complaints'}</span>
+            <span className="text-xs font-bold text-text">{t('nav.complaints') || 'Feedback & Complaints'}</span>
           </div>
           <span className="text-xs text-muted">&rarr;</span>
         </Link>
 
         <Link
           to="/help"
-          className="p-4 flex items-center justify-between hover:bg-sky-50 dark:hover:bg-surface-2 transition"
+          className="p-4 flex items-center justify-between hover:bg-surface-2 transition"
         >
           <div className="flex items-center gap-3">
             <HelpCircle className="w-4 h-4 text-cobalt-500" />
-            <span className="text-xs font-bold text-ink-950">{t('nav.help') || 'Help & Support'}</span>
+            <span className="text-xs font-bold text-text">{t('nav.help') || 'Help & Support'}</span>
           </div>
           <span className="text-xs text-muted">&rarr;</span>
         </Link>

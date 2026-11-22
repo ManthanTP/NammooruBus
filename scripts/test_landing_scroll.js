@@ -35,11 +35,15 @@ async function run() {
     const context = await browser.newContext({
       viewport: { width: 1280, height: 800 },
     })
+    await context.addInitScript(() => {
+      sessionStorage.setItem('nb_splash_shown', 'true')
+      localStorage.setItem('nb_lang', 'en')
+    })
     const page = await context.newPage()
 
     console.log('\n🧪 TEST 1: Initial Page Load & Top State')
     await page.goto(`${baseUrl}/`, { waitUntil: 'domcontentloaded' })
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(1000)
 
     // Check that at the very top (hero), no nav item is active
     const activeAtTop = await page.$$eval(
@@ -56,12 +60,11 @@ async function run() {
     console.log('\n🧪 TEST 2: Nav Link Clicks & URL Hash & Active Pill')
     const sections = ['features', 'how-it-works', 'roles', 'app', 'faq']
 
-    for (const sec of sections) {
-      // Find button corresponding to section
+    for (let idx = 0; idx < sections.length; idx++) {
+      const sec = sections[idx]
+      // Find button corresponding to section by position in navigation
       const button = page.locator(
-        `nav[aria-label="Landing Page Navigation"] button:has-text("${
-          sec === 'how-it-works' ? 'How it works' : sec.charAt(0).toUpperCase() + sec.slice(1)
-        }")`
+        `nav[aria-label="Landing Page Navigation"] button:nth-child(${idx + 1})`
       )
       await button.click()
       await page.waitForTimeout(300)
@@ -90,7 +93,7 @@ async function run() {
     await page.waitForTimeout(400)
 
     const faqButton = page.locator(
-      'nav[aria-label="Landing Page Navigation"] button:has-text("FAQ")'
+      'nav[aria-label="Landing Page Navigation"] button:last-child'
     )
     const faqIsCurrent = await faqButton.getAttribute('aria-current')
     if (faqIsCurrent === 'true') {
@@ -123,6 +126,10 @@ async function run() {
     const reducedContext = await browser.newContext({
       viewport: { width: 1280, height: 800 },
       reducedMotion: 'reduce',
+    })
+    await reducedContext.addInitScript(() => {
+      sessionStorage.setItem('nb_splash_shown', 'true')
+      localStorage.setItem('nb_lang', 'en')
     })
     const reducedPage = await reducedContext.newPage()
     await reducedPage.goto(`${baseUrl}/`, { waitUntil: 'domcontentloaded' })

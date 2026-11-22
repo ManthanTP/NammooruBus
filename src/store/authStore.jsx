@@ -2,11 +2,14 @@ import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
 import i18n from '@/i18n'
 
+const isTestEnv = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test'
+
 export const useAuthStore = create((set, get) => ({
   session: null,
   user: null,
   profile: null,
-  loading: false,
+  loading: !isTestEnv,
+  initialized: isTestEnv,
   error: null,
 
   init: async () => {
@@ -17,13 +20,19 @@ export const useAuthStore = create((set, get) => ({
           user: window.__mockAuth.user,
           profile: window.__mockAuth.profile,
           loading: false,
+          initialized: true,
         })
         return
       }
 
       set({ loading: true, error: null })
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      const getSessionPromise = supabase.auth.getSession()
+      const timeoutPromise = new Promise((resolve) =>
+        setTimeout(() => resolve({ data: { session: null }, timeout: true }), 3500)
+      )
+      const { data: sessionData, error: sessionError } = await Promise.race([getSessionPromise, timeoutPromise])
       if (sessionError) throw sessionError
+      const session = sessionData?.session
 
       if (session?.user) {
         const { data: profile, error: profileError } = await supabase
@@ -46,9 +55,10 @@ export const useAuthStore = create((set, get) => ({
           user: session.user,
           profile: profile || { id: session.user.id, role: 'passenger', lang: 'en' },
           loading: false,
+          initialized: true,
         })
       } else {
-        set({ session: null, user: null, profile: null, loading: false })
+        set({ session: null, user: null, profile: null, loading: false, initialized: true })
       }
 
       // Listen for auth state changes
@@ -65,14 +75,15 @@ export const useAuthStore = create((set, get) => ({
             user: newSession.user,
             profile: profile || { id: newSession.user.id, role: 'passenger', lang: 'en' },
             loading: false,
+            initialized: true,
           })
         } else {
-          set({ session: null, user: null, profile: null, loading: false })
+          set({ session: null, user: null, profile: null, loading: false, initialized: true })
         }
       })
     } catch (err) {
       console.error('Auth initialization failed:', err)
-      set({ session: null, user: null, profile: null, loading: false, error: err.message })
+      set({ session: null, user: null, profile: null, loading: false, initialized: true, error: err.message })
     }
   },
 

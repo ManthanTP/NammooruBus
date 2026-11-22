@@ -357,12 +357,6 @@ export default function DriverTripPage() {
           </button>
         </div>
       </div>
-          >
-            <Users className="w-4 h-4" />
-            <span>Packed</span>
-          </button>
-        </div>
-      </div>
 
       {/* End Trip Button */}
       <div className="pt-2">

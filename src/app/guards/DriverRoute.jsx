@@ -2,16 +2,16 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 
 export default function DriverRoute({ children }) {
-  const { user, profile, loading } = useAuthStore()
+  const { user, profile, loading, initialized } = useAuthStore()
 
   if (typeof window !== 'undefined' && (window.__mockAuth || sessionStorage.getItem('nb_mock_driver') === 'true')) {
     return children ? children : <Outlet />
   }
 
-  if (loading) {
+  if (loading || !initialized) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-page">
-        <div className="w-8 h-8 border-4 border-cobalt border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen bg-bg">
+        <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
