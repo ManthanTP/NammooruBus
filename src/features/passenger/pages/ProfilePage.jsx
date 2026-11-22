@@ -206,9 +206,8 @@ export default function ProfilePage() {
                     key={key}
                     type="button"
                     onClick={() => setTheme(key)}
-                    className={`relative px-2.5 py-1.5 rounded-pill text-xs font-bold flex items-center gap-1.5 transition select-none cursor-pointer ${
-                      isActive ? 'on-brand font-extrabold shadow-soft' : 'text-muted hover:text-text'
-                    }`}
+                    className={`relative px-2.5 py-1.5 rounded-pill text-xs font-bold flex items-center gap-1.5 transition select-none cursor-pointer ${isActive ? 'on-brand font-extrabold shadow-soft' : 'text-muted hover:text-text'
+                      }`}
                     style={
                       isActive
                         ? { background: 'var(--gradient-brand)', color: 'var(--on-brand)' }
