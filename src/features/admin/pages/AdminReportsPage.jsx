@@ -14,6 +14,7 @@ import {
 import { supabase } from '@/lib/supabase'
 import { useToastStore } from '@/components/ui/Toast'
 import RouteBadge from '@/components/ui/RouteBadge'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 // Plain JavaScript CSV generator utility
 function exportToCsv(filename, rows) {
@@ -132,14 +133,14 @@ export default function AdminReportsPage() {
         }
       })
 
-      ;(trips || []).forEach((t) => {
-        if (delayMap[t.route_id]) {
-          delayMap[t.route_id].total_trips += 1
-          if (t.status === 'delayed') delayMap[t.route_id].delayed_trips += 1
-          else if (t.status === 'breakdown') delayMap[t.route_id].breakdowns += 1
-          else delayMap[t.route_id].on_time += 1
-        }
-      })
+        ; (trips || []).forEach((t) => {
+          if (delayMap[t.route_id]) {
+            delayMap[t.route_id].total_trips += 1
+            if (t.status === 'delayed') delayMap[t.route_id].delayed_trips += 1
+            else if (t.status === 'breakdown') delayMap[t.route_id].breakdowns += 1
+            else delayMap[t.route_id].on_time += 1
+          }
+        })
 
       // If no trips exist in database yet, provide seed baseline
       const delayArray = Object.values(delayMap).map((d) => {
@@ -171,21 +172,21 @@ export default function AdminReportsPage() {
         }
       })
 
-      ;(complaints || []).forEach((c) => {
-        const cat = catMap[c.category] || catMap.other
-        cat.total += 1
-        if (c.status === 'resolved') {
-          cat.resolved += 1
-          const start = new Date(c.created_at).getTime()
-          const end = new Date(c.updated_at || c.created_at).getTime()
-          const hours = Math.max(0.5, (end - start) / (1000 * 60 * 60))
-          cat.total_resolution_hours += hours
-        } else if (c.status === 'in_progress') {
-          cat.in_progress += 1
-        } else {
-          cat.open += 1
-        }
-      })
+        ; (complaints || []).forEach((c) => {
+          const cat = catMap[c.category] || catMap.other
+          cat.total += 1
+          if (c.status === 'resolved') {
+            cat.resolved += 1
+            const start = new Date(c.created_at).getTime()
+            const end = new Date(c.updated_at || c.created_at).getTime()
+            const hours = Math.max(0.5, (end - start) / (1000 * 60 * 60))
+            cat.total_resolution_hours += hours
+          } else if (c.status === 'in_progress') {
+            cat.in_progress += 1
+          } else {
+            cat.open += 1
+          }
+        })
 
       const resolutionArray = categories.map((catKey) => {
         const data = catMap[catKey]
@@ -219,7 +220,7 @@ export default function AdminReportsPage() {
         }
       }
 
-      ;(crowdReports || []).forEach((cr) => {
+      ; (crowdReports || []).forEach((cr) => {
         const h = new Date(cr.created_at).getHours()
         if (hoursMap[h]) {
           hoursMap[h].total += 1
@@ -312,59 +313,17 @@ export default function AdminReportsPage() {
       </div>
 
       {/* Report Tabs */}
-      <div className="flex border-b border-line gap-2 overflow-x-auto text-xs font-bold">
-        <button
-          type="button"
-          onClick={() => setActiveTab('usage')}
-          className={`pb-2.5 px-3 border-b-2 flex items-center gap-2 transition shrink-0 ${
-            activeTab === 'usage'
-              ? 'border-cobalt text-cobalt'
-              : 'border-transparent text-text-secondary hover:text-ink'
-          }`}
-        >
-          <TrendingUp className="w-4 h-4" />
-          <span>Route Usage (Searches)</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('delays')}
-          className={`pb-2.5 px-3 border-b-2 flex items-center gap-2 transition shrink-0 ${
-            activeTab === 'delays'
-              ? 'border-cobalt text-cobalt'
-              : 'border-transparent text-text-secondary hover:text-ink'
-          }`}
-        >
-          <Clock className="w-4 h-4" />
-          <span>Delay & Punctuality</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('complaints')}
-          className={`pb-2.5 px-3 border-b-2 flex items-center gap-2 transition shrink-0 ${
-            activeTab === 'complaints'
-              ? 'border-cobalt text-cobalt'
-              : 'border-transparent text-text-secondary hover:text-ink'
-          }`}
-        >
-          <MessageSquare className="w-4 h-4" />
-          <span>Grievance Turnaround</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('crowd')}
-          className={`pb-2.5 px-3 border-b-2 flex items-center gap-2 transition shrink-0 ${
-            activeTab === 'crowd'
-              ? 'border-cobalt text-cobalt'
-              : 'border-transparent text-text-secondary hover:text-ink'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>Crowd By Hour</span>
-        </button>
-      </div>
+      <SegmentedControl
+        options={[
+          { key: 'usage', label: 'Route Usage', icon: TrendingUp },
+          { key: 'delays', label: 'Delay & Punctuality', icon: Clock },
+          { key: 'complaints', label: 'Grievance Turnaround', icon: MessageSquare },
+          { key: 'crowd', label: 'Crowd By Hour', icon: Users },
+        ]}
+        value={activeTab}
+        onChange={setActiveTab}
+        ariaLabel="Admin reports tabs"
+      />
 
       {/* Tab 1: Route Usage */}
       {activeTab === 'usage' && (
@@ -597,13 +556,12 @@ export default function AdminReportsPage() {
                     </td>
                     <td className="p-3 text-right">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          row.dominant_crowd === 'Packed'
-                            ? 'bg-danger/15 text-danger'
-                            : row.dominant_crowd === 'Filling Up'
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${row.dominant_crowd === 'Packed'
+                          ? 'bg-danger/15 text-danger'
+                          : row.dominant_crowd === 'Filling Up'
                             ? 'bg-warning/15 text-warning'
                             : 'bg-success/15 text-success'
-                        }`}
+                          }`}
                       >
                         {row.dominant_crowd}
                       </span>

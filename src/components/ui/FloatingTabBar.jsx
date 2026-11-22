@@ -9,7 +9,7 @@ export default function FloatingTabBar() {
   const pathname = location.pathname
 
   const tabs = [
-    { key: 'explore', label: t('nav.explore'), path: '/', icon: Compass },
+    { key: 'explore', label: t('nav.explore'), path: '/explore', icon: Compass },
     { key: 'live', label: t('nav.live'), path: '/live', icon: Radio },
     { key: 'nearby', label: t('nav.nearby'), path: '/nearby', icon: MapPin },
     { key: 'routes', label: t('nav.routes'), path: '/routes', icon: Route },
@@ -17,14 +17,14 @@ export default function FloatingTabBar() {
   ]
 
   const isActive = (tabPath) => {
-    if (tabPath === '/') return pathname === '/'
+    if (tabPath === '/explore') return pathname === '/explore'
     return pathname.startsWith(tabPath)
   }
 
   return (
     <nav
       aria-label="Main Navigation"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-[420px] h-16 bg-white px-2 py-1.5 rounded-full flex items-center justify-around border border-line"
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-[420px] h-16 bg-surface px-2 py-1.5 rounded-full flex items-center justify-around border border-line"
       style={{ boxShadow: 'var(--shadow-float)' }}
     >
       {tabs.map((tab) => {

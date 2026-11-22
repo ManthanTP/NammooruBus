@@ -6,9 +6,14 @@
       (function() {
         try {
           var saved = localStorage.getItem('nb-theme') || 'system';
-          var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-          var theme = isDark ? 'dark' : 'light';
-          document.documentElement.setAttribute('data-theme', theme);
+          var resolved = saved;
+          if (saved === 'system') {
+            resolved = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+          }
+          if (resolved !== 'dark' && resolved !== 'blue' && resolved !== 'light') {
+            resolved = 'light';
+          }
+          document.documentElement.setAttribute('data-theme', resolved);
         } catch(e) {}
       })();
     </script>
@@ -25,16 +30,42 @@
     <link rel="preload" as="image" href="/brand/logo-full.png" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Our town. Our bus. ನಮ್ಮೂರು. ನಮ್ಮ ಬಸ್." />
+    <meta name="description" content="Live bus locations, smart routes and fares for Hubballi-Dharwad. Free, bilingual passenger and driver app." />
     <meta name="theme-color" content="#0040FF" />
+    <link rel="canonical" href="https://nammoorubus.vercel.app/" />
 
     <!-- Open Graph / Social preview -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Nammooru Bus" />
-    <meta property="og:description" content="Our town. Our bus. ನಮ್ಮೂರು. ನಮ್ಮ ಬಸ್." />
-    <meta property="og:image" content="/brand/logo-full.png" />
+    <meta property="og:url" content="https://nammoorubus.vercel.app/" />
+    <meta property="og:title" content="Nammooru Bus: Live city bus tracking for Hubballi-Dharwad" />
+    <meta property="og:description" content="Live bus locations, smart routes and fares for Hubballi-Dharwad. Free, bilingual passenger and driver app." />
+    <meta property="og:image" content="https://nammoorubus.vercel.app/brand/logo-full.png" />
 
-    <title>Nammooru Bus</title>
+    <!-- Twitter Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Nammooru Bus: Live city bus tracking for Hubballi-Dharwad" />
+    <meta name="twitter:description" content="Live bus locations, smart routes and fares for Hubballi-Dharwad. Free, bilingual passenger and driver app." />
+    <meta name="twitter:image" content="https://nammoorubus.vercel.app/brand/logo-full.png" />
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Nammooru Bus",
+        "url": "https://nammoorubus.vercel.app/",
+        "description": "Live city bus tracking, route finder and fares for Hubballi-Dharwad",
+        "applicationCategory": "TravelApplication",
+        "operatingSystem": "All",
+        "author": {
+          "@type": "Person",
+          "name": "Manthan Patel",
+          "url": "https://manthantp-portfolio.vercel.app/"
+        }
+      }
+    </script>
+
+    <title>Nammooru Bus: Live city bus tracking for Hubballi-Dharwad</title>
 
     <!-- Leaflet CSS -->
     <link

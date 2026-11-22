@@ -25,7 +25,7 @@ export default function TicketCard({
       onClick={onClick}
       role="button"
       tabIndex={0}
-      className={`relative bg-white rounded-[20px] border border-line overflow-hidden transition-all duration-150 hover:border-cobalt-500 cursor-pointer active:scale-[0.99] ${className}`}
+      className={`relative bg-surface rounded-[20px] border border-line overflow-hidden transition-all duration-150 hover:border-brand cursor-pointer active:scale-[0.99] ${className}`}
       style={{ boxShadow: 'var(--shadow-soft)' }}
     >
       {/* "Best" amber ribbon badge */}

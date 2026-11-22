@@ -74,7 +74,7 @@ export default function RoutesPage() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search route code or destination..."
-          className="w-full h-12 bg-white rounded-full pl-10 pr-4 text-xs font-semibold text-ink-950 border border-line shadow-xs focus:outline-none focus:border-cobalt-500 transition"
+          className="w-full h-12 bg-surface rounded-full pl-10 pr-4 text-xs font-semibold text-text border border-line shadow-xs focus:outline-none focus:border-brand transition"
         />
       </div>
 
@@ -96,7 +96,7 @@ export default function RoutesPage() {
               onClick={() => navigate(`/routes/${r.id}`)}
               role="button"
               tabIndex={0}
-              className="p-4 bg-white rounded-[20px] border border-line shadow-soft hover:border-cobalt-500 transition-all cursor-pointer flex flex-col gap-3 group text-left active:scale-[0.99]"
+              className="p-4 bg-surface rounded-[20px] border border-line shadow-soft hover:border-brand transition-all cursor-pointer flex flex-col gap-3 group text-left active:scale-[0.99]"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">

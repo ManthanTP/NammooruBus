@@ -46,7 +46,7 @@ export default function BottomSheetModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-            className="relative z-10 w-full max-w-md bg-white rounded-t-[28px] md:rounded-[28px] p-6 space-y-4 border border-line shadow-float"
+            className="relative z-10 w-full max-w-md bg-surface rounded-t-[28px] md:rounded-[28px] p-6 space-y-4 border border-line shadow-float"
           >
             {/* Grab handle on mobile */}
             <div className="w-10 h-1 bg-line rounded-full mx-auto md:hidden" />

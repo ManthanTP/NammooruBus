@@ -75,7 +75,7 @@ export default function DataTable({
   }
 
   return (
-    <div className="bg-white rounded-[20px] shadow-soft overflow-hidden flex flex-col">
+    <div className="bg-surface rounded-[20px] shadow-soft overflow-hidden flex flex-col border border-line">
       {/* Table Toolbar */}
       <div className="p-4 border-b border-line flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-72">
@@ -134,7 +134,7 @@ export default function DataTable({
                 <tr
                   key={row.id || idx}
                   className={`${
-                    idx % 2 === 1 ? 'bg-sky-50/60' : 'bg-white'
+                    idx % 2 === 1 ? 'bg-surface-2/40' : 'bg-surface'
                   } hover:bg-sky-100/50 hover:shadow-xs transition-all`}
                 >
                   {columns.map((col) => (

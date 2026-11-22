@@ -131,7 +131,7 @@ export default function RegisterPage() {
         }
       }
 
-      navigate('/')
+      navigate('/explore')
     } catch (err) {
       setFormError(formatAuthError(err))
       setSubmitting(false)

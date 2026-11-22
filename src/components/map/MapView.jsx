@@ -177,18 +177,19 @@ export default function MapView({ showUserBusLink = true }) {
   const { trips, selectedTripId, setSelectedTripId } = useLiveStore()
   const { position: userPos, accuracy } = useLocationStore()
   const { resolvedTheme } = useThemeStore()
+  const isDarkOrBlue = resolvedTheme === 'dark' || resolvedTheme === 'blue'
   const isDark = resolvedTheme === 'dark'
 
   const parsedLat = parseFloat(import.meta.env.VITE_DEFAULT_LAT)
   const parsedLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG)
   const defaultLat = !Number.isNaN(parsedLat) && Number.isFinite(parsedLat) ? parsedLat : 15.3647
   const defaultLng = !Number.isNaN(parsedLng) && Number.isFinite(parsedLng) ? parsedLng : 75.1240
-  const tileUrl = getTileUrl(isDark)
+  const tileUrl = getTileUrl()
   const attribution = TILE_ATTRIBUTION
 
-  const casingColor = isDark ? '#050B2E' : '#FFFFFF'
-  const activeRouteColor = routeColor || (isDark ? '#4C7DFF' : '#0040FF')
-  const walkLegColor = isDark ? '#EEF2FF' : '#00136E'
+  const casingColor = isDarkOrBlue ? (isDark ? '#0A0B10' : '#050B2E') : '#FFFFFF'
+  const activeRouteColor = isDarkOrBlue ? '#4C7DFF' : (routeColor || '#0040FF')
+  const walkLegColor = isDarkOrBlue ? '#FFFFFF' : '#00136E'
 
   // Find selected bus if active
   const selectedTrip = trips.find((t) => t.id === selectedTripId)
@@ -471,7 +472,7 @@ export default function MapView({ showUserBusLink = true }) {
       </MapContainer>
 
       {/* Soft overlay on basemap (only in light mode) */}
-      {!isDark && <div className="absolute inset-0 bg-white/10 pointer-events-none z-[400]" />}
+      {!isDarkOrBlue && <div className="absolute inset-0 bg-white/5 pointer-events-none z-[400]" />}
 
       {/* Approximate Path Chip */}
       {hasAnyApproximate && (

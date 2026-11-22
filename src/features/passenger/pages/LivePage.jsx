@@ -228,7 +228,7 @@ export default function LivePage() {
               className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 active:scale-95 ${
                 isSelected
                   ? 'text-white shadow-xs'
-                  : 'text-muted bg-white border border-line hover:text-ink-950'
+                  : 'text-muted bg-surface border border-line hover:text-text'
               }`}
               style={isSelected ? { background: 'var(--gradient-brand)' } : {}}
             >
@@ -241,7 +241,7 @@ export default function LivePage() {
       {/* 6. Selected Bus Detail Card */}
       {selectedTrip && tripDetails ? (
         <div
-          className="p-4 bg-white rounded-[20px] border border-line space-y-3.5"
+          className="p-4 bg-surface rounded-[20px] border border-line space-y-3.5"
           style={{ boxShadow: 'var(--shadow-soft)' }}
         >
           {/* Header */}
@@ -363,8 +363,8 @@ export default function LivePage() {
                 tabIndex={0}
                 className={`p-3.5 rounded-[20px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.99] ${
                   isSelected
-                    ? 'bg-sky-50 border-cobalt-500 shadow-soft'
-                    : 'bg-white hover:border-cobalt-500 border-line shadow-xs'
+                    ? 'bg-surface-2 border-brand shadow-soft'
+                    : 'bg-surface hover:border-brand border-line shadow-xs'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -413,7 +413,7 @@ export default function LivePage() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 50 }}
-              className="w-full max-w-sm bg-white rounded-[28px] p-5 border border-line shadow-float space-y-4"
+              className="w-full max-w-sm bg-surface rounded-[28px] p-5 border border-line shadow-float space-y-4"
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-extrabold text-ink-950 font-heading">

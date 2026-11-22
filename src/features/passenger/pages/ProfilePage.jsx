@@ -6,7 +6,7 @@ import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, A
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
 import { useThemeStore } from '@/store/themeStore'
-import { useToastStore } from '@/components/ui/Toast'
+import { useToastStore, toast } from '@/components/ui/Toast'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import Button from '@/components/ui/Button'
 
@@ -36,7 +36,7 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     await signOut()
-    addToast('Logged out successfully', 'info')
+    toast.info('toast.logged_out')
     navigate('/')
   }
 
@@ -62,7 +62,7 @@ export default function ProfilePage() {
     setClaimLoading(false)
 
     if (status === 'ok') {
-      addToast('Driver role unlocked! Redirecting...', 'success')
+      toast.success('toast.driver_unlocked')
       navigate('/driver')
     } else if (status === 'invalid') {
       setClaimError('Invalid driver key.')
@@ -149,39 +149,47 @@ export default function ProfilePage() {
 
         <div className="h-[1px] bg-line/60" />
 
-        {/* 3-way theme segmented control */}
-        <div className="flex items-center justify-between">
+        {/* 4-way theme segmented control: Light, Dark, Blue, System */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <span className="text-xs font-bold text-ink-950">
             {t('settings.theme') || 'Theme'}
           </span>
           <LayoutGroup id="profile-theme-group">
-            <div className="flex items-center p-1 bg-sky-50 dark:bg-navy-950/70 border border-line rounded-pill">
+            <div className="flex items-center p-1 bg-surface-2 border border-line rounded-pill">
               {[
-                { key: 'light', label: 'Light', icon: Sun },
-                { key: 'dark', label: 'Dark', icon: Moon },
-                { key: 'system', label: 'System', icon: Laptop },
-              ].map(({ key, label, icon: Icon }) => {
+                { key: 'light', label: 'Light', swatch: '#FFFFFF', border: '#D9E2F7', icon: Sun },
+                { key: 'dark', label: 'Dark', swatch: '#0A0B10', border: '#2A2F42', icon: Moon },
+                { key: 'blue', label: 'Blue', swatch: '#050B2E', border: '#22308A', icon: Moon },
+                { key: 'system', label: 'System', isSys: true, icon: Laptop },
+              ].map(({ key, label, swatch, border, isSys, icon: Icon }) => {
                 const isActive = theme === key
                 return (
                   <button
                     key={key}
                     type="button"
                     onClick={() => setTheme(key)}
-                    className={`relative px-2.5 py-1 rounded-pill text-xs font-bold flex items-center gap-1.5 transition select-none ${
-                      isActive
-                        ? 'text-white'
-                        : 'text-muted hover:text-ink-950'
-                    }`}
+                    className={`relative px-2.5 py-1.5 rounded-pill text-xs font-bold flex items-center gap-1.5 transition select-none cursor-pointer ${isActive
+                      ? 'text-white font-extrabold'
+                      : 'text-muted hover:text-ink-950'
+                      }`}
                   >
                     {isActive && (
                       <motion.div
                         layoutId="profile-theme-pill"
-                        className="absolute inset-0 rounded-pill bg-cobalt-500 shadow-xs"
+                        className="absolute inset-0 rounded-pill shadow-xs"
+                        style={{ background: 'var(--gradient-brand)' }}
                         transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                       />
                     )}
-                    <span className="relative z-10 flex items-center gap-1">
-                      <Icon className="w-3.5 h-3.5" />
+                    <span className="relative z-10 flex items-center gap-1.5">
+                      {isSys ? (
+                        <Icon className="w-3.5 h-3.5" />
+                      ) : (
+                        <span
+                          className="w-3 h-3 rounded-full border shrink-0"
+                          style={{ backgroundColor: swatch, borderColor: border }}
+                        />
+                      )}
                       <span>{label}</span>
                     </span>
                   </button>

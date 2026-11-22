@@ -3,7 +3,7 @@ import { Bus, Route, CheckCircle2, AlertCircle, Save } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
-import { useToastStore } from '@/components/ui/Toast'
+import { useToastStore, toast } from '@/components/ui/Toast'
 import RouteBadge from '@/components/ui/RouteBadge'
 import Button from '@/components/ui/Button'
 
@@ -89,7 +89,7 @@ export default function DriverBusPage() {
 
       if (data && data.status === 'ok') {
         setSuccessMsg('Bus assignment updated successfully!')
-        addToast('Bus assignment saved', 'success')
+        toast.success('toast.bus_assigned')
         await fetchDriverInfo()
       } else if (data?.status === 'bus_taken') {
         setErrorMsg('This bus registration is already claimed by another driver. Please contact admin.')

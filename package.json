@@ -10,7 +10,8 @@
     "test": "vitest run",
     "lint": "eslint src",
     "i18n:check": "node ./scripts/check_i18n.js",
-    "icons": "powershell -ExecutionPolicy Bypass -File ./scripts/generate_icons.ps1"
+    "icons": "node ./scripts/generate_icons.js",
+    "test:themes": "node ./scripts/test_themes.js"
   },
   "dependencies": {
     "@fontsource/dotgothic16": "^5.0.0",
@@ -32,9 +33,11 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@tailwindcss/vite": "^4.0.8",
     "@vitejs/plugin-react": "^4.3.4",
     "playwright": "^1.65.1",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.0.8",
     "vite": "^6.2.0",
     "vitest": "^5.1.1"

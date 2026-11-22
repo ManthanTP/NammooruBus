@@ -27,7 +27,7 @@ export default function Ticket({ result, onClick, index = 0 }) {
       onClick={onClick}
       role="button"
       tabIndex={0}
-      className="relative bg-white rounded-[20px] border border-line overflow-hidden transition-all duration-150 hover:border-cobalt-500 cursor-pointer active:scale-[0.98] select-none text-left"
+      className="relative bg-surface rounded-[20px] border border-line overflow-hidden transition-all duration-150 hover:border-brand cursor-pointer active:scale-[0.98] select-none text-left"
       style={{ boxShadow: 'var(--shadow-soft)' }}
     >
       {/* "Best" amber ribbon badge */}

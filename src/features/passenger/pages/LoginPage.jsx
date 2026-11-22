@@ -69,7 +69,7 @@ export default function LoginPage() {
       } else if (profile?.role === 'driver') {
         navigate('/driver')
       } else {
-        navigate('/')
+        navigate('/explore')
       }
     } catch (err) {
       setFormError(formatAuthError(err))

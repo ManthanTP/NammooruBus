@@ -26,7 +26,7 @@ export default function ConfirmDialog({
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="w-full max-w-sm bg-white rounded-sheet border border-line p-6 shadow-float space-y-4"
+          className="w-full max-w-sm bg-surface rounded-sheet border border-line p-6 shadow-float space-y-4"
         >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2.5">

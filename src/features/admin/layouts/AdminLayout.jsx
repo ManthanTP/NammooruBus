@@ -198,11 +198,11 @@ export default function AdminLayout() {
               <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-[12px] p-0.5 flex items-center justify-center dark:bg-white transition-colors shrink-0">
+              <div className="w-10 h-10 rounded-[12px] bg-white overflow-hidden p-0.5 flex items-center justify-center shadow-xs shrink-0">
                 <img
-                  src="/brand/logo-mark-transparent.png"
+                  src="/brand/logo-mark.png"
                   alt="Logo"
-                  className="h-8 w-8 object-contain"
+                  className="w-full h-full object-contain"
                 />
               </div>
               <h1 className="font-heading text-lg font-extrabold tracking-tight text-ink-950">

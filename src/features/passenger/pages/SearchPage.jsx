@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, ArrowUpDown, MapPin, Navigation, X, Check, Search, Bus, AlertCircle } from 'lucide-react'
@@ -15,12 +15,27 @@ export default function SearchPage() {
   const { stops, routes, routeStops } = useDataStore()
   const { position: userPos, start: startLocation } = useLocationStore()
 
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+
   const [fromStop, setFromStop] = useState(null)
   const [toStop, setToStop] = useState(null)
   const [activeField, setActiveField] = useState('from') // 'from' | 'to'
   const [searchQuery, setSearchQuery] = useState('')
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(location.state?.notice || null)
   const [isSwapping, setIsSwapping] = useState(false)
+
+  // Pre-fill From if query param exists (e.g. from Nearby "Buses from here to...")
+  useEffect(() => {
+    const fromParam = searchParams.get('from')
+    if (fromParam && stops.length > 0 && !fromStop) {
+      const match = stops.find((s) => s.id === fromParam || s.code === fromParam)
+      if (match) {
+        setFromStop(match)
+        setActiveField('to')
+      }
+    }
+  }, [searchParams, stops, fromStop])
 
   // Map route badges passing each stop
   const routesByStop = useMemo(() => {
@@ -94,8 +109,10 @@ export default function SearchPage() {
       }
     }
 
-    if (nearest) {
+    if (nearest && minDist <= 1.0) {
       handleSelectStop(nearest)
+    } else {
+      setErrorMessage('No stop within 1 km of you. Pick a start stop.')
     }
   }
 
@@ -236,9 +253,9 @@ export default function SearchPage() {
       <button
         type="button"
         onClick={handleUseLocation}
-        className="flex items-center gap-2 px-3 py-2.5 mb-2 bg-cobalt-tint/60 hover:bg-cobalt-tint border border-cobalt/20 rounded-input text-xs font-bold text-cobalt transition text-left"
+        className="flex items-center gap-2 px-3 py-2.5 mb-2 bg-surface-2 hover:bg-surface border border-line rounded-input text-xs font-bold text-text transition text-left cursor-pointer"
       >
-        <Navigation className="w-4 h-4 shrink-0" />
+        <Navigation className="w-4 h-4 shrink-0 text-brand" />
         <span>{t('passenger.your_location')} (Pick nearest stop)</span>
       </button>
 

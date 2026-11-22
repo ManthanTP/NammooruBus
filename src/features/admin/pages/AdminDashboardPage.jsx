@@ -177,7 +177,7 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={fetchDashboardData}
-            className="p-2 border border-line bg-white hover:bg-sky-50 rounded-pill text-muted hover:text-ink-950 transition shadow-soft"
+            className="p-2 border border-line bg-surface hover:bg-surface-2 rounded-pill text-muted hover:text-text transition shadow-soft"
             title="Refresh statistics"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -218,52 +218,52 @@ export default function AdminDashboardPage() {
           <div className="absolute -bottom-3 -right-3 w-16 h-16 rounded-full bg-white/5 pointer-events-none" />
         </Link>
 
-        {/* 2. Routes (White card, cobalt number) */}
+        {/* 2. Routes */}
         <Link
           to="/12345678/admin/routes"
-          className="bg-white p-4 rounded-card border border-line shadow-soft hover:border-cobalt-500 transition group"
+          className="bg-surface p-4 rounded-card border border-line shadow-soft hover:border-brand transition group"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Routes</span>
-            <div className="w-8 h-8 rounded-pill bg-sky-100 text-cobalt-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-pill bg-surface-2 text-brand flex items-center justify-center group-hover:scale-105 transition-transform">
               <RouteIcon className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2 text-3xl font-extrabold text-cobalt-500 font-heading">
+          <div className="mt-2 text-3xl font-extrabold text-brand font-heading">
             {stats.routesCount}
           </div>
           <span className="text-[10px] text-muted font-medium mt-1 block">Active transit lines</span>
         </Link>
 
-        {/* 3. Stops (White card, cobalt number) */}
+        {/* 3. Stops */}
         <Link
           to="/12345678/admin/stops"
-          className="bg-white p-4 rounded-card border border-line shadow-soft hover:border-cobalt-500 transition group"
+          className="bg-surface p-4 rounded-card border border-line shadow-soft hover:border-brand transition group"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Stops</span>
-            <div className="w-8 h-8 rounded-pill bg-sky-100 text-cobalt-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-pill bg-surface-2 text-brand flex items-center justify-center group-hover:scale-105 transition-transform">
               <MapPin className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2 text-3xl font-extrabold text-cobalt-500 font-heading">
+          <div className="mt-2 text-3xl font-extrabold text-brand font-heading">
             {stats.stopsCount}
           </div>
           <span className="text-[10px] text-muted font-medium mt-1 block">Boarding stations</span>
         </Link>
 
-        {/* 4. Fleet Buses (White card, cobalt number) */}
+        {/* 4. Fleet Buses */}
         <Link
           to="/12345678/admin/fleet"
-          className="bg-white p-4 rounded-card border border-line shadow-soft hover:border-cobalt-500 transition group"
+          className="bg-surface p-4 rounded-card border border-line shadow-soft hover:border-brand transition group"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Fleet Buses</span>
-            <div className="w-8 h-8 rounded-pill bg-sky-100 text-cobalt-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-pill bg-surface-2 text-brand flex items-center justify-center group-hover:scale-105 transition-transform">
               <Bus className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-2 text-3xl font-extrabold text-cobalt-500 font-heading">
+          <div className="mt-2 text-3xl font-extrabold text-brand font-heading">
             {stats.busesCount}
           </div>
           <span className="text-[10px] text-muted font-medium mt-1 block">Registered vehicles</span>
@@ -272,7 +272,7 @@ export default function AdminDashboardPage() {
         {/* 5. Open Issues */}
         <Link
           to="/12345678/admin/complaints"
-          className="bg-white p-4 rounded-card border border-line shadow-soft hover:border-danger transition group col-span-2 lg:col-span-1"
+          className="bg-surface p-4 rounded-card border border-line shadow-soft hover:border-danger transition group col-span-2 lg:col-span-1"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Open Issues</span>
@@ -288,28 +288,28 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Quick Actions Bar */}
-      <div className="bg-white p-4 rounded-card border border-line shadow-soft flex items-center justify-between gap-3 flex-wrap">
-        <span className="text-xs font-extrabold text-ink-950 font-heading">Administrative Actions:</span>
+      <div className="bg-surface p-4 rounded-card border border-line shadow-soft flex items-center justify-between gap-3 flex-wrap">
+        <span className="text-xs font-extrabold text-text font-heading">Administrative Actions:</span>
         <div className="flex items-center gap-2 flex-wrap">
           <Link
             to="/12345678/admin/routes/new"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 border border-line rounded-pill text-xs font-bold text-ink-950 transition"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-2 hover:bg-surface-2/80 border border-line rounded-pill text-xs font-bold text-text transition"
           >
-            <Plus className="w-3.5 h-3.5 text-cobalt-500" />
+            <Plus className="w-3.5 h-3.5 text-brand" />
             <span>New Route</span>
           </Link>
           <Link
             to="/12345678/admin/stops"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 border border-line rounded-pill text-xs font-bold text-ink-950 transition"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-2 hover:bg-surface-2/80 border border-line rounded-pill text-xs font-bold text-text transition"
           >
-            <MapPin className="w-3.5 h-3.5 text-cobalt-500" />
+            <MapPin className="w-3.5 h-3.5 text-brand" />
             <span>Add Stop</span>
           </Link>
           <Link
             to="/12345678/admin/import"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-50 hover:bg-sky-100 border border-line rounded-pill text-xs font-bold text-ink-950 transition"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-2 hover:bg-surface-2/80 border border-line rounded-pill text-xs font-bold text-text transition"
           >
-            <Upload className="w-3.5 h-3.5 text-cobalt-500" />
+            <Upload className="w-3.5 h-3.5 text-brand" />
             <span>Import CSV</span>
           </Link>
         </div>
@@ -318,10 +318,10 @@ export default function AdminDashboardPage() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Chart 1: Top Routes by Searches */}
-        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
+        <div className="bg-surface rounded-card border border-line p-5 shadow-soft space-y-4">
           <div>
-            <h3 className="text-xs font-extrabold text-ink-950 uppercase tracking-wider flex items-center gap-1.5">
-              <TrendingUp className="w-4 h-4 text-cobalt-500" />
+            <h3 className="text-xs font-extrabold text-text uppercase tracking-wider flex items-center gap-1.5">
+              <TrendingUp className="w-4 h-4 text-brand" />
               Top Routes by Searches (Last 7 Days)
             </h3>
             <span className="text-[11px] text-muted">
@@ -332,29 +332,30 @@ export default function AdminDashboardPage() {
           <div className="h-64 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topSearches} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="code" tickLine={false} tick={{ fontSize: 11, fill: '#5B6591' }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#5B6591' }} />
+                <XAxis dataKey="code" tickLine={false} tick={{ fontSize: 11, fill: 'var(--muted)' }} />
+                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'var(--muted)' }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#FFFFFF',
-                    borderColor: '#D9E2F7',
+                    backgroundColor: 'var(--surface)',
+                    borderColor: 'var(--line)',
+                    color: 'var(--text)',
                     borderRadius: '12px',
                     fontSize: '12px',
-                    boxShadow: '0 4px 12px rgba(5,15,69,0.08)',
+                    boxShadow: 'var(--shadow-soft)',
                   }}
                   cursor={{ fill: 'rgba(0,64,255,0.05)' }}
                 />
-                <Bar dataKey="searches" fill="#0040FF" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="searches" fill="var(--brand)" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Chart 2: Complaints by Category */}
-        <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
+        <div className="bg-surface rounded-card border border-line p-5 shadow-soft space-y-4">
           <div>
-            <h3 className="text-xs font-extrabold text-ink-950 uppercase tracking-wider flex items-center gap-1.5">
-              <AlertCircle className="w-4 h-4 text-amber-500" />
+            <h3 className="text-xs font-extrabold text-text uppercase tracking-wider flex items-center gap-1.5">
+              <AlertCircle className="w-4 h-4 text-amber" />
               Grievance Distribution
             </h3>
             <span className="text-[11px] text-muted">
@@ -383,16 +384,18 @@ export default function AdminDashboardPage() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#FFFFFF',
-                    borderColor: '#D9E2F7',
+                    backgroundColor: 'var(--surface)',
+                    borderColor: 'var(--line)',
+                    color: 'var(--text)',
                     borderRadius: '12px',
                     fontSize: '12px',
+                    boxShadow: 'var(--shadow-soft)',
                   }}
                 />
                 <Legend
                   verticalAlign="bottom"
                   height={36}
-                  formatter={(val) => <span className="text-xs text-ink-950 font-medium">{val}</span>}
+                  formatter={(val) => <span className="text-xs text-text font-medium">{val}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -401,7 +404,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Recent Complaints Table */}
-      <div className="bg-white rounded-card border border-line p-5 shadow-soft space-y-4">
+      <div className="bg-surface rounded-card border border-line p-5 shadow-soft space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-extrabold text-ink-950 uppercase tracking-wider">
             Recent Passenger Grievances

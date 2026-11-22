@@ -2,12 +2,18 @@ import { create } from 'zustand'
 
 function getInitialTheme() {
   if (typeof window === 'undefined') return 'system'
-  return localStorage.getItem('nb-theme') || 'system'
+  const saved = localStorage.getItem('nb-theme')
+  if (saved === 'dark' || saved === 'blue' || saved === 'light') {
+    return saved
+  }
+  return 'system'
 }
 
 function resolveTheme(theme) {
   if (theme === 'dark') return 'dark'
+  if (theme === 'blue') return 'blue'
   if (theme === 'light') return 'light'
+  // System mode maps to dark or light based on OS
   if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     return 'dark'
   }
@@ -22,17 +28,18 @@ function applyTheme(theme) {
   // Update theme-color meta tag
   const meta = document.querySelector('meta[name="theme-color"]')
   if (meta) {
-    meta.setAttribute('content', resolved === 'dark' ? '#050B2E' : '#0040FF')
+    const color = resolved === 'dark' ? '#0A0B10' : (resolved === 'blue' ? '#050B2E' : '#0040FF')
+    meta.setAttribute('content', color)
   }
 
   // Capacitor StatusBar update if running in native app
   if (window.Capacitor?.Plugins?.StatusBar) {
     try {
       window.Capacitor.Plugins.StatusBar.setStyle({
-        style: resolved === 'dark' ? 'DARK' : 'LIGHT',
+        style: resolved === 'light' ? 'LIGHT' : 'DARK',
       })
       window.Capacitor.Plugins.StatusBar.setBackgroundColor({
-        color: resolved === 'dark' ? '#050B2E' : '#0040FF',
+        color: resolved === 'dark' ? '#0A0B10' : (resolved === 'blue' ? '#050B2E' : '#0040FF'),
       })
     } catch (e) {
       // Ignore if unavailable
@@ -53,8 +60,9 @@ export const useThemeStore = create((set, get) => ({
   },
 
   toggleTheme: () => {
+    // Cycles Light -> Dark -> Blue -> Light
     const current = get().resolvedTheme
-    const next = current === 'dark' ? 'light' : 'dark'
+    const next = current === 'light' ? 'dark' : (current === 'dark' ? 'blue' : 'light')
     get().setTheme(next)
   },
 

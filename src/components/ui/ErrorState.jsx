@@ -13,7 +13,7 @@ export default function ErrorState({
 }) {
   return (
     <div
-      className={`bg-white rounded-[20px] p-6 text-center border border-line space-y-4 ${className}`}
+      className={`bg-surface rounded-[20px] p-6 text-center border border-line space-y-4 ${className}`}
       style={{ boxShadow: 'var(--shadow-soft)' }}
     >
       <div className="w-12 h-12 rounded-full bg-danger/10 text-danger flex items-center justify-center mx-auto shadow-xs">

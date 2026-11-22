@@ -37,12 +37,12 @@ export default function SavedPage() {
       {/* 1. Top Header */}
       <div className="flex items-center justify-between pt-1">
         <div className="flex items-center gap-2">
-          <Bookmark className="w-5 h-5 text-amber-500 fill-amber-500" />
-          <h1 className="font-heading font-extrabold text-xl text-ink-950">
+          <Bookmark className="w-5 h-5 text-amber fill-amber" />
+          <h1 className="font-heading font-extrabold text-xl text-text">
             {t('passenger.saved_trips_title') || 'Saved Trips'}
           </h1>
         </div>
-        <span className="text-xs font-bold text-cobalt-500 bg-sky-100 px-2.5 py-0.5 rounded-full">
+        <span className="text-xs font-bold text-text bg-surface-2 border border-line px-2.5 py-0.5 rounded-full">
           {savedTrips.length} saved
         </span>
       </div>
@@ -59,20 +59,20 @@ export default function SavedPage() {
           </div>
           <Link
             to="/login"
-            className="px-4 py-2 bg-white text-cobalt-500 text-xs font-bold rounded-full shadow-xs hover:bg-sky-50 transition shrink-0 active:scale-95"
+            className="px-4 py-2 bg-white text-navy-900 text-xs font-bold rounded-full shadow-xs hover:bg-white/90 transition shrink-0 active:scale-95"
           >
             {t('auth.sign_in') || 'Sign in'}
           </Link>
         </div>
       ) : (
-        <div className="p-3.5 bg-white border border-line rounded-[20px] shadow-soft flex items-center justify-between text-xs">
+        <div className="p-3.5 bg-surface border border-line rounded-[20px] shadow-soft flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 rounded-full bg-sky-100 text-cobalt-500 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-full bg-surface-2 text-brand flex items-center justify-center shrink-0 border border-line">
               <User className="w-4 h-4" />
             </div>
-            <span className="font-semibold text-ink-950 truncate">{user.email}</span>
+            <span className="font-semibold text-text truncate">{user.email}</span>
           </div>
-          <span className="text-[10px] bg-amber-100 text-navy-900 font-extrabold px-2.5 py-0.5 rounded-full shrink-0">
+          <span className="text-[10px] bg-amber/20 text-text font-extrabold px-2.5 py-0.5 rounded-full shrink-0 border border-amber/30">
             Cloud Synced
           </span>
         </div>
@@ -97,14 +97,14 @@ export default function SavedPage() {
                   onClick={() => handleRunSearch(trip)}
                   role="button"
                   tabIndex={0}
-                  className="relative bg-white rounded-[20px] border border-line overflow-hidden shadow-soft hover:border-cobalt-500 transition-all cursor-pointer select-none text-left active:scale-[0.99]"
+                  className="relative bg-surface rounded-[20px] border border-line overflow-hidden shadow-soft hover:border-brand transition-all cursor-pointer select-none text-left active:scale-[0.99]"
                 >
                   {/* Top section: stops and route badge */}
                   <div className="p-4 flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 text-sm font-bold font-heading text-ink-950 truncate">
+                      <div className="flex items-center gap-1.5 text-sm font-bold font-heading text-text truncate">
                         <span className="truncate">{fromStopObj ? localName(fromStopObj, i18n.language) : 'Origin'}</span>
-                        <span className="text-amber-500 font-bold">&rarr;</span>
+                        <span className="text-amber font-bold">&rarr;</span>
                         <span className="truncate">{toStopObj ? localName(toStopObj, i18n.language) : 'Destination'}</span>
                       </div>
                       <div className="flex items-center gap-1.5 mt-2 flex-wrap">
@@ -119,18 +119,18 @@ export default function SavedPage() {
                       </div>
                     </div>
 
-                    <Bookmark className="w-5 h-5 text-amber-500 fill-amber-500 shrink-0" />
+                    <Bookmark className="w-5 h-5 text-amber fill-amber shrink-0" />
                   </div>
 
                   {/* Perforated dashed divider */}
                   <div className="relative flex items-center px-2">
-                    <div className="absolute -left-2.5 w-5 h-5 rounded-full bg-sky-50 border-r border-line" />
+                    <div className="absolute -left-2.5 w-5 h-5 rounded-full bg-bg border-r border-line" />
                     <div className="w-full border-t border-dashed border-line" />
-                    <div className="absolute -right-2.5 w-5 h-5 rounded-full bg-sky-50 border-l border-line" />
+                    <div className="absolute -right-2.5 w-5 h-5 rounded-full bg-bg border-l border-line" />
                   </div>
 
                   {/* Bottom section: action buttons */}
-                  <div className="px-4 py-2.5 bg-sky-50/50 flex items-center justify-between">
+                  <div className="px-4 py-2.5 bg-surface-2 flex items-center justify-between border-t border-line/40">
                     <button
                       type="button"
                       onClick={(e) => handleRemove(e, trip.id)}
@@ -143,7 +143,8 @@ export default function SavedPage() {
                     <button
                       type="button"
                       onClick={() => handleRunSearch(trip)}
-                      className="px-3.5 py-1.5 bg-cobalt-500 text-white rounded-full text-xs font-bold transition flex items-center gap-1 shadow-xs hover:bg-cobalt-600 active:scale-95"
+                      className="px-3.5 py-1.5 text-white rounded-full text-xs font-bold transition flex items-center gap-1 shadow-xs active:scale-95"
+                      style={{ background: 'var(--gradient-brand)' }}
                     >
                       <span>Open</span>
                       <ArrowRight className="w-3.5 h-3.5" />

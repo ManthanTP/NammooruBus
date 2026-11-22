@@ -18,7 +18,7 @@ import { useSavedStore } from '@/store/savedStore'
 import { useAuthStore } from '@/store/authStore'
 import { useLiveStore } from '@/store/liveStore'
 import { useLocationStore } from '@/store/locationStore'
-import { useToastStore } from '@/components/ui/Toast'
+import { useToastStore, toast } from '@/components/ui/Toast'
 import { calculateBusEta } from '@/lib/eta'
 import { localName } from '@/lib/formatters'
 import { findRoutes } from '@/lib/routeFinder'
@@ -362,18 +362,24 @@ export default function JourneyPage() {
   const handleToggleSave = () => {
     if (!journey) return
 
-    // If guest, show login prompt sheet/modal
+    // If guest, show login prompt sheet/modal and toast with action
     if (!user) {
       setShowGuestModal(true)
+      toast.info('toast.login_required', {
+        action: {
+          label: t('auth.sign_in', 'Sign in'),
+          onClick: () => navigate('/login'),
+        },
+      })
       return
     }
 
     if (currentlySaved) {
       removeTrip({ from_stop: fromStop.id, to_stop: toStop.id }, user)
-      addToast('Removed from saved trips', 'info')
+      toast.info('toast.trip_removed')
     } else {
       saveTrip(journey, user)
-      addToast('Saved to your trips', 'success')
+      toast.success('toast.trip_saved')
     }
   }
 
@@ -389,12 +395,12 @@ export default function JourneyPage() {
       } catch (err) {
         if (err.name !== 'AbortError') {
           navigator.clipboard.writeText(`${text} ${window.location.href}`)
-          addToast('Journey copied to clipboard!', 'info')
+          toast.info('toast.journey_copied')
         }
       }
     } else {
       navigator.clipboard.writeText(`${text} ${window.location.href}`)
-      addToast('Journey link copied to clipboard!', 'info')
+      toast.info('toast.link_copied')
     }
   }
 
@@ -536,7 +542,7 @@ export default function JourneyPage() {
       </div>
 
       {/* Vertical Stepper with Signature Road Rail */}
-      <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft space-y-4">
+      <div className="p-4 bg-surface rounded-[20px] border border-line shadow-soft space-y-4">
         {/* Step 1: Origin Stop */}
         <div className="flex gap-3.5 relative">
           <div className="flex flex-col items-center">
@@ -644,14 +650,14 @@ export default function JourneyPage() {
       </div>
 
       {/* Sticky Bottom Action Bar above tab bar: Save, Share, Track Live, compact SOS */}
-      <div className="fixed bottom-16 md:bottom-4 left-0 right-0 p-3 bg-white/95 backdrop-blur-md border-t border-line z-30 flex items-center justify-center gap-2 max-w-lg mx-auto md:max-w-none shadow-float">
+      <div className="fixed bottom-16 md:bottom-4 left-0 right-0 p-3 bg-surface/95 backdrop-blur-md border-t border-line z-30 flex items-center justify-center gap-2 max-w-lg mx-auto md:max-w-none shadow-float">
         <button
           type="button"
           onClick={handleToggleSave}
           className={`h-11 px-3.5 rounded-full border flex items-center gap-1.5 text-xs font-bold transition active:scale-95 ${
             currentlySaved
-              ? 'bg-amber-500 border-amber-500 text-navy-900'
-              : 'bg-white border-line text-muted hover:text-ink-950'
+              ? 'bg-amber border-amber text-navy-900'
+              : 'bg-surface border-line text-muted hover:text-text'
           }`}
           title={currentlySaved ? 'Saved' : 'Save'}
         >
@@ -662,7 +668,7 @@ export default function JourneyPage() {
         <button
           type="button"
           onClick={handleShare}
-          className="h-11 px-3.5 rounded-full bg-white border border-line text-muted hover:text-ink-950 flex items-center gap-1.5 text-xs font-bold transition active:scale-95"
+          className="h-11 px-3.5 rounded-full bg-surface border border-line text-muted hover:text-text flex items-center gap-1.5 text-xs font-bold transition active:scale-95"
           title="Share"
         >
           <Share2 className="w-4 h-4" />

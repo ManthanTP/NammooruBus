@@ -13,6 +13,7 @@ import Skeleton from '@/components/ui/Skeleton'
 import EmptyState from '@/components/ui/EmptyState'
 import MapCard from '@/components/map/MapCard'
 import Button from '@/components/ui/Button'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 export default function ResultsPage() {
   const { t, i18n } = useTranslation()
@@ -41,8 +42,7 @@ export default function ResultsPage() {
 
   const computeResults = useCallback(() => {
     if (!fromStopId || !toStopId) {
-      setErrorMessage('Missing origin or destination stop')
-      setLoading(false)
+      navigate('/search', { replace: true, state: { notice: 'Please select both origin and destination stops.' } })
       return
     }
 
@@ -53,6 +53,11 @@ export default function ResultsPage() {
     }
 
     if (stops.length === 0 || routes.length === 0) {
+      return
+    }
+
+    if (!fromStop || !toStop) {
+      navigate('/search', { replace: true, state: { notice: 'Selected stop could not be found. Please search again.' } })
       return
     }
 
@@ -87,8 +92,8 @@ export default function ResultsPage() {
         supabase.from('search_log').insert({
           from_stop: fromStopId,
           to_stop: toStopId,
-        }).then(() => {})
-      } catch (e) {}
+        }).then(() => { })
+      } catch (e) { }
     } catch (err) {
       console.error('Error finding routes:', err)
       setErrorMessage('Could not compute bus routes. Please try again.')
@@ -192,35 +197,12 @@ export default function ResultsPage() {
 
       {/* 4. Sort Chips */}
       {results.length > 0 && !loading && !errorMessage && (
-        <LayoutGroup id="results-sort-group">
-          <div className="flex p-1 bg-white rounded-full border border-line shadow-xs gap-1">
-            {sortTabs.map((tab) => {
-              const Icon = tab.icon
-              const isCurrent = activeSort === tab.key
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveSort(tab.key)}
-                  className={`relative flex-1 py-1.5 px-2 text-xs font-bold rounded-full transition-colors flex items-center justify-center gap-1 select-none ${
-                    isCurrent ? 'text-white' : 'text-muted hover:text-ink-950'
-                  }`}
-                >
-                  {isCurrent && (
-                    <motion.div
-                      layoutId="resultsSortPill"
-                      className="absolute inset-0 rounded-full -z-10 shadow-xs"
-                      style={{ background: 'var(--gradient-brand)' }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                    />
-                  )}
-                  <Icon size={14} strokeWidth={2} />
-                  <span className="truncate">{tab.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        </LayoutGroup>
+        <SegmentedControl
+          options={sortTabs}
+          value={activeSort}
+          onChange={setActiveSort}
+          ariaLabel="Sort bus results"
+        />
       )}
 
       {/* 5. Skeleton Loading State */}

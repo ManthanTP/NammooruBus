@@ -10,6 +10,7 @@ import { fetchDrivingRoute } from '@/lib/roadRouting'
 import RouteBadge from '@/components/ui/RouteBadge'
 import MapCard from '@/components/map/MapCard'
 import Skeleton from '@/components/ui/Skeleton'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 export default function RouteDetailPage() {
   const { id } = useParams()
@@ -142,41 +143,23 @@ export default function RouteDetailPage() {
       <MapCard height={240} />
 
       {/* 3. Weekday / Weekend Segmented Pill */}
-      <LayoutGroup id="day-type-group">
-        <div className="flex p-1 bg-white rounded-full border border-line shadow-xs">
-          {['weekday', 'weekend'].map((dt) => {
-            const isSelected = dayType === dt
-            return (
-              <button
-                key={dt}
-                type="button"
-                onClick={() => setDayType(dt)}
-                className={`relative flex-1 py-1.5 text-xs font-bold rounded-full capitalize transition-colors flex items-center justify-center gap-1.5 select-none ${isSelected ? 'text-white' : 'text-muted hover:text-ink-950'
-                  }`}
-              >
-                {isSelected && (
-                  <motion.div
-                    layoutId="dayTypePill"
-                    className="absolute inset-0 rounded-full -z-10 shadow-xs"
-                    style={{ background: 'var(--gradient-brand)' }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                  />
-                )}
-                <Calendar size={14} strokeWidth={2} />
-                <span>{t(`passenger.${dt}`) || dt}</span>
-              </button>
-            )
-          })}
-        </div>
-      </LayoutGroup>
+      <SegmentedControl
+        options={[
+          { key: 'weekday', label: t('passenger.weekday') || 'Weekday', icon: Calendar },
+          { key: 'weekend', label: t('passenger.weekend') || 'Weekend', icon: Calendar },
+        ]}
+        value={dayType}
+        onChange={setDayType}
+        ariaLabel="Schedule day type"
+      />
 
       {/* 4. Schedule Summary Stat Row */}
-      <div className="grid grid-cols-3 gap-2 p-3.5 bg-white rounded-[20px] border border-line shadow-soft text-center text-xs">
+      <div className="grid grid-cols-3 gap-2 p-3.5 bg-surface rounded-[20px] border border-line shadow-soft text-center text-xs">
         <div>
           <span className="text-[10px] font-bold text-muted uppercase block">
             {t('passenger.first_bus') || 'First Bus'}
           </span>
-          <span className="font-extrabold text-ink-950 font-mono text-sm block mt-0.5">
+          <span className="font-extrabold text-text font-mono text-sm block mt-0.5">
             {schedule?.first_bus ? schedule.first_bus.slice(0, 5) : '06:00'}
           </span>
         </div>
@@ -184,7 +167,7 @@ export default function RouteDetailPage() {
           <span className="text-[10px] font-bold text-muted uppercase block">
             {t('passenger.last_bus') || 'Last Bus'}
           </span>
-          <span className="font-extrabold text-ink-950 font-mono text-sm block mt-0.5">
+          <span className="font-extrabold text-text font-mono text-sm block mt-0.5">
             {schedule?.last_bus ? schedule.last_bus.slice(0, 5) : '21:30'}
           </span>
         </div>
@@ -192,14 +175,14 @@ export default function RouteDetailPage() {
           <span className="text-[10px] font-bold text-muted uppercase block">
             Headway
           </span>
-          <span className="font-extrabold text-cobalt-500 font-mono text-sm block mt-0.5">
+          <span className="font-extrabold text-brand font-mono text-sm block mt-0.5">
             {schedule?.headway_min ? `${schedule.headway_min}m` : '15m'}
           </span>
         </div>
       </div>
 
       {/* 5. Stop Timeline on the Road Rail */}
-      <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft space-y-3">
+      <div className="p-4 bg-surface rounded-[20px] border border-line shadow-soft space-y-3">
         <h3 className="text-xs font-bold uppercase tracking-wider text-muted mb-2">
           Route Timeline ({orderedStops.length} stops)
         </h3>

@@ -4,7 +4,7 @@
 export default function Card({ children, className = '', padding = 'p-5' }) {
   return (
     <div
-      className={`bg-white rounded-[20px] ${padding} ${className}`}
+      className={`bg-surface rounded-[20px] border border-line ${padding} ${className}`}
       style={{ boxShadow: 'var(--shadow-soft)' }}
     >
       {children}

@@ -52,9 +52,8 @@ function getFiles(dir) {
 const files = getFiles(srcDir)
 
 // Regex patterns to capture translation keys
-// t('key') or t("key") or i18n.t('key') or i18n.t("key")
-// Also handles options e.g. t('key', { ... }) or t('key', 'default')
-const keyRegex = /\b(?:t|i18n\.t)\s*\(\s*['"]([a-zA-Z0-9_.-]+)['"]/g
+// t('key') or t("key") or i18n.t('key') or toast.success('key')
+const keyRegex = /\b(?:t|i18n\.t|toast\.(?:success|error|info|warning))\s*\(\s*['"]([a-zA-Z0-9_.-]+)['"]/g
 
 const usedKeys = new Set()
 const keyLocations = {}

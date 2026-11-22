@@ -26,6 +26,8 @@ import LoginPage from '@/features/passenger/pages/LoginPage'
 import RegisterPage from '@/features/passenger/pages/RegisterPage'
 import ForgotPasswordPage from '@/features/passenger/pages/ForgotPasswordPage'
 import ResetPasswordPage from '@/features/passenger/pages/ResetPasswordPage'
+import LandingPage from '@/features/passenger/pages/LandingPage'
+import NotFoundPage from '@/features/passenger/pages/NotFoundPage'
 import PlaceholderPage from '@/components/ui/PlaceholderPage'
 
 // Guards
@@ -75,12 +77,18 @@ const withBoundary = (element) => (
 )
 
 export const router = createBrowserRouter([
+  // Public Landing Page
+  {
+    path: '/',
+    element: withBoundary(<LandingPage />),
+  },
+
   // Passenger Portal Layout
   {
     element: withBoundary(<PassengerLayout />),
     children: [
       {
-        path: '/',
+        path: '/explore',
         element: withBoundary(<HomePage />),
       },
       {
@@ -285,6 +293,6 @@ export const router = createBrowserRouter([
   // Fallback 404
   {
     path: '*',
-    element: withBoundary(<PlaceholderPage title="Page Not Found" path="*" />),
+    element: withBoundary(<NotFoundPage />),
   },
 ])

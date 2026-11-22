@@ -34,7 +34,7 @@ export default function PassengerLayout() {
   const isHomePage = location.pathname === '/'
 
   const navLinks = [
-    { key: 'explore', label: t('nav.explore'), path: '/', icon: Compass },
+    { key: 'explore', label: t('nav.explore'), path: '/explore', icon: Compass },
     { key: 'live', label: t('nav.live'), path: '/live', icon: Radio },
     { key: 'nearby', label: t('nav.nearby'), path: '/nearby', icon: MapPin },
     { key: 'routes', label: t('nav.routes'), path: '/routes', icon: Route },
@@ -42,24 +42,24 @@ export default function PassengerLayout() {
   ]
 
   return (
-    <div className="relative w-full min-h-screen bg-bg font-body text-ink-950 flex flex-col md:flex-row overflow-x-hidden">
+    <div className="relative w-full min-h-screen bg-bg font-body text-text flex flex-col md:flex-row overflow-x-hidden">
       {/* 1. Global Top App Bar: 56px height, solid surface on all pages, line border */}
       <header
         className="fixed top-0 left-0 right-0 z-40 h-14 px-2.5 sm:px-4 md:px-6 flex items-center justify-between bg-surface border-b border-line shadow-xs transition-colors"
       >
         <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-          <Link to="/" className="flex items-center gap-2 select-none shrink-0 group">
-            {/* Logo mark: 36px, in dark mode wrapped in white plate so navy bus is not lost */}
-            <div className="w-9 h-9 rounded-[12px] p-0.5 flex items-center justify-center dark:bg-white transition-colors shrink-0">
+          <Link to="/explore" className="flex items-center gap-2 select-none shrink-0 group">
+            {/* White-box logo: 40px, radius 12, logo mark on white rounded square */}
+            <div className="w-10 h-10 rounded-[12px] bg-white overflow-hidden p-0.5 flex items-center justify-center shadow-xs shrink-0">
               <img
-                src="/brand/logo-mark-transparent.png"
+                src="/brand/logo-mark.png"
                 alt="Nammooru Logo"
-                className="h-8 w-8 object-contain"
+                className="w-full h-full object-contain"
               />
             </div>
             <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight whitespace-nowrap">
-              <span className="text-ink-950">Nammooru</span>
-              <span className="text-cobalt-500 dark:text-[#6E94FF] ml-0.5">Bus</span>
+              <span className="text-text">Nammooru</span>
+              <span className="text-brand ml-0.5">Bus</span>
             </span>
           </Link>
         </div>
@@ -67,17 +67,16 @@ export default function PassengerLayout() {
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-1 bg-surface-2 p-1 rounded-pill border border-line shadow-xs">
           {navLinks.map((item) => {
-            const active = item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
+            const active = location.pathname.startsWith(item.path)
             const Icon = item.icon
             return (
               <Link
                 key={item.key}
                 to={item.path}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-pill text-xs font-bold transition ${
-                  active
-                    ? 'text-white shadow-xs'
-                    : 'text-muted hover:text-ink-950 hover:bg-sky-50 dark:hover:bg-surface'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-pill text-xs font-bold transition ${active
+                  ? 'text-white shadow-xs'
+                  : 'text-muted hover:text-ink-950 hover:bg-sky-50 dark:hover:bg-surface'
+                  }`}
                 style={active ? { background: 'var(--gradient-brand)' } : {}}
               >
                 <Icon size={16} strokeWidth={2} />
@@ -149,9 +148,8 @@ export default function PassengerLayout() {
       <div className="flex-1 w-full flex flex-col md:flex-row min-h-screen pt-14">
         {/* Left Column (Content) */}
         <main
-          className={`flex-1 md:w-[460px] md:max-w-[460px] md:flex-none min-h-screen pb-24 md:pb-8 px-4 md:px-5 overflow-y-auto md:border-r md:border-line md:bg-surface md:m-3 md:rounded-[28px] md:shadow-soft transition-all ${
-            isSearchPage ? 'bg-surface' : ''
-          }`}
+          className={`flex-1 md:w-[460px] md:max-w-[460px] md:flex-none min-h-screen pb-24 md:pb-8 px-4 md:px-5 overflow-y-auto md:border-r md:border-line md:bg-surface md:m-3 md:rounded-[28px] md:shadow-soft transition-all ${isSearchPage ? 'bg-surface' : ''
+            }`}
           style={{
             paddingBottom: 'calc(96px + env(safe-area-inset-bottom))',
           }}

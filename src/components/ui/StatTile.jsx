@@ -36,7 +36,7 @@ export default function StatTile({
 
   return (
     <div
-      className={`bg-white rounded-[20px] p-4 border border-line flex flex-col justify-between ${className}`}
+      className={`bg-surface rounded-[20px] p-4 border border-line flex flex-col justify-between ${className}`}
       style={{ boxShadow: 'var(--shadow-soft)' }}
     >
       <div className="flex items-center justify-between text-muted mb-2">

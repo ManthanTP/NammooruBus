@@ -29,7 +29,7 @@ export default function Stepper({ steps = [], className = '' }) {
             {/* Node Icon on Road Rail */}
             <div className="absolute -left-8 top-1.5 flex items-center justify-center">
               {step.type === 'walk' ? (
-                <div className="w-6 h-6 rounded-full bg-white border-2 border-navy-900 text-navy-900 flex items-center justify-center shadow-xs">
+                <div className="w-6 h-6 rounded-full bg-surface border-2 border-brand text-text flex items-center justify-center shadow-xs">
                   <Footprints className="w-3 h-3" />
                 </div>
               ) : step.type === 'transfer' ? (
@@ -41,15 +41,15 @@ export default function Stepper({ steps = [], className = '' }) {
                   <MapPin className="w-4 h-4 fill-current" />
                 </div>
               ) : (
-                <div className="w-6 h-6 rounded-full bg-white border-2 border-cobalt-500 text-cobalt-500 flex items-center justify-center shadow-xs">
-                  <span className="w-2 h-2 rounded-full bg-cobalt-500" />
+                <div className="w-6 h-6 rounded-full bg-surface border-2 border-brand text-brand flex items-center justify-center shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-brand" />
                 </div>
               )}
             </div>
 
             {/* Step Content Card */}
             <div
-              className="bg-white rounded-[16px] p-4 border border-line"
+              className="bg-surface rounded-[16px] p-4 border border-line"
               style={{ boxShadow: 'var(--shadow-soft)' }}
             >
               <div className="flex items-start justify-between gap-2">

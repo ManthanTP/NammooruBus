@@ -16,7 +16,7 @@ export default function PublicRoute({ children }) {
     if (profile?.role === 'driver') {
       return <Navigate to="/driver" replace />
     }
-    return <Navigate to="/" replace />
+    return <Navigate to="/explore" replace />
   }
 
   return children ? children : <Outlet />

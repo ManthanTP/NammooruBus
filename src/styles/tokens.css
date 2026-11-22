@@ -1,5 +1,5 @@
 :root {
-  /* Light Tokens */
+  /* LIGHT TOKENS */
   --bg: #F2F6FF;
   --surface: #FFFFFF;
   --surface-2: #E4ECFF;
@@ -7,7 +7,7 @@
   --text: #050F45;
   --muted: #5B6591;
   --brand: #0040FF;
-  --brand-strong: #0040FF;
+  --brand-strong: #0020A5;
   --amber: #FFB400;
   --amber-soft: #FFF3D1;
   --shadow: 0 10px 30px rgba(0, 32, 165, 0.10);
@@ -23,10 +23,10 @@
   --sky-100: #E4ECFF;
   --white: #FFFFFF;
 
-  /* Status colours only for status */
+  /* Status colours */
   --color-success: #12A150;
   --color-warning: #FFB400;
-  --color-danger: #E5383B;
+  --color-danger: #C92A2A;
 
   /* Aliases for smooth migration & existing classes */
   --color-ink: var(--ink-950);
@@ -48,7 +48,7 @@
   --radius-sheet: 28px;
   --radius-input: 12px;
 
-  /* Shadows: one soft shadow only */
+  /* Shadows */
   --shadow-soft: 0 10px 30px rgba(0, 32, 165, 0.10);
   --shadow-float: 0 12px 36px rgba(0, 32, 165, 0.14);
 
@@ -62,7 +62,8 @@
   --font-kannada: 'Noto Sans Kannada', sans-serif;
 }
 
-[data-theme="dark"] {
+/* BLUE THEME (Navy blue) */
+[data-theme="blue"] {
   --bg: #050B2E;
   --surface: #0B1450;
   --surface-2: #101C66;
@@ -78,7 +79,6 @@
   --color-danger: #FF6B6E;
   --color-warning: #FFB400;
 
-  /* Map palette overrides for automatic dark theme adaptation */
   --cobalt-500: #4C7DFF;
   --cobalt-600: #336BFF;
   --royal-700: #101C66;
@@ -97,7 +97,41 @@
   --color-text-secondary: var(--muted);
   --color-led-amber: var(--amber);
   --color-led-bg: #050B2E;
+}
 
-  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.45);
-  --shadow-float: 0 12px 36px rgba(0, 0, 0, 0.55);
+/* DARK THEME (Neutral black, no blue tint) */
+[data-theme="dark"] {
+  --bg: #0A0B10;
+  --surface: #12141C;
+  --surface-2: #1A1D28;
+  --line: #2A2F42;
+  --text: #F2F4FA;
+  --muted: #A3A9C2;
+  --brand: #4C7DFF;
+  --brand-strong: #0040FF;
+  --amber: #FFB400;
+  --amber-soft: rgba(255, 180, 0, 0.14);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --color-success: #3DDC97;
+  --color-danger: #FF6B6E;
+  --color-warning: #FFB400;
+
+  --cobalt-500: #4C7DFF;
+  --cobalt-600: #336BFF;
+  --royal-700: #1A1D28;
+  --navy-900: #12141C;
+  --ink-950: #F2F4FA;
+  --sky-50: #0A0B10;
+  --sky-100: #1A1D28;
+  --white: #12141C;
+
+  --color-ink: var(--text);
+  --color-cobalt: var(--brand);
+  --color-cobalt-tint: var(--surface-2);
+  --color-page: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-text-secondary: var(--muted);
+  --color-led-amber: var(--amber);
+  --color-led-bg: #0A0B10;
 }

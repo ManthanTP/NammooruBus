@@ -107,11 +107,12 @@ export default function DriverLayout() {
         {/* Left: Logo mark + "Nammooru Bus" + Driver tag */}
         <div className="flex items-center gap-2 min-w-0">
           <Link to="/driver" className="flex items-center gap-2 select-none shrink-0 group">
-            <div className="w-9 h-9 rounded-[12px] p-0.5 flex items-center justify-center dark:bg-white transition-colors shrink-0">
+            {/* White-box logo: 40px, radius 12, logo mark on white rounded square */}
+            <div className="w-10 h-10 rounded-[12px] bg-white overflow-hidden p-0.5 flex items-center justify-center shadow-xs shrink-0">
               <img
-                src="/brand/logo-mark-transparent.png"
+                src="/brand/logo-mark.png"
                 alt="Nammooru Logo"
-                className="h-8 w-8 object-contain"
+                className="w-full h-full object-contain"
               />
             </div>
             <div className="flex items-center gap-1.5">
