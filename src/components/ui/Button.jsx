@@ -36,7 +36,7 @@ export default function Button({
       return { background: 'var(--gradient-brand)', color: 'var(--on-brand)' }
     }
     if (variant === 'danger') {
-      return { backgroundColor: 'var(--color-danger)', color: '#FFFFFF' }
+      return { backgroundColor: '#C92A2A', color: '#FFFFFF' }
     }
     return {}
   }
