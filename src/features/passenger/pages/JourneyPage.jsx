@@ -436,7 +436,8 @@ export default function JourneyPage() {
         <button
           type="button"
           onClick={() => navigate('/search')}
-          className="px-4 py-2 bg-cobalt text-white text-xs font-bold rounded-pill"
+          className="px-4 py-2 on-brand text-xs font-bold rounded-pill shadow-soft"
+          style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
           Plan a journey
         </button>
@@ -463,11 +464,10 @@ export default function JourneyPage() {
           <button
             type="button"
             onClick={handleToggleSave}
-            className={`p-1.5 rounded-pill border transition ${
-              currentlySaved
-                ? 'bg-cobalt text-white border-cobalt'
-                : 'bg-surface text-text-secondary border-line hover:text-ink'
-            }`}
+            className={`p-1.5 rounded-pill border transition ${currentlySaved
+              ? 'bg-cobalt text-white border-cobalt'
+              : 'bg-surface text-text-secondary border-line hover:text-ink'
+              }`}
             title={currentlySaved ? 'Remove from saved' : 'Save trip'}
           >
             <Bookmark className={`w-3.5 h-3.5 ${currentlySaved ? 'fill-current' : ''}`} />
@@ -500,43 +500,43 @@ export default function JourneyPage() {
       {/* Summary Tiles Row (Gradient Style per Section 6) */}
       <div className="grid grid-cols-3 gap-2">
         <div
-          className="p-3.5 rounded-[20px] text-white shadow-soft text-center flex flex-col justify-between"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="p-3.5 rounded-[20px] on-brand shadow-soft text-center flex flex-col justify-between"
+          style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
-          <span className="text-[10px] uppercase font-bold text-white/80 block">
+          <span className="text-[10px] uppercase font-bold block" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
             {t('passenger.total_time') || 'Total time'}
           </span>
-          <span className="text-lg font-extrabold text-white font-heading mt-1">
-            {journey.totalMinutes} <span className="text-xs font-semibold text-white/70">min</span>
+          <span className="text-lg font-extrabold font-heading mt-1" style={{ color: 'var(--on-brand)' }}>
+            {journey.totalMinutes} <span className="text-xs font-semibold" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>min</span>
           </span>
         </div>
 
         <div
-          className="p-3.5 rounded-[20px] text-white shadow-soft text-center flex flex-col justify-between"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="p-3.5 rounded-[20px] on-brand shadow-soft text-center flex flex-col justify-between"
+          style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
-          <span className="text-[10px] uppercase font-bold text-white/80 block">
+          <span className="text-[10px] uppercase font-bold block" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
             {t('passenger.fare') || 'Fare'}
           </span>
-          <span className="text-lg font-extrabold text-white font-heading mt-1">
+          <span className="text-lg font-extrabold font-heading mt-1" style={{ color: 'var(--on-brand)' }}>
             ₹{journey.totalFare}
           </span>
         </div>
 
         <div
-          className="p-3.5 rounded-[20px] text-white shadow-soft text-center flex flex-col justify-between"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="p-3.5 rounded-[20px] on-brand shadow-soft text-center flex flex-col justify-between"
+          style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
           <div className="flex items-center justify-center gap-1">
-            <span className="text-[10px] uppercase font-bold text-white/80">
+            <span className="text-[10px] uppercase font-bold" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
               Next Bus
             </span>
             {liveEtaInfo && (
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             )}
           </div>
-          <span className="text-lg font-extrabold text-amber-500 font-heading mt-1">
-            {liveEtaInfo ? liveEtaInfo.etaMin : journey.nextBusMin} <span className="text-xs font-semibold text-white/70">min</span>
+          <span className="text-lg font-extrabold font-heading mt-1" style={{ color: 'var(--amber)' }}>
+            {liveEtaInfo ? liveEtaInfo.etaMin : journey.nextBusMin} <span className="text-xs font-semibold" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>min</span>
           </span>
         </div>
       </div>
@@ -654,11 +654,10 @@ export default function JourneyPage() {
         <button
           type="button"
           onClick={handleToggleSave}
-          className={`h-11 px-3.5 rounded-full border flex items-center gap-1.5 text-xs font-bold transition active:scale-95 ${
-            currentlySaved
-              ? 'bg-amber border-amber text-navy-900'
-              : 'bg-surface border-line text-muted hover:text-text'
-          }`}
+          className={`h-11 px-3.5 rounded-full border flex items-center gap-1.5 text-xs font-bold transition active:scale-95 ${currentlySaved
+            ? 'bg-amber border-amber text-navy-900'
+            : 'bg-surface border-line text-muted hover:text-text'
+            }`}
           title={currentlySaved ? 'Saved' : 'Save'}
         >
           <Bookmark className={`w-4 h-4 ${currentlySaved ? 'fill-current' : ''}`} />
@@ -677,11 +676,11 @@ export default function JourneyPage() {
 
         <Link
           to={`/live?route=${journey.legs[0]?.route?.code}`}
-          className="flex-1 h-11 text-white text-xs font-bold rounded-full shadow-soft flex items-center justify-center gap-2 active:scale-98 transition font-heading"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="flex-1 h-11 on-brand text-xs font-bold rounded-full shadow-soft flex items-center justify-center gap-2 active:scale-98 transition font-heading"
+          style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
-          <Radio className="w-4 h-4 text-amber-500" />
-          <span>{t('passenger.track_live') || 'Track live'}</span>
+          <Radio className="w-4 h-4 text-amber-500" style={{ color: 'var(--amber)' }} />
+          <span style={{ color: 'var(--on-brand)' }}>{t('passenger.track_live') || 'Track live'}</span>
         </Link>
 
         <SosButton

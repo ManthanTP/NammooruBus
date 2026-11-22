@@ -30,19 +30,20 @@ export default function HelpPage() {
     <div className="space-y-4 pb-8">
       {/* 1. Header with logo-full */}
       <div
-        className="rounded-[28px] p-6 text-white shadow-soft relative overflow-hidden text-center flex flex-col items-center"
-        style={{ background: 'var(--gradient-brand)' }}
+        className="rounded-[28px] p-6 on-brand shadow-soft relative overflow-hidden text-center flex flex-col items-center"
+        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
       >
         <div className="w-full flex items-center justify-between mb-2">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="w-8 h-8 rounded-full bg-white/15 text-white flex items-center justify-center transition active:scale-95"
+            className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center transition active:scale-95 cursor-pointer"
+            style={{ color: 'var(--on-brand)' }}
             title="Back"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
           </button>
-          <span className="font-heading font-extrabold text-xs text-white uppercase tracking-wider">
+          <span className="font-heading font-extrabold text-xs uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
             {t('nav.help') || 'Help & Support'}
           </span>
           <div className="w-8" />

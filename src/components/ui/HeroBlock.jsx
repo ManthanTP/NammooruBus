@@ -3,6 +3,7 @@ import RoadRibbon from './RoadRibbon'
 /**
  * HeroBlock — gradient block with radius 28, overlapping rounded slabs echoing the N,
  * and signature RoadRibbon SVG at the bottom.
+ * Enforces .on-brand with pure white greeting & title, and 85% white tagline.
  */
 export default function HeroBlock({
   greeting = 'Namaskara 👋',
@@ -13,8 +14,8 @@ export default function HeroBlock({
 }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-[28px] text-white pt-8 pb-10 px-5 ${className}`}
-      style={{ background: 'var(--gradient-brand)' }}
+      className={`relative overflow-hidden rounded-[28px] on-brand pt-8 pb-10 px-5 ${className}`}
+      style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
     >
       {/* Background overlapping rounded slabs echoing the "N" of the logo */}
       <div
@@ -28,14 +29,23 @@ export default function HeroBlock({
 
       {/* Hero content */}
       <div className="relative z-10 space-y-1.5">
-        <span className="text-xs font-semibold uppercase tracking-wider text-white/80 block">
+        <span
+          className="text-xs font-semibold uppercase tracking-wider block"
+          style={{ color: 'var(--on-brand)' }}
+        >
           {greeting}
         </span>
-        <h1 className="text-2xl md:text-3xl font-extrabold font-heading tracking-tight text-white leading-tight">
+        <h1
+          className="text-2xl md:text-3xl font-extrabold font-heading tracking-tight leading-tight"
+          style={{ color: 'var(--on-brand)' }}
+        >
           {title}
         </h1>
         {subtitle && (
-          <p className="text-xs text-white/75 font-medium">
+          <p
+            className="text-xs font-medium"
+            style={{ color: 'rgba(255, 255, 255, 0.85)' }}
+          >
             {subtitle}
           </p>
         )}

@@ -266,10 +266,14 @@ export default function NearbyPage() {
               type="button"
               onClick={() => setRadiusM(m)}
               className={`min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 active:scale-95 cursor-pointer ${isSelected
-                ? 'text-white shadow-xs'
+                ? 'on-brand shadow-xs'
                 : 'bg-surface text-muted border border-line hover:text-text hover:bg-surface-2'
                 }`}
-              style={isSelected ? { background: 'var(--gradient-brand)' } : {}}
+              style={
+                isSelected
+                  ? { background: 'var(--gradient-brand)', color: 'var(--on-brand)' }
+                  : {}
+              }
             >
               {m >= 1000 ? `${m / 1000} km` : `${m} m`}
             </button>

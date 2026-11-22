@@ -81,15 +81,18 @@ export default function LoginPage() {
     <div className="min-h-screen bg-bg flex flex-col justify-between font-body text-ink-950 transition-colors">
       {/* 1. Top Half: Signature Gradient with logo-full on white plate */}
       <div
-        className="pt-10 pb-16 px-6 text-white flex flex-col items-center justify-center relative overflow-hidden shrink-0"
-        style={{ background: 'var(--gradient-brand)' }}
+        className="pt-10 pb-16 px-6 on-brand flex flex-col items-center justify-center relative overflow-hidden shrink-0"
+        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
       >
         <div className="absolute top-4 right-4 z-10">
           <LanguageToggle />
         </div>
 
         {/* White rounded plate with logo-full */}
-        <div className="bg-white rounded-[20px] p-4 shadow-float mb-4 flex items-center justify-center max-w-[200px]">
+        <div
+          className="rounded-[20px] p-4 shadow-float mb-4 flex items-center justify-center max-w-[200px]"
+          style={{ backgroundColor: '#FFFFFF' }}
+        >
           <img
             src="/brand/logo-full.png"
             alt="Nammooru Bus"
@@ -128,7 +131,7 @@ export default function LoginPage() {
               </div>
               <Link
                 to="/12345678/admin/login"
-                className="text-xs font-bold text-cobalt-500 hover:underline flex items-center gap-1 self-end"
+                className="text-xs font-bold text-brand hover:underline flex items-center gap-1 self-end"
               >
                 {t('auth.admin_portal_link')} <ArrowRight className="w-3.5 h-3.5" />
               </Link>
@@ -165,7 +168,7 @@ export default function LoginPage() {
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-bold text-cobalt-500 hover:underline"
+                  className="text-xs font-bold text-brand hover:underline"
                 >
                   {t('auth.forgot_password')}
                 </Link>
@@ -195,8 +198,8 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full h-[52px] rounded-full text-white font-heading font-bold text-sm tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-soft disabled:opacity-60 cursor-pointer mt-2"
-              style={{ background: 'var(--gradient-brand)' }}
+              className="w-full h-[52px] rounded-full on-brand font-heading font-bold text-sm tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-soft disabled:opacity-60 cursor-pointer mt-2"
+              style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
             >
               {submitting && (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

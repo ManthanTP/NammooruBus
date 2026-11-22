@@ -85,46 +85,59 @@ export default function ProfilePage() {
     <div className="space-y-4 pb-8">
       {/* 1. Gradient Profile Header */}
       <div
-        className="rounded-[28px] p-6 text-white shadow-soft relative overflow-hidden"
-        style={{ background: 'var(--gradient-brand)' }}
+        className="rounded-[28px] p-6 on-brand shadow-soft relative overflow-hidden"
+        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
       >
         <div className="flex items-center justify-between mb-4">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="w-8 h-8 rounded-full bg-white/15 text-white flex items-center justify-center transition active:scale-95"
+            className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center transition active:scale-95 cursor-pointer"
+            style={{ color: 'var(--on-brand)' }}
             title="Back"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
           </button>
-          <span className="font-heading font-extrabold text-xs text-white uppercase tracking-wider">
+          <span className="font-heading font-extrabold text-xs uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
             {t('nav.profile') || 'My Profile'}
           </span>
           <div className="w-8" />
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full border-4 border-white bg-white text-cobalt-500 font-heading font-extrabold text-2xl flex items-center justify-center shadow-float shrink-0">
+          <div
+            className="w-16 h-16 rounded-full border-4 border-white font-heading font-extrabold text-2xl flex items-center justify-center shadow-float shrink-0"
+            style={{ backgroundColor: '#FFFFFF', color: '#0040FF' }}
+          >
             {profile?.full_name ? profile.full_name[0].toUpperCase() : 'U'}
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="font-heading font-extrabold text-lg text-white truncate">
+            <h2 className="font-heading font-extrabold text-lg truncate" style={{ color: 'var(--on-brand)' }}>
               {profile?.full_name || 'Nammooru Passenger'}
             </h2>
-            <p className="text-xs text-white/75 truncate mt-0.5">
+            <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
               {user?.email || 'user@example.com'}
             </p>
             <div className="mt-2 flex items-center gap-1.5 flex-wrap">
               {profile?.role === 'driver' ? (
-                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-500 text-navy-900 shadow-xs">
+                <span
+                  className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-500 on-amber shadow-xs"
+                  style={{ color: 'var(--on-amber)' }}
+                >
                   Driver
                 </span>
               ) : profile?.role === 'admin' ? (
-                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-white text-navy-900 shadow-xs">
+                <span
+                  className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-white shadow-xs"
+                  style={{ backgroundColor: '#FFFFFF', color: '#00136E' }}
+                >
                   Administrator
                 </span>
               ) : (
-                <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-white/20 text-white">
+                <span
+                  className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-white/20"
+                  style={{ color: 'var(--on-brand)' }}
+                >
                   Passenger
                 </span>
               )}
@@ -168,29 +181,33 @@ export default function ProfilePage() {
                     key={key}
                     type="button"
                     onClick={() => setTheme(key)}
-                    className={`relative px-2.5 py-1.5 rounded-pill text-xs font-bold flex items-center gap-1.5 transition select-none cursor-pointer ${isActive
-                      ? 'text-white font-extrabold'
-                      : 'text-muted hover:text-ink-950'
-                      }`}
+                    className={`relative px-2.5 py-1.5 rounded-pill text-xs font-bold flex items-center gap-1.5 transition select-none cursor-pointer ${
+                      isActive ? 'on-brand font-extrabold shadow-soft' : 'text-muted hover:text-text'
+                    }`}
+                    style={
+                      isActive
+                        ? { background: 'var(--gradient-brand)', color: 'var(--on-brand)' }
+                        : { color: 'var(--muted)' }
+                    }
                   >
                     {isActive && (
                       <motion.div
                         layoutId="profile-theme-pill"
-                        className="absolute inset-0 rounded-pill shadow-xs"
+                        className="absolute inset-0 rounded-pill shadow-xs z-0 pointer-events-none"
                         style={{ background: 'var(--gradient-brand)' }}
                         transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                       />
                     )}
-                    <span className="relative z-10 flex items-center gap-1.5">
+                    <span className="relative z-10 flex items-center gap-1.5" style={{ color: isActive ? 'var(--on-brand)' : 'var(--muted)' }}>
                       {isSys ? (
-                        <Icon className="w-3.5 h-3.5" />
+                        <Icon className="w-3.5 h-3.5" style={{ color: isActive ? 'var(--on-brand)' : 'var(--muted)' }} />
                       ) : (
                         <span
                           className="w-3 h-3 rounded-full border shrink-0"
                           style={{ backgroundColor: swatch, borderColor: border }}
                         />
                       )}
-                      <span>{label}</span>
+                      <span style={{ color: isActive ? 'var(--on-brand)' : 'var(--muted)' }}>{label}</span>
                     </span>
                   </button>
                 )

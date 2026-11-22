@@ -35,12 +35,15 @@ export default function FloatingTabBar() {
           <Link
             key={tab.key}
             to={tab.path}
-            className="relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full py-1 px-1 rounded-full select-none"
+            className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full py-1 px-1 rounded-full select-none ${
+              active ? 'on-brand' : 'text-muted'
+            }`}
+            style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}
           >
             {active && (
               <motion.div
                 layoutId="activeTabPill"
-                className="absolute inset-0 rounded-full -z-10 shadow-sm"
+                className="absolute inset-0 rounded-full shadow-sm z-0 pointer-events-none"
                 style={{ background: 'var(--gradient-brand)' }}
                 transition={{ type: 'spring', stiffness: 450, damping: 35 }}
               />
@@ -48,11 +51,14 @@ export default function FloatingTabBar() {
             <Icon
               size={22}
               strokeWidth={2}
-              className={`transition-colors ${active ? 'text-white' : 'text-muted hover:text-ink-950'}`}
+              className="relative z-10 transition-colors"
+              style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}
             />
             <span
-              className={`text-[10.5px] font-semibold leading-tight tracking-tight truncate max-w-[62px] ${active ? 'text-white font-bold' : 'text-muted'
-                }`}
+              className={`relative z-10 text-[10.5px] leading-tight tracking-tight truncate max-w-[62px] ${
+                active ? 'font-bold' : 'font-medium'
+              }`}
+              style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}
             >
               {tab.label}
             </span>

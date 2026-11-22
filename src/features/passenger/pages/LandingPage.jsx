@@ -207,11 +207,11 @@ export default function LandingPage() {
 
           <Link
             to="/explore"
-            className="inline-flex items-center justify-center min-h-[38px] px-4 py-1.5 rounded-full text-xs font-heading font-bold text-white shadow-xs hover:opacity-95 transition active:scale-95"
-            style={{ background: 'var(--gradient-brand)' }}
+            className="inline-flex items-center justify-center min-h-[38px] px-4 py-1.5 rounded-full text-xs font-heading font-bold on-brand shadow-xs hover:opacity-95 transition active:scale-95"
+            style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
           >
-            <span>{t('landing.open_app', 'Open app')}</span>
-            <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            <span style={{ color: 'var(--on-brand)' }}>{t('landing.open_app', 'Open app')}</span>
+            <ArrowRight className="w-3.5 h-3.5 ml-1" style={{ color: 'var(--on-brand)' }} />
           </Link>
 
           {/* Mobile Menu Button */}
@@ -286,8 +286,8 @@ export default function LandingPage() {
               <Link
                 to="/explore"
                 onClick={() => setMobileMenuOpen(false)}
-                className="min-h-[44px] w-full flex items-center justify-center rounded-full text-sm font-bold text-white shadow-xs transition"
-                style={{ background: 'var(--gradient-brand)' }}
+                className="min-h-[44px] w-full flex items-center justify-center rounded-full text-sm font-bold on-brand shadow-xs transition"
+                style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
               >
                 {t('landing.open_app', 'Open app')}
               </Link>
@@ -477,10 +477,10 @@ export default function LandingPage() {
                   className="p-5 bg-surface rounded-[20px] border border-line shadow-card hover:border-brand/40 transition-all flex flex-col gap-3 group"
                 >
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform"
-                    style={{ background: 'var(--gradient-brand)' }}
+                    className="w-10 h-10 rounded-full flex items-center justify-center on-brand shadow-xs group-hover:scale-105 transition-transform"
+                    style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-5 h-5" style={{ color: 'var(--on-brand)' }} />
                   </div>
                   <div>
                     <h3 className="font-heading font-bold text-sm text-text">
@@ -538,8 +538,8 @@ export default function LandingPage() {
               {/* Step 3 */}
               <div className="p-6 bg-surface rounded-[24px] border border-line shadow-card flex flex-col items-center text-center gap-3">
                 <div
-                  className="w-12 h-12 rounded-full text-white flex items-center justify-center font-heading font-extrabold text-base shadow-xs"
-                  style={{ background: 'var(--gradient-brand)' }}
+                  className="w-12 h-12 rounded-full on-brand flex items-center justify-center font-heading font-extrabold text-base shadow-xs"
+                  style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
                 >
                   3
                 </div>
@@ -600,11 +600,11 @@ export default function LandingPage() {
               </div>
               <Link
                 to="/register"
-                className="min-h-[44px] px-4 py-2 rounded-full text-xs font-bold text-white flex items-center justify-center gap-1.5 transition active:scale-95 shadow-xs"
-                style={{ background: 'var(--gradient-brand)' }}
+                className="min-h-[44px] px-4 py-2 rounded-full text-xs font-bold on-brand flex items-center justify-center gap-1.5 transition active:scale-95 shadow-xs"
+                style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
               >
-                <span>{t('landing.role_driver_btn', 'Sign up as driver')}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span style={{ color: 'var(--on-brand)' }}>{t('landing.role_driver_btn', 'Sign up as driver')}</span>
+                <ArrowRight className="w-3.5 h-3.5" style={{ color: 'var(--on-brand)' }} />
               </Link>
             </div>
 
@@ -651,11 +651,11 @@ export default function LandingPage() {
                   <a
                     href={APK_URL}
                     download
-                    className="min-h-[44px] px-6 py-2.5 rounded-full text-xs font-bold text-white flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
-                    style={{ background: 'var(--gradient-brand)' }}
+                    className="min-h-[44px] px-6 py-2.5 rounded-full text-xs font-bold on-brand flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
+                    style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
                   >
-                    <Download className="w-4 h-4" />
-                    <span>
+                    <Download className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
+                    <span style={{ color: 'var(--on-brand)' }}>
                       {t('landing.app_download', 'Download APK')}{' '}
                       {APK_VERSION && `(v${APK_VERSION})`}
                       {APK_SIZE && ` • ${APK_SIZE}`}
@@ -682,10 +682,10 @@ export default function LandingPage() {
 
             <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-[28px] bg-surface border border-line p-4 flex flex-col items-center justify-center text-center shadow-soft">
               <div
-                className="w-16 h-16 rounded-[20px] flex items-center justify-center text-white mb-3 shadow-xs"
-                style={{ background: 'var(--gradient-brand)' }}
+                className="w-16 h-16 rounded-[20px] flex items-center justify-center on-brand mb-3 shadow-xs"
+                style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
               >
-                <Bus className="w-8 h-8" />
+                <Bus className="w-8 h-8" style={{ color: 'var(--on-brand)' }} />
               </div>
               <span className="font-heading font-extrabold text-xs text-text">Nammooru Bus APK</span>
               <span className="text-[10px] text-muted mt-0.5">Built with Capacitor</span>

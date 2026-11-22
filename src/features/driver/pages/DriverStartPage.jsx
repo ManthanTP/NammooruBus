@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
 import RouteBadge from '@/components/ui/RouteBadge'
 import Button from '@/components/ui/Button'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 export default function DriverStartPage() {
   const navigate = useNavigate()
@@ -187,25 +188,28 @@ export default function DriverStartPage() {
     <div className="space-y-4 pb-8">
       {/* 1. Gradient Header with Driver Name & Assigned Bus Chip */}
       <div
-        className="rounded-[28px] p-5 text-white shadow-soft relative overflow-hidden"
-        style={{ background: 'var(--gradient-brand)' }}
+        className="rounded-[28px] p-5 on-brand shadow-soft relative overflow-hidden"
+        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
       >
-        <span className="text-xs font-semibold text-white/70 block uppercase tracking-wider">
+        <span className="text-xs font-semibold block uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
           Driver Console
         </span>
-        <h2 className="font-heading font-extrabold text-xl text-white mt-0.5">
+        <h2 className="font-heading font-extrabold text-xl mt-0.5" style={{ color: 'var(--on-brand)' }}>
           {user?.user_metadata?.full_name || 'Driver Shift'}
         </h2>
 
         {/* Bus Badge Chip */}
         {driverRecord?.bus ? (
           <div className="mt-3 flex items-center gap-2 flex-wrap">
-            <span className="px-3 py-1 bg-amber-500 text-navy-900 rounded-full font-heading font-extrabold text-xs shadow-xs flex items-center gap-1.5">
-              <Bus className="w-3.5 h-3.5" />
+            <span
+              className="px-3 py-1 bg-amber-500 on-amber rounded-full font-heading font-extrabold text-xs shadow-xs flex items-center gap-1.5"
+              style={{ color: 'var(--on-amber)' }}
+            >
+              <Bus className="w-3.5 h-3.5" style={{ color: 'var(--on-amber)' }} />
               <span>Your Bus: {driverRecord.bus.reg_no}</span>
             </span>
             {assignedRoute && (
-              <span className="px-2.5 py-1 bg-white/20 text-white rounded-full text-xs font-semibold">
+              <span className="px-2.5 py-1 bg-white/20 rounded-full text-xs font-semibold" style={{ color: 'var(--on-brand)' }}>
                 Route {assignedRoute.code}
               </span>
             )}
@@ -219,7 +223,7 @@ export default function DriverStartPage() {
 
       {/* 2. Active Trip Notification (if already ongoing) */}
       {activeTrip ? (
-        <div className="p-5 bg-white rounded-[20px] border-2 border-amber-500 shadow-soft space-y-4 text-center">
+        <div className="p-5 bg-surface rounded-[20px] border-2 border-amber-500 shadow-soft space-y-4 text-center">
           <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
             <Bus className="w-6 h-6" />
           </div>
@@ -227,7 +231,7 @@ export default function DriverStartPage() {
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
               Trip in Progress
             </span>
-            <h3 className="font-heading font-extrabold text-base text-ink-950 mt-1">
+            <h3 className="font-heading font-extrabold text-base text-text mt-1">
               Route {activeTrip.route?.code} - {activeTrip.bus?.reg_no}
             </h3>
             <p className="text-xs text-muted mt-0.5">
@@ -248,7 +252,7 @@ export default function DriverStartPage() {
             <button
               type="button"
               onClick={handleEndExistingTrip}
-              className="w-full py-2.5 text-xs font-bold text-danger hover:bg-danger/10 rounded-full transition"
+              className="w-full py-2.5 text-xs font-bold text-danger hover:bg-danger/10 rounded-full transition cursor-pointer"
             >
               End Previous Trip
             </button>
@@ -256,9 +260,9 @@ export default function DriverStartPage() {
         </div>
       ) : (
         /* 3. New Trip Configuration Form */
-        <div className="bg-white p-5 rounded-[20px] border border-line shadow-soft space-y-4">
+        <div className="bg-surface p-5 rounded-[20px] border border-line shadow-soft space-y-4">
           <div>
-            <h3 className="font-heading font-extrabold text-base text-ink-950">
+            <h3 className="font-heading font-extrabold text-base text-text">
               Start Shift
             </h3>
             <p className="text-xs text-muted">
@@ -335,34 +339,18 @@ export default function DriverStartPage() {
 
           {/* Direction Toggle */}
           <div>
-            <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
+            <label className="block text-xs font-bold text-text mb-1.5 font-heading">
               Trip Direction
             </label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setDirection(0)}
-                className={`h-12 rounded-[12px] font-bold text-xs border transition active:scale-95 flex items-center justify-center gap-1.5 ${
-                  direction === 0
-                    ? 'bg-cobalt-500 border-cobalt-500 text-white shadow-xs'
-                    : 'bg-sky-50 border-line text-muted hover:text-ink-950'
-                }`}
-              >
-                Forward (0)
-              </button>
-              <button
-                type="button"
-                onClick={() => setDirection(1)}
-                className={`h-12 rounded-[12px] font-bold text-xs border transition active:scale-95 flex items-center justify-center gap-1.5 ${
-                  direction === 1
-                    ? 'bg-cobalt-500 border-cobalt-500 text-white shadow-xs'
-                    : 'bg-sky-50 border-line text-muted hover:text-ink-950'
-                }`}
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                Return (1)
-              </button>
-            </div>
+            <SegmentedControl
+              options={[
+                { key: 0, label: 'Forward (0)' },
+                { key: 1, label: 'Return (1)', icon: RotateCcw },
+              ]}
+              value={direction}
+              onChange={setDirection}
+              ariaLabel="Trip Direction"
+            />
           </div>
         </div>
       )}

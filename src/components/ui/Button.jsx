@@ -24,17 +24,22 @@ export default function Button({
   }
 
   const variants = {
-    primary: 'text-white shadow-soft hover:opacity-95',
+    primary: 'on-brand shadow-soft hover:opacity-95',
     secondary: 'bg-surface border-2 border-brand text-brand hover:bg-surface-2',
     ghost: 'bg-transparent text-brand hover:bg-surface-2',
-    danger: 'bg-danger text-white hover:opacity-90',
+    danger: 'text-white hover:opacity-90',
     'icon-only': 'bg-transparent text-brand hover:bg-surface-2 p-2',
   }
 
-  const primaryStyle =
-    variant === 'primary'
-      ? { background: 'var(--gradient-brand)', color: '#FFFFFF' }
-      : {}
+  const getVariantStyle = () => {
+    if (variant === 'primary') {
+      return { background: 'var(--gradient-brand)', color: 'var(--on-brand)' }
+    }
+    if (variant === 'danger') {
+      return { backgroundColor: 'var(--color-danger)', color: '#FFFFFF' }
+    }
+    return {}
+  }
 
   return (
     <button
@@ -43,7 +48,7 @@ export default function Button({
       onClick={onClick}
       aria-label={ariaLabel}
       className={`${base} ${sizes[size] ?? sizes.md} ${variants[variant] ?? variants.primary} ${className}`}
-      style={primaryStyle}
+      style={getVariantStyle()}
     >
       {loading ? (
         <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />

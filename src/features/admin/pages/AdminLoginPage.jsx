@@ -107,15 +107,18 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-sky-50 flex flex-col justify-between">
       {/* 1. Top Section: Signature Gradient with Logo on White Plate */}
       <div
-        className="pt-10 pb-16 px-6 text-white flex flex-col items-center justify-center relative overflow-hidden"
-        style={{ background: 'var(--gradient-brand)' }}
+        className="pt-10 pb-16 px-6 on-brand flex flex-col items-center justify-center relative overflow-hidden"
+        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
       >
         <div className="absolute top-4 right-4 z-10">
           <LanguageToggle />
         </div>
 
         {/* White rounded plate with logo-full */}
-        <div className="bg-white rounded-[20px] p-4 shadow-float mb-4 flex items-center justify-center max-w-[200px]">
+        <div
+          className="rounded-[20px] p-4 shadow-float mb-4 flex items-center justify-center max-w-[200px]"
+          style={{ backgroundColor: '#FFFFFF' }}
+        >
           <img
             src="/brand/logo-full.png"
             alt="Nammooru Bus"

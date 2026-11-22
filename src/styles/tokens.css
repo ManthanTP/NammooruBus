@@ -12,6 +12,11 @@
   --amber-soft: #FFF3D1;
   --shadow: 0 10px 30px rgba(0, 32, 165, 0.10);
 
+  /* Fixed On-Brand and On-Amber Tokens (Never change with theme) */
+  --on-brand: #FFFFFF;
+  --on-amber: #00136E;
+  --white: #FFFFFF;
+
   --cobalt-500: #0040FF;
   --cobalt-600: #0033D6;
   --royal-700: #0020A5;
@@ -21,7 +26,6 @@
   --amber-100: #FFF3D1;
   --sky-50: #F2F6FF;
   --sky-100: #E4ECFF;
-  --white: #FFFFFF;
 
   /* Status colours */
   --color-success: #12A150;
@@ -33,7 +37,7 @@
   --color-cobalt: var(--cobalt-500);
   --color-cobalt-tint: var(--sky-100);
   --color-page: var(--sky-50);
-  --color-surface: var(--white);
+  --color-surface: var(--surface);
   --color-line: var(--line);
   --color-text-secondary: var(--muted);
   --color-led-amber: var(--amber-500);
@@ -68,9 +72,9 @@
   --surface: #0B1450;
   --surface-2: #101C66;
   --line: #22308A;
-  --text: #EEF2FF;
-  --muted: #A9B4E8;
-  --brand: #4C7DFF;
+  --text: #FFFFFF;
+  --muted: #C9D0F2;
+  --brand: #8FB0FF;
   --brand-strong: #0040FF;
   --amber: #FFB400;
   --amber-soft: rgba(255, 180, 0, 0.14);
@@ -79,14 +83,17 @@
   --color-danger: #FF6B6E;
   --color-warning: #FFB400;
 
-  --cobalt-500: #4C7DFF;
-  --cobalt-600: #336BFF;
+  --on-brand: #FFFFFF;
+  --on-amber: #00136E;
+  --white: #FFFFFF;
+
+  --cobalt-500: #8FB0FF;
+  --cobalt-600: #A8C2FF;
   --royal-700: #101C66;
   --navy-900: #0B1450;
-  --ink-950: #EEF2FF;
+  --ink-950: #FFFFFF;
   --sky-50: #050B2E;
   --sky-100: #101C66;
-  --white: #0B1450;
 
   --color-ink: var(--text);
   --color-cobalt: var(--brand);
@@ -105,9 +112,9 @@
   --surface: #12141C;
   --surface-2: #1A1D28;
   --line: #2A2F42;
-  --text: #F2F4FA;
-  --muted: #A3A9C2;
-  --brand: #4C7DFF;
+  --text: #FFFFFF;
+  --muted: #C4C9DA;
+  --brand: #8FB0FF;
   --brand-strong: #0040FF;
   --amber: #FFB400;
   --amber-soft: rgba(255, 180, 0, 0.14);
@@ -116,14 +123,17 @@
   --color-danger: #FF6B6E;
   --color-warning: #FFB400;
 
-  --cobalt-500: #4C7DFF;
-  --cobalt-600: #336BFF;
+  --on-brand: #FFFFFF;
+  --on-amber: #00136E;
+  --white: #FFFFFF;
+
+  --cobalt-500: #8FB0FF;
+  --cobalt-600: #A8C2FF;
   --royal-700: #1A1D28;
   --navy-900: #12141C;
-  --ink-950: #F2F4FA;
+  --ink-950: #FFFFFF;
   --sky-50: #0A0B10;
   --sky-100: #1A1D28;
-  --white: #12141C;
 
   --color-ink: var(--text);
   --color-cobalt: var(--brand);

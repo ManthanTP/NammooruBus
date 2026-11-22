@@ -225,11 +225,10 @@ export default function LivePage() {
               key={chip.key}
               type="button"
               onClick={() => setSelectedRouteCode(chip.key)}
-              className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 active:scale-95 ${
-                isSelected
-                  ? 'text-white shadow-xs'
-                  : 'text-muted bg-surface border border-line hover:text-text'
-              }`}
+              className={`relative px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 active:scale-95 ${isSelected
+                ? 'text-white shadow-xs'
+                : 'text-muted bg-surface border border-line hover:text-text'
+                }`}
               style={isSelected ? { background: 'var(--gradient-brand)' } : {}}
             >
               {chip.code}
@@ -361,11 +360,10 @@ export default function LivePage() {
                 onClick={() => setSelectedTripId(trip.id)}
                 role="button"
                 tabIndex={0}
-                className={`p-3.5 rounded-[20px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.99] ${
-                  isSelected
-                    ? 'bg-surface-2 border-brand shadow-soft'
-                    : 'bg-surface hover:border-brand border-line shadow-xs'
-                }`}
+                className={`p-3.5 rounded-[20px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.99] ${isSelected
+                  ? 'bg-surface-2 border-brand shadow-soft'
+                  : 'bg-surface hover:border-brand border-line shadow-xs'
+                  }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="shrink-0 flex items-center gap-1.5">

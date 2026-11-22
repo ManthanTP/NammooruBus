@@ -13,6 +13,8 @@
   --color-brand-strong: var(--brand-strong);
   --color-amber: var(--amber);
   --color-amber-soft: var(--amber-soft);
+  --color-on-brand: var(--on-brand);
+  --color-on-amber: var(--on-amber);
 
   --color-cobalt-500: var(--cobalt-500);
   --color-cobalt-600: var(--cobalt-600);
@@ -23,7 +25,7 @@
   --color-amber-100: var(--amber-100);
   --color-sky-50: var(--sky-50);
   --color-sky-100: var(--sky-100);
-  --color-white: var(--white);
+  --color-white: #FFFFFF;
   --color-danger: var(--color-danger);
   --color-warning: var(--color-warning);
   --color-success: var(--color-success);
@@ -88,6 +90,45 @@ h6 {
 
 .road-gradient {
   background: var(--gradient-brand);
+}
+
+/* Phase 5.11: On-Brand and On-Amber Utility Classes */
+.on-brand {
+  color: var(--on-brand) !important;
+}
+
+.on-brand * {
+  color: inherit;
+}
+
+.on-brand svg {
+  stroke: currentColor;
+}
+
+.on-amber {
+  color: var(--on-amber) !important;
+}
+
+.on-amber * {
+  color: inherit;
+}
+
+.on-amber svg {
+  stroke: currentColor;
+}
+
+/* Placeholders & Disabled Styling */
+input::placeholder,
+textarea::placeholder {
+  color: #9AA3CC;
+  opacity: 1;
+}
+
+button:disabled,
+input:disabled,
+textarea:disabled,
+[disabled] {
+  opacity: 0.6;
 }
 
 /* Button & interactive press shrink */

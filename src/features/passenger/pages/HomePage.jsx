@@ -159,11 +159,11 @@ export default function HomePage() {
         <button
           type="button"
           onClick={handleFindBuses}
-          className="mt-3 w-full h-12 px-4 rounded-full text-white font-heading font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="mt-3 w-full h-12 px-4 rounded-full on-brand font-heading font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform cursor-pointer shadow-soft"
+          style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
-          <Search className="w-4 h-4" />
-          <span>{t('passenger.find_buses')}</span>
+          <Search className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
+          <span style={{ color: 'var(--on-brand)' }}>{t('passenger.find_buses')}</span>
         </button>
       </div>
 
@@ -275,7 +275,7 @@ export default function HomePage() {
                     </span>
                   </div>
                 </div>
-                <span className="text-[10px] text-cobalt-500 font-semibold mt-2.5 flex items-center gap-1">
+                <span className="text-[10px] text-brand font-semibold mt-2.5 flex items-center gap-1">
                   View timetable →
                 </span>
               </Link>

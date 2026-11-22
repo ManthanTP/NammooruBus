@@ -118,7 +118,7 @@ export default function DriverLayout() {
             <div className="flex items-center gap-1.5">
               <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight whitespace-nowrap">
                 <span className="text-ink-950">Nammooru</span>
-                <span className="text-cobalt-500 dark:text-[#6E94FF] ml-0.5">Bus</span>
+                <span className="text-brand ml-0.5">Bus</span>
               </span>
               <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-extrabold text-[10px] uppercase tracking-wider hidden xs:inline-block">
                 Driver
@@ -268,21 +268,23 @@ export default function DriverLayout() {
                   key={tab.key}
                   to={tab.path}
                   end={tab.exact}
-                  className={`relative flex flex-col items-center justify-center py-1.5 px-2.5 rounded-pill transition-colors flex-1 min-w-0 ${active ? 'text-white' : 'text-muted hover:text-ink-950'
-                    }`}
+                  className={`relative flex flex-col items-center justify-center py-1.5 px-2.5 rounded-pill transition-colors flex-1 min-w-0 ${
+                    active ? 'on-brand' : 'text-muted hover:text-text'
+                  }`}
+                  style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}
                   aria-label={tab.label}
                 >
                   {active && (
                     <motion.div
                       layoutId="driver-tab-pill"
-                      className="absolute inset-0 rounded-pill shadow-xs"
+                      className="absolute inset-0 rounded-pill shadow-xs z-0 pointer-events-none"
                       style={{ background: 'var(--gradient-brand)' }}
                       transition={{ type: 'spring', stiffness: 450, damping: 32 }}
                     />
                   )}
-                  <span className="relative z-10 flex flex-col items-center">
-                    <Icon className="w-5 h-5 mb-0.5" strokeWidth={active ? 2.5 : 2} />
-                    <span className="text-[10px] font-heading font-extrabold tracking-tight">
+                  <span className="relative z-10 flex flex-col items-center" style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}>
+                    <Icon className="w-5 h-5 mb-0.5" strokeWidth={active ? 2.5 : 2} style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }} />
+                    <span className="text-[10px] font-heading font-extrabold tracking-tight" style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}>
                       {tab.label}
                     </span>
                   </span>

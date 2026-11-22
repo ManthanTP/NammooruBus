@@ -13,19 +13,19 @@ export default function StatTile({
   if (variant === 'gradient') {
     return (
       <div
-        className={`rounded-[20px] p-4 text-white flex flex-col justify-between shadow-soft ${className}`}
-        style={{ background: 'var(--gradient-brand)' }}
+        className={`rounded-[20px] p-4 on-brand flex flex-col justify-between shadow-soft ${className}`}
+        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
       >
-        <div className="flex items-center justify-between text-white/80 mb-2">
+        <div className="flex items-center justify-between mb-2" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
           <span className="text-xs font-semibold">{label}</span>
-          {Icon && <Icon className="w-4 h-4 text-amber-500" />}
+          {Icon && <Icon className="w-4 h-4 text-amber-500" style={{ color: 'var(--amber)' }} />}
         </div>
         <div>
-          <div className="font-heading font-extrabold text-2xl text-white leading-tight">
+          <div className="font-heading font-extrabold text-2xl leading-tight" style={{ color: 'var(--on-brand)' }}>
             {value}
           </div>
           {subvalue && (
-            <span className="text-[11px] text-white/70 font-medium block mt-0.5">
+            <span className="text-[11px] font-medium block mt-0.5" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
               {subvalue}
             </span>
           )}

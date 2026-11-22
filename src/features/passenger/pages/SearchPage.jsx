@@ -339,10 +339,19 @@ export default function SearchPage() {
           type="button"
           onClick={handleFindBuses}
           disabled={!fromStop || !toStop}
-          className="w-full max-w-md py-3 px-4 bg-cobalt disabled:bg-line disabled:text-text-secondary text-white font-extrabold text-sm rounded-pill shadow-soft transition flex items-center justify-center gap-2"
+          className={`w-full max-w-md py-3 px-4 font-extrabold text-sm rounded-pill shadow-soft transition flex items-center justify-center gap-2 ${
+            !fromStop || !toStop
+              ? 'bg-surface-2 text-muted cursor-not-allowed border border-line'
+              : 'on-brand cursor-pointer'
+          }`}
+          style={
+            !fromStop || !toStop
+              ? {}
+              : { background: 'var(--gradient-brand)', color: 'var(--on-brand)' }
+          }
         >
-          <Search className="w-4 h-4" />
-          <span>{t('passenger.find_buses')}</span>
+          <Search className="w-4 h-4" style={{ color: !fromStop || !toStop ? 'var(--muted)' : 'var(--on-brand)' }} />
+          <span style={{ color: !fromStop || !toStop ? 'var(--muted)' : 'var(--on-brand)' }}>{t('passenger.find_buses')}</span>
         </button>
       </div>
     </div>

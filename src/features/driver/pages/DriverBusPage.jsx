@@ -109,16 +109,16 @@ export default function DriverBusPage() {
     <div className="space-y-4 pb-20">
       {/* 1. Header Card */}
       <div
-        className="rounded-[28px] p-5 text-white shadow-soft relative overflow-hidden"
-        style={{ background: 'var(--gradient-brand)' }}
+        className="rounded-[28px] p-5 on-brand shadow-soft relative overflow-hidden"
+        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
       >
-        <span className="text-xs font-semibold text-white/70 block uppercase tracking-wider">
+        <span className="text-xs font-semibold block uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
           Vehicle & Route Management
         </span>
-        <h1 className="font-heading font-extrabold text-xl text-white mt-0.5">
+        <h1 className="font-heading font-extrabold text-xl mt-0.5" style={{ color: 'var(--on-brand)' }}>
           Assigned Bus Details
         </h1>
-        <p className="text-xs text-white/80 mt-1">
+        <p className="text-xs mt-1" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
           Your bus broadcasts live GPS location along the selected route.
         </p>
       </div>

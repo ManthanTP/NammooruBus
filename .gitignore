@@ -33,4 +33,5 @@ Thumbs.db
 *.swo
 *.md
 *.pptx
-.docs/
+
+/docs

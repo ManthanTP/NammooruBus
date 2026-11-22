@@ -114,53 +114,53 @@ export default function UserBusComparison({
 
   return (
     <div
-      className="rounded-[20px] p-4 text-white shadow-soft space-y-3"
-      style={{ background: 'var(--gradient-brand)' }}
+      className="rounded-[20px] p-4 on-brand shadow-soft space-y-3"
+      style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
     >
       {/* Big Verdict Line */}
       <div className="flex items-center gap-2">
         {comparison.verdictType === 'warning' ? (
-          <div className="w-7 h-7 rounded-full bg-amber-500 text-navy-900 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-4 h-4" />
+          <div className="w-7 h-7 rounded-full bg-amber-500 on-amber flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-4 h-4" style={{ color: 'var(--on-amber)' }} />
           </div>
         ) : (
-          <div className="w-7 h-7 rounded-full bg-white text-cobalt-500 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-4 h-4" />
+          <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center shrink-0" style={{ backgroundColor: '#FFFFFF', color: '#0040FF' }}>
+            <CheckCircle2 className="w-4 h-4" style={{ color: '#0040FF' }} />
           </div>
         )}
-        <h4 className="font-heading font-extrabold text-sm md:text-base text-white leading-tight">
+        <h4 className="font-heading font-extrabold text-sm md:text-base leading-tight" style={{ color: 'var(--on-brand)' }}>
           {comparison.verdictText}
         </h4>
       </div>
 
       {/* 3 Metric Numbers Row */}
-      <div className="grid grid-cols-3 gap-2 pt-1 border-t border-white/15">
+      <div className="grid grid-cols-3 gap-2 pt-1 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}>
         {/* 1. You to bus */}
-        <div className="bg-white/10 backdrop-blur-xs rounded-[14px] p-2.5 text-center">
-          <span className="text-[10px] uppercase font-bold text-white/70 block">
+        <div className="rounded-[14px] p-2.5 text-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }}>
+          <span className="text-[10px] uppercase font-bold block" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
             To Bus
           </span>
-          <span className="font-heading font-extrabold text-base text-white">
+          <span className="font-heading font-extrabold text-base" style={{ color: 'var(--on-brand)' }}>
             {comparison.distToBusStr}
           </span>
         </div>
 
         {/* 2. Walk to stop */}
-        <div className="bg-white/10 backdrop-blur-xs rounded-[14px] p-2.5 text-center">
-          <span className="text-[10px] uppercase font-bold text-white/70 block">
+        <div className="rounded-[14px] p-2.5 text-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }}>
+          <span className="text-[10px] uppercase font-bold block" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
             Walk
           </span>
-          <span className="font-heading font-extrabold text-base text-white">
+          <span className="font-heading font-extrabold text-base" style={{ color: 'var(--on-brand)' }}>
             {comparison.walkMinutes} min
           </span>
         </div>
 
         {/* 3. Bus ETA */}
-        <div className="bg-white/10 backdrop-blur-xs rounded-[14px] p-2.5 text-center">
-          <span className="text-[10px] uppercase font-bold text-white/70 block">
+        <div className="rounded-[14px] p-2.5 text-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }}>
+          <span className="text-[10px] uppercase font-bold block" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
             Bus ETA
           </span>
-          <span className="font-heading font-extrabold text-base text-amber-500">
+          <span className="font-heading font-extrabold text-base" style={{ color: 'var(--amber)' }}>
             {comparison.busEtaMin ? `${comparison.busEtaMin} min` : '--'}
           </span>
         </div>

@@ -115,23 +115,24 @@ export default function RouteDetailPage() {
     <div className="space-y-3.5 pb-6">
       {/* 1. Coloured Header with Badge */}
       <div
-        className="rounded-[20px] p-4 text-white shadow-soft flex items-center justify-between"
-        style={{ background: 'var(--gradient-brand)' }}
+        className="rounded-[20px] p-4 on-brand shadow-soft flex items-center justify-between"
+        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
       >
         <button
           type="button"
           onClick={() => navigate('/routes')}
-          className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition active:scale-95 shrink-0"
+          className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition active:scale-95 shrink-0 cursor-pointer"
+          style={{ color: 'var(--on-brand)' }}
           title="Back to routes"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
         </button>
 
         <div className="text-center min-w-0 px-2 flex-1">
-          <h2 className="font-heading font-extrabold text-base text-white truncate">
+          <h2 className="font-heading font-extrabold text-base truncate" style={{ color: 'var(--on-brand)' }}>
             {localName(route, i18n.language)}
           </h2>
-          <span className="text-[11px] text-white/70 block mt-0.5">
+          <span className="text-[11px] block mt-0.5" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
             {orderedStops.length} stops &bull; {route.two_way ? 'Two-way service' : 'One-way service'}
           </span>
         </div>

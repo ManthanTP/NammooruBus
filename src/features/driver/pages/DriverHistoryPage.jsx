@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import RouteBadge from '@/components/ui/RouteBadge'
 import StatTile from '@/components/ui/StatTile'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 export default function DriverHistoryPage() {
   const navigate = useNavigate()
@@ -252,35 +253,16 @@ export default function DriverHistoryPage() {
       <div className="space-y-2 no-print">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-muted">Filter Date Range</span>
-          <div className="flex p-1 bg-white border border-line rounded-pill text-xs font-bold shadow-soft">
-            <button
-              type="button"
-              onClick={() => setRangeType('7d')}
-              className={`px-3 py-1 rounded-pill transition ${
-                rangeType === '7d' ? 'bg-cobalt-500 text-white' : 'text-muted hover:text-ink-950'
-              }`}
-            >
-              7 Days
-            </button>
-            <button
-              type="button"
-              onClick={() => setRangeType('30d')}
-              className={`px-3 py-1 rounded-pill transition ${
-                rangeType === '30d' ? 'bg-cobalt-500 text-white' : 'text-muted hover:text-ink-950'
-              }`}
-            >
-              30 Days
-            </button>
-            <button
-              type="button"
-              onClick={() => setRangeType('custom')}
-              className={`px-3 py-1 rounded-pill transition ${
-                rangeType === 'custom' ? 'bg-cobalt-500 text-white' : 'text-muted hover:text-ink-950'
-              }`}
-            >
-              Custom
-            </button>
-          </div>
+          <SegmentedControl
+            options={[
+              { key: '7d', label: '7 Days' },
+              { key: '30d', label: '30 Days' },
+              { key: 'custom', label: 'Custom' },
+            ]}
+            value={rangeType}
+            onChange={setRangeType}
+            ariaLabel="Date range filter"
+          />
         </div>
 
         {rangeType === 'custom' && (

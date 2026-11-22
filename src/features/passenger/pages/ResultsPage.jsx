@@ -136,29 +136,30 @@ export default function ResultsPage() {
     <div className="space-y-3.5 pb-4">
       {/* 1. Slim Gradient Header with Back, From to To, and Swap button */}
       <div
-        className="rounded-[20px] p-3.5 text-white flex items-center justify-between shadow-soft"
-        style={{ background: 'var(--gradient-brand)' }}
+        className="rounded-[20px] p-3.5 on-brand flex items-center justify-between shadow-soft"
+        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
       >
         <button
           type="button"
           onClick={() => navigate('/search')}
-          className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition active:scale-95 shrink-0"
+          className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition active:scale-95 shrink-0 cursor-pointer"
+          style={{ color: 'var(--on-brand)' }}
           title="Back to search"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
         </button>
 
         <div className="text-center min-w-0 px-2 flex-1">
-          <div className="flex items-center justify-center gap-1.5 text-xs font-extrabold font-heading text-white truncate">
-            <span className="truncate max-w-[100px] sm:max-w-[130px]">
+          <div className="flex items-center justify-center gap-1.5 text-xs font-extrabold font-heading truncate" style={{ color: 'var(--on-brand)' }}>
+            <span className="truncate max-w-[100px] sm:max-w-[130px]" style={{ color: 'var(--on-brand)' }}>
               {fromStop ? localName(fromStop, i18n.language) : 'Origin'}
             </span>
-            <span className="text-amber-500 font-bold">&rarr;</span>
-            <span className="truncate max-w-[100px] sm:max-w-[130px]">
+            <span className="text-amber-500 font-bold" style={{ color: 'var(--amber)' }}>&rarr;</span>
+            <span className="truncate max-w-[100px] sm:max-w-[130px]" style={{ color: 'var(--on-brand)' }}>
               {toStop ? localName(toStop, i18n.language) : 'Destination'}
             </span>
           </div>
-          <span className="text-[10.5px] text-white/70 block mt-0.5 font-medium">
+          <span className="text-[10.5px] block mt-0.5 font-medium" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
             {results.length} bus option{results.length === 1 ? '' : 's'} found
           </span>
         </div>
@@ -166,10 +167,11 @@ export default function ResultsPage() {
         <button
           type="button"
           onClick={handleSwap}
-          className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition active:scale-95 shrink-0"
+          className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition active:scale-95 shrink-0 cursor-pointer"
+          style={{ color: 'var(--amber)' }}
           title="Swap stops"
         >
-          <ArrowUpDown className="w-4 h-4 text-amber-500" />
+          <ArrowUpDown className="w-4 h-4 text-amber-500" style={{ color: 'var(--amber)' }} />
         </button>
       </div>
 

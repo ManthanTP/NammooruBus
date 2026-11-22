@@ -32,7 +32,10 @@ export default function Ticket({ result, onClick, index = 0 }) {
     >
       {/* "Best" amber ribbon badge */}
       {isBest && (
-        <div className="absolute top-0 right-0 bg-amber-500 text-navy-900 font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-bl-[10px] shadow-xs z-10">
+        <div
+          className="absolute top-0 right-0 bg-amber-500 on-amber font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-bl-[10px] shadow-xs z-10"
+          style={{ color: 'var(--on-amber)' }}
+        >
           Best
         </div>
       )}

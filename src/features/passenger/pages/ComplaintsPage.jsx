@@ -176,11 +176,11 @@ export default function ComplaintsPage() {
           </div>
           <Link
             to="/login"
-            className="w-full h-11 text-white rounded-full text-xs font-bold shadow-soft flex items-center justify-center gap-2 transition active:scale-98 font-heading"
-            style={{ background: 'var(--gradient-brand)' }}
+            className="w-full h-11 on-brand rounded-full text-xs font-bold shadow-soft flex items-center justify-center gap-2 transition active:scale-98 font-heading"
+            style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
           >
-            <span>{t('auth.sign_in') || 'Sign in'}</span>
-            <ChevronRight className="w-4 h-4" />
+            <span style={{ color: 'var(--on-brand)' }}>{t('auth.sign_in') || 'Sign in'}</span>
+            <ChevronRight className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
           </Link>
         </div>
       ) : (
@@ -293,11 +293,11 @@ export default function ComplaintsPage() {
             <button
               type="submit"
               disabled={submitting || message.trim().length < 5}
-              className="w-full h-12 text-white rounded-full text-xs font-bold shadow-soft flex items-center justify-center gap-2 transition disabled:opacity-50 active:scale-98 font-heading"
-              style={{ background: 'var(--gradient-brand)' }}
+              className="w-full h-12 on-brand rounded-full text-xs font-bold shadow-soft flex items-center justify-center gap-2 transition disabled:opacity-50 active:scale-98 font-heading cursor-pointer"
+              style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
             >
-              <Send className="w-4 h-4" />
-              <span>{submitting ? t('complaints.submitting') : t('complaints.submit_btn')}</span>
+              <Send className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
+              <span style={{ color: 'var(--on-brand)' }}>{submitting ? t('complaints.submitting') : t('complaints.submit_btn')}</span>
             </button>
           </form>
         </div>

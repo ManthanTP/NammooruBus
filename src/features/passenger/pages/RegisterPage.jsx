@@ -8,6 +8,7 @@ import { useDataStore } from '@/store/dataStore'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import RoadRibbon from '@/components/ui/RoadRibbon'
 import AuthSwitch from '@/components/ui/AuthSwitch'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 function formatAuthError(error) {
   if (!error) return null
@@ -142,14 +143,17 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-bg flex flex-col justify-between font-body text-ink-950 transition-colors">
       {/* 1. Top Half: Signature Gradient with logo-full */}
       <div
-        className="pt-10 pb-16 px-6 text-white flex flex-col items-center justify-center relative overflow-hidden shrink-0"
-        style={{ background: 'var(--gradient-brand)' }}
+        className="pt-10 pb-16 px-6 on-brand flex flex-col items-center justify-center relative overflow-hidden shrink-0"
+        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
       >
         <div className="absolute top-4 right-4 z-10">
           <LanguageToggle />
         </div>
 
-        <div className="bg-white rounded-[20px] p-4 shadow-float mb-4 flex items-center justify-center max-w-[200px]">
+        <div
+          className="rounded-[20px] p-4 shadow-float mb-4 flex items-center justify-center max-w-[200px]"
+          style={{ backgroundColor: '#FFFFFF' }}
+        >
           <img
             src="/brand/logo-full.png"
             alt="Nammooru Bus"
@@ -255,28 +259,15 @@ export default function RegisterPage() {
 
             {/* Account Role Selector / Driver Switch */}
             <div className="pt-1">
-              <div className="flex items-center justify-between p-1 bg-sky-50 dark:bg-surface-2 rounded-full border border-line">
-                <button
-                  type="button"
-                  onClick={() => setIsDriver(false)}
-                  className={`flex-1 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${!isDriver
-                    ? 'bg-cobalt-500 text-white shadow-xs'
-                    : 'text-muted hover:text-ink-950'
-                    }`}
-                >
-                  Passenger
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsDriver(true)}
-                  className={`flex-1 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${isDriver
-                    ? 'bg-amber-500 text-navy-900 shadow-xs'
-                    : 'text-muted hover:text-ink-950'
-                    }`}
-                >
-                  Driver 🚌
-                </button>
-              </div>
+              <SegmentedControl
+                options={[
+                  { key: 'passenger', label: 'Passenger' },
+                  { key: 'driver', label: 'Driver 🚌' },
+                ]}
+                value={isDriver ? 'driver' : 'passenger'}
+                onChange={(val) => setIsDriver(val === 'driver')}
+                ariaLabel="Account Role Selector"
+              />
             </div>
 
             {/* Smooth height-animated Driver Details fields */}
@@ -349,8 +340,8 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full h-[52px] rounded-full text-white font-heading font-bold text-sm tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-soft disabled:opacity-60 cursor-pointer mt-2"
-              style={{ background: 'var(--gradient-brand)' }}
+              className="w-full h-[52px] rounded-full on-brand font-heading font-bold text-sm tracking-tight flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-soft disabled:opacity-60 cursor-pointer mt-2"
+              style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
             >
               {submitting && (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

@@ -12,12 +12,15 @@ export default function NotFoundPage() {
       {/* 404 Visual */}
       <div className="relative mb-6">
         <div
-          className="w-24 h-24 rounded-[28px] flex items-center justify-center text-white shadow-card"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="w-24 h-24 rounded-[28px] flex items-center justify-center on-brand shadow-card"
+          style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
-          <Compass className="w-12 h-12" />
+          <Compass className="w-12 h-12" style={{ color: 'var(--on-brand)' }} />
         </div>
-        <span className="absolute -bottom-2 -right-2 px-2.5 py-0.5 rounded-full bg-amber text-navy-900 font-extrabold text-xs shadow-xs">
+        <span
+          className="absolute -bottom-2 -right-2 px-2.5 py-0.5 rounded-full bg-amber on-amber font-extrabold text-xs shadow-xs"
+          style={{ color: 'var(--on-amber)' }}
+        >
           404
         </span>
       </div>
@@ -42,11 +45,11 @@ export default function NotFoundPage() {
         <button
           type="button"
           onClick={() => navigate('/explore')}
-          className="min-h-[44px] px-5 py-2 rounded-full text-white font-bold text-xs shadow-xs transition active:scale-95 flex items-center gap-1.5"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="min-h-[44px] px-5 py-2 rounded-full on-brand font-bold text-xs shadow-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+          style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
-          <Compass className="w-4 h-4" />
-          <span>Explore Buses</span>
+          <Compass className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
+          <span style={{ color: 'var(--on-brand)' }}>Explore Buses</span>
         </button>
       </div>
     </div>

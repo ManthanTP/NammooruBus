@@ -39,10 +39,10 @@ export default function AuthSwitch({ mode = 'login' }) {
         </p>
       </div>
 
-      {/* Outlined secondary button: 48px, rounded full, 2px cobalt border, cobalt text */}
+      {/* Outlined secondary button: 48px, rounded full, 2px brand border, brand text */}
       <Link
         to={to}
-        className="w-full h-12 rounded-full border-2 border-cobalt-500 text-cobalt-500 hover:bg-sky-50 dark:hover:bg-surface-2 text-sm font-heading font-bold flex items-center justify-center transition active:scale-[0.98] shadow-xs"
+        className="w-full h-12 rounded-full border-2 border-brand text-brand hover:bg-surface-2 text-sm font-heading font-bold flex items-center justify-center transition active:scale-[0.98] shadow-xs"
       >
         <span>{actionLabel}</span>
       </Link>

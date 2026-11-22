@@ -82,9 +82,9 @@ export default function AdminDashboardPage() {
         .limit(100)
 
       const searchFreq = {}
-      ;(allRoutes || []).forEach((r) => {
-        searchFreq[r.code] = 0
-      })
+        ; (allRoutes || []).forEach((r) => {
+          searchFreq[r.code] = 0
+        })
 
       if (searchLogs && searchLogs.length > 0) {
         searchLogs.forEach((s, idx) => {
@@ -95,7 +95,7 @@ export default function AdminDashboardPage() {
           }
         })
       } else {
-        ;(allRoutes || []).slice(0, 6).forEach((r, idx) => {
+        ; (allRoutes || []).slice(0, 6).forEach((r, idx) => {
           searchFreq[r.code] = (6 - idx) * 12 + 5
         })
       }
@@ -113,9 +113,9 @@ export default function AdminDashboardPage() {
         .select('category, status')
 
       const catCounts = {}
-      ;(complaintsData || []).forEach((c) => {
-        catCounts[c.category] = (catCounts[c.category] || 0) + 1
-      })
+        ; (complaintsData || []).forEach((c) => {
+          catCounts[c.category] = (catCounts[c.category] || 0) + 1
+        })
 
       let pieData = Object.entries(catCounts).map(([name, value]) => ({
         name: name.charAt(0).toUpperCase() + name.slice(1),
@@ -199,19 +199,19 @@ export default function AdminDashboardPage() {
         {/* 1. Primary KPI: Active Trips with signature gradient */}
         <Link
           to="/12345678/admin/live"
-          className="p-4 rounded-card text-white shadow-soft hover:opacity-95 transition col-span-2 sm:col-span-1 relative overflow-hidden"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="p-4 rounded-card on-brand shadow-soft hover:opacity-95 transition col-span-2 sm:col-span-1 relative overflow-hidden"
+          style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-white/80 uppercase tracking-wider">Active Trips</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>Active Trips</span>
             <div className="w-8 h-8 rounded-pill bg-white/20 text-amber-500 flex items-center justify-center">
-              <Activity className="w-4 h-4 animate-pulse" />
+              <Activity className="w-4 h-4 animate-pulse" style={{ color: 'var(--amber)' }} />
             </div>
           </div>
-          <div className="mt-2 text-3xl font-extrabold text-white font-heading">
+          <div className="mt-2 text-3xl font-extrabold font-heading" style={{ color: 'var(--on-brand)' }}>
             {stats.activeTripsCount}
           </div>
-          <span className="text-[10px] text-amber-500 font-bold flex items-center gap-1 mt-1">
+          <span className="text-[10px] font-bold flex items-center gap-1 mt-1" style={{ color: 'var(--amber)' }}>
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
             Live GPS broadcast
           </span>
@@ -448,13 +448,12 @@ export default function AdminDashboardPage() {
 
                 <div className="flex items-center gap-3 shrink-0">
                   <span
-                    className={`px-2 py-0.5 rounded-pill text-[10px] font-bold ${
-                      c.status === 'resolved'
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : c.status === 'in_progress'
+                    className={`px-2 py-0.5 rounded-pill text-[10px] font-bold ${c.status === 'resolved'
+                      ? 'bg-emerald-50 text-emerald-700'
+                      : c.status === 'in_progress'
                         ? 'bg-amber-100 text-amber-800'
                         : 'bg-danger/10 text-danger'
-                    }`}
+                      }`}
                   >
                     {c.status}
                   </span>

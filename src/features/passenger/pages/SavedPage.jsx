@@ -50,16 +50,17 @@ export default function SavedPage() {
       {/* 2. Guest Mode or Logged In Card */}
       {!user ? (
         <div
-          className="p-4 rounded-[20px] text-white flex items-center justify-between gap-3 shadow-soft"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="p-4 rounded-[20px] on-brand flex items-center justify-between gap-3 shadow-soft"
+          style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
           <div>
-            <p className="font-bold font-heading text-sm text-white">Guest Mode</p>
-            <p className="text-xs text-white/80 mt-0.5">Log in to sync your saved trips across all devices.</p>
+            <p className="font-bold font-heading text-sm" style={{ color: 'var(--on-brand)' }}>Guest Mode</p>
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>Log in to sync your saved trips across all devices.</p>
           </div>
           <Link
             to="/login"
-            className="px-4 py-2 bg-white text-navy-900 text-xs font-bold rounded-full shadow-xs hover:bg-white/90 transition shrink-0 active:scale-95"
+            className="px-4 py-2 text-xs font-bold rounded-full shadow-xs hover:opacity-90 transition shrink-0 active:scale-95"
+            style={{ backgroundColor: '#FFFFFF', color: '#00136E' }}
           >
             {t('auth.sign_in') || 'Sign in'}
           </Link>

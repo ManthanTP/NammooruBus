@@ -74,13 +74,23 @@ export default function PassengerLayout() {
                 key={item.key}
                 to={item.path}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-pill text-xs font-bold transition ${active
-                  ? 'text-white shadow-xs'
-                  : 'text-muted hover:text-ink-950 hover:bg-sky-50 dark:hover:bg-surface'
+                  ? 'on-brand shadow-soft'
+                  : 'text-muted hover:text-text hover:bg-surface'
                   }`}
-                style={active ? { background: 'var(--gradient-brand)' } : {}}
+                style={
+                  active
+                    ? { background: 'var(--gradient-brand)', color: 'var(--on-brand)' }
+                    : { color: 'var(--muted)' }
+                }
               >
-                <Icon size={16} strokeWidth={2} />
-                <span>{item.label}</span>
+                <Icon
+                  size={16}
+                  strokeWidth={2}
+                  style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}
+                />
+                <span style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}>
+                  {item.label}
+                </span>
               </Link>
             )
           })}
