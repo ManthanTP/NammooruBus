@@ -141,7 +141,7 @@ export default function LandingPage() {
           if (data.latest.apkUrl) setAppUrl(data.latest.apkUrl)
         }
       })
-      .catch(() => {})
+      .catch(() => { })
   }, [])
   const [dismissedBottomBar, setDismissedBottomBar] = useState(() => {
     if (typeof window === 'undefined') return true

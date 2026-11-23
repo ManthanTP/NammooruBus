@@ -18,7 +18,7 @@ export const hapticTick = async () => {
   if (appStorage.getItem('nb-vibration') === 'false') return
   try {
     await Haptics.impact({ style: ImpactStyle.Light })
-  } catch (_) {}
+  } catch (_) { }
 }
 
 export const hapticMedium = async () => {
@@ -26,7 +26,7 @@ export const hapticMedium = async () => {
   if (appStorage.getItem('nb-vibration') === 'false') return
   try {
     await Haptics.impact({ style: ImpactStyle.Medium })
-  } catch (_) {}
+  } catch (_) { }
 }
 
 export const hapticSuccess = async () => {
@@ -34,7 +34,7 @@ export const hapticSuccess = async () => {
   if (appStorage.getItem('nb-vibration') === 'false') return
   try {
     await Haptics.notification({ type: NotificationType.Success })
-  } catch (_) {}
+  } catch (_) { }
 }
 
 export const hapticError = async () => {
@@ -42,7 +42,7 @@ export const hapticError = async () => {
   if (appStorage.getItem('nb-vibration') === 'false') return
   try {
     await Haptics.notification({ type: NotificationType.Error })
-  } catch (_) {}
+  } catch (_) { }
 }
 
 /**
@@ -200,7 +200,7 @@ export const onNetworkStatusChange = (callback) => {
       callback(status.connected)
     })
     return () => {
-      handle.then((h) => h.remove()).catch(() => {})
+      handle.then((h) => h.remove()).catch(() => { })
     }
   }
 

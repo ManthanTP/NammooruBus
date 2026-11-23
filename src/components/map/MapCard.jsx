@@ -94,9 +94,8 @@ export default function MapCard({ height = 220, isSticky = false, title = 'Explo
     <>
       {/* 1. Normal In-Page Map Card (Mobile Only) */}
       <div
-        className={`w-full rounded-[28px] border-[3px] border-surface overflow-hidden relative bg-surface shrink-0 md:hidden transition-all ${
-          isSticky ? 'sticky top-16 z-20' : ''
-        } ${className}`}
+        className={`w-full rounded-[28px] border-[3px] border-surface overflow-hidden relative bg-surface shrink-0 md:hidden transition-all ${isSticky ? 'sticky top-16 z-20' : ''
+          } ${className}`}
         style={{
           height,
           boxShadow: 'var(--shadow-soft)',

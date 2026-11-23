@@ -48,7 +48,7 @@ export function handleBackAction({ navigate, location, hasActiveTrip = false, is
   // 6. Driver active trip: Minimize app to background without killing trip
   if (path === '/driver/trip' && hasActiveTrip) {
     if (isNative()) {
-      Promise.resolve(App.minimizeApp?.()).catch(() => {})
+      Promise.resolve(App.minimizeApp?.()).catch(() => { })
     }
     return 'minimized_driver_trip'
   }
@@ -63,7 +63,7 @@ export function handleBackAction({ navigate, location, hasActiveTrip = false, is
       return 'welcome_prev_slide'
     }
     if (isNative()) {
-      Promise.resolve(App.exitApp?.()).catch(() => {})
+      Promise.resolve(App.exitApp?.()).catch(() => { })
     }
     return 'exit_welcome'
   }
@@ -75,7 +75,7 @@ export function handleBackAction({ navigate, location, hasActiveTrip = false, is
       return 'back_to_welcome'
     }
     if (isNative()) {
-      Promise.resolve(App.exitApp?.()).catch(() => {})
+      Promise.resolve(App.exitApp?.()).catch(() => { })
     }
     return 'exit_get_started'
   }
@@ -100,7 +100,7 @@ export function handleBackAction({ navigate, location, hasActiveTrip = false, is
   if (path === '/driver') {
     const now = Date.now()
     if (now - lastBackPressTime < 2000) {
-      if (isNative()) Promise.resolve(App.exitApp?.()).catch(() => {})
+      if (isNative()) Promise.resolve(App.exitApp?.()).catch(() => { })
       return 'exit_app'
     }
     lastBackPressTime = now
@@ -118,7 +118,7 @@ export function handleBackAction({ navigate, location, hasActiveTrip = false, is
   if (path === '/explore' || path === '/') {
     const now = Date.now()
     if (now - lastBackPressTime < 2000) {
-      if (isNative()) Promise.resolve(App.exitApp?.()).catch(() => {})
+      if (isNative()) Promise.resolve(App.exitApp?.()).catch(() => { })
       return 'exit_app'
     }
     lastBackPressTime = now
@@ -140,7 +140,7 @@ export function handleBackAction({ navigate, location, hasActiveTrip = false, is
  * Initializes the global hardware back button listener for Capacitor native app.
  */
 export function initNativeBackButton(getRouterContext) {
-  if (!isNative()) return () => {}
+  if (!isNative()) return () => { }
 
   const handle = App.addListener('backButton', () => {
     const context = getRouterContext ? getRouterContext() : {}
@@ -148,6 +148,6 @@ export function initNativeBackButton(getRouterContext) {
   })
 
   return () => {
-    handle.then((h) => h.remove()).catch(() => {})
+    handle.then((h) => h.remove()).catch(() => { })
   }
 }

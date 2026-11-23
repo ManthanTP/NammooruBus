@@ -38,9 +38,8 @@ export default function FloatingTabBar() {
           <Link
             key={tab.key}
             to={tab.path}
-            className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full py-1 px-1 rounded-full select-none ${
-              active ? 'on-brand' : 'text-muted'
-            }`}
+            className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full py-1 px-1 rounded-full select-none ${active ? 'on-brand' : 'text-muted'
+              }`}
             style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}
           >
             {active && (
@@ -58,9 +57,8 @@ export default function FloatingTabBar() {
               style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}
             />
             <span
-              className={`relative z-10 text-[10.5px] leading-tight tracking-tight truncate max-w-[62px] ${
-                active ? 'font-bold' : 'font-medium'
-              }`}
+              className={`relative z-10 text-[10.5px] leading-tight tracking-tight truncate max-w-[62px] ${active ? 'font-bold' : 'font-medium'
+                }`}
               style={{ color: active ? 'var(--on-brand)' : 'var(--muted)' }}
             >
               {tab.label}

@@ -99,7 +99,7 @@ export default function WelcomePage() {
       illustration: (
         <div className="relative w-full h-44 sm:h-52 bg-surface-2 rounded-[24px] border border-line p-4 flex flex-col justify-between overflow-hidden shadow-soft">
           <div className="absolute inset-0 opacity-15" style={{ backgroundImage: 'radial-gradient(circle, #0040FF 1.5px, transparent 1.5px)', backgroundSize: '16px 16px' }} />
-          
+
           <div className="relative z-10 flex items-center justify-between">
             <span className="px-3 py-1 bg-brand text-white rounded-pill text-xs font-heading font-extrabold shadow-xs">
               Route 12 • CBT Dharwad
@@ -278,11 +278,10 @@ export default function WelcomePage() {
               <button
                 type="button"
                 onClick={() => handleSelectLanguage('en')}
-                className={`w-full p-5 rounded-[22px] border-2 transition-all flex items-center justify-between shadow-soft cursor-pointer ${
-                  i18n.language !== 'kn'
-                    ? 'bg-white border-[#0040FF] shadow-float ring-2 ring-[#0040FF]/20'
-                    : 'bg-white/80 hover:bg-white border-line'
-                }`}
+                className={`w-full p-5 rounded-[22px] border-2 transition-all flex items-center justify-between shadow-soft cursor-pointer ${i18n.language !== 'kn'
+                  ? 'bg-white border-[#0040FF] shadow-float ring-2 ring-[#0040FF]/20'
+                  : 'bg-white/80 hover:bg-white border-line'
+                  }`}
               >
                 <div className="flex items-center gap-3.5 text-left">
                   <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center font-heading font-extrabold text-base text-cobalt-600">
@@ -297,11 +296,10 @@ export default function WelcomePage() {
                 </div>
 
                 <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center border transition ${
-                    i18n.language !== 'kn'
-                      ? 'bg-[#0040FF] border-[#0040FF] text-white'
-                      : 'border-line text-transparent'
-                  }`}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center border transition ${i18n.language !== 'kn'
+                    ? 'bg-[#0040FF] border-[#0040FF] text-white'
+                    : 'border-line text-transparent'
+                    }`}
                 >
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
                 </div>
@@ -311,11 +309,10 @@ export default function WelcomePage() {
               <button
                 type="button"
                 onClick={() => handleSelectLanguage('kn')}
-                className={`w-full p-5 rounded-[22px] border-2 transition-all flex items-center justify-between shadow-soft cursor-pointer ${
-                  i18n.language === 'kn'
-                    ? 'bg-white border-[#0040FF] shadow-float ring-2 ring-[#0040FF]/20'
-                    : 'bg-white/80 hover:bg-white border-line'
-                }`}
+                className={`w-full p-5 rounded-[22px] border-2 transition-all flex items-center justify-between shadow-soft cursor-pointer ${i18n.language === 'kn'
+                  ? 'bg-white border-[#0040FF] shadow-float ring-2 ring-[#0040FF]/20'
+                  : 'bg-white/80 hover:bg-white border-line'
+                  }`}
               >
                 <div className="flex items-center gap-3.5 text-left">
                   <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center font-heading font-extrabold text-base text-amber-700">
@@ -330,11 +327,10 @@ export default function WelcomePage() {
                 </div>
 
                 <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center border transition ${
-                    i18n.language === 'kn'
-                      ? 'bg-[#0040FF] border-[#0040FF] text-white'
-                      : 'border-line text-transparent'
-                  }`}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center border transition ${i18n.language === 'kn'
+                    ? 'bg-[#0040FF] border-[#0040FF] text-white'
+                    : 'border-line text-transparent'
+                    }`}
                 >
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
                 </div>
@@ -441,9 +437,8 @@ export default function WelcomePage() {
                         hapticTick()
                         setCurrentSlide(idx)
                       }}
-                      className={`h-2.5 rounded-full transition-all duration-300 ${
-                        currentSlide === idx ? 'w-8 bg-brand' : 'w-2.5 bg-line hover:bg-muted'
-                      }`}
+                      className={`h-2.5 rounded-full transition-all duration-300 ${currentSlide === idx ? 'w-8 bg-brand' : 'w-2.5 bg-line hover:bg-muted'
+                        }`}
                       aria-label={`Slide ${idx + 1}`}
                     />
                   ))}
@@ -553,11 +548,10 @@ export default function WelcomePage() {
                   <button
                     type="button"
                     onClick={() => handleSelectLanguage('en')}
-                    className={`py-2 px-3 rounded-pill text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                      i18n.language !== 'kn'
-                        ? 'bg-brand text-white shadow-xs'
-                        : 'text-muted hover:text-text'
-                    }`}
+                    className={`py-2 px-3 rounded-pill text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${i18n.language !== 'kn'
+                      ? 'bg-brand text-white shadow-xs'
+                      : 'text-muted hover:text-text'
+                      }`}
                   >
                     <span>English</span>
                   </button>
@@ -565,11 +559,10 @@ export default function WelcomePage() {
                   <button
                     type="button"
                     onClick={() => handleSelectLanguage('kn')}
-                    className={`py-2 px-3 rounded-pill text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                      i18n.language === 'kn'
-                        ? 'bg-brand text-white shadow-xs'
-                        : 'text-muted hover:text-text'
-                    }`}
+                    className={`py-2 px-3 rounded-pill text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${i18n.language === 'kn'
+                      ? 'bg-brand text-white shadow-xs'
+                      : 'text-muted hover:text-text'
+                      }`}
                   >
                     <span>ಕನ್ನಡ</span>
                   </button>
@@ -631,11 +624,10 @@ export default function WelcomePage() {
                           hapticTick()
                           setTheme(tOption.key)
                         }}
-                        className={`p-3 rounded-[18px] border-2 transition-all text-left flex flex-col justify-between gap-2.5 cursor-pointer ${
-                          isSelected
-                            ? 'border-brand bg-brand/5 shadow-soft ring-2 ring-brand/20'
-                            : 'border-line bg-surface-2 hover:border-muted/40'
-                        }`}
+                        className={`p-3 rounded-[18px] border-2 transition-all text-left flex flex-col justify-between gap-2.5 cursor-pointer ${isSelected
+                          ? 'border-brand bg-brand/5 shadow-soft ring-2 ring-brand/20'
+                          : 'border-line bg-surface-2 hover:border-muted/40'
+                          }`}
                       >
                         {/* Mini mockup illustration */}
                         <div className="w-full h-14 rounded-[10px] overflow-hidden border border-line/60 relative flex flex-col justify-between p-1.5 shadow-2xs">
@@ -661,11 +653,10 @@ export default function WelcomePage() {
                           </span>
 
                           <div
-                            className={`w-4 h-4 rounded-full flex items-center justify-center border ${
-                              isSelected
-                                ? 'bg-brand border-brand text-white'
-                                : 'border-line text-transparent'
-                            }`}
+                            className={`w-4 h-4 rounded-full flex items-center justify-center border ${isSelected
+                              ? 'bg-brand border-brand text-white'
+                              : 'border-line text-transparent'
+                              }`}
                           >
                             <Check className="w-2.5 h-2.5 stroke-[3]" />
                           </div>
