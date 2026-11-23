@@ -258,15 +258,13 @@ export default function ProfilePage() {
               appStorage.setItem('nb-vibration', next ? 'true' : 'false')
               if (next) hapticTick()
             }}
-            className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
-              vibrationEnabled ? 'bg-brand' : 'bg-line'
-            }`}
+            className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${vibrationEnabled ? 'bg-brand' : 'bg-line'
+              }`}
             aria-label="Toggle haptic vibration"
           >
             <div
-              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                vibrationEnabled ? 'translate-x-5' : 'translate-x-0'
-              }`}
+              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${vibrationEnabled ? 'translate-x-5' : 'translate-x-0'
+                }`}
             />
           </button>
         </div>
