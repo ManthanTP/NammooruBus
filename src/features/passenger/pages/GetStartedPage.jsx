@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
@@ -5,26 +6,35 @@ import { ArrowRight, Bus, ShieldCheck } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import { appStorage } from '@/lib/storage'
-import { hapticTick } from '@/lib/platform'
+import { hapticTick, setStatusBarTheme } from '@/lib/platform'
 
 export default function GetStartedPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
 
+  useEffect(() => {
+    setStatusBarTheme('brand')
+  }, [])
+
   const handleContinueAsGuest = () => {
     hapticTick()
     appStorage.setItem('nb-onboarded', 'true')
     appStorage.setItem('nb-guest', 'true')
+    appStorage.removeItem('nb_onboarding_step')
     navigate('/explore', { replace: true })
   }
 
   const handleSignIn = () => {
     hapticTick()
+    appStorage.setItem('nb-onboarded', 'true')
+    appStorage.removeItem('nb_onboarding_step')
     navigate('/login')
   }
 
   const handleSignUp = () => {
     hapticTick()
+    appStorage.setItem('nb-onboarded', 'true')
+    appStorage.removeItem('nb_onboarding_step')
     navigate('/register')
   }
 

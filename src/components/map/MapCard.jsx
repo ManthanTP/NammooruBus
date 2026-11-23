@@ -167,7 +167,7 @@ export default function MapCard({ height = 220, isSticky = false, title = 'Explo
               {/* Top Controls Overlay */}
               <div
                 className="absolute top-0 left-0 right-0 z-[400] px-3.5 py-3 pointer-events-none flex items-center justify-between"
-                style={{ paddingTop: 'max(12px, env(safe-area-inset-top))' }}
+                style={{ paddingTop: 'max(12px, var(--safe-top, 0px))' }}
               >
                 {/* Title Chip */}
                 <div className="bg-surface/95 backdrop-blur-md px-3.5 py-1.5 rounded-pill border border-line shadow-soft pointer-events-auto flex items-center gap-2">
@@ -192,7 +192,7 @@ export default function MapCard({ height = 220, isSticky = false, title = 'Explo
               {/* Bottom-Right Locate Button */}
               <div
                 className="absolute bottom-6 right-4 z-[400] pointer-events-auto flex flex-col gap-2"
-                style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+                style={{ paddingBottom: 'max(12px, var(--safe-bottom, 0px))' }}
               >
                 <button
                   type="button"

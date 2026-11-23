@@ -16,11 +16,37 @@
           "value": "public, max-age=3600, must-revalidate"
         }
       ]
+    },
+    {
+      "source": "/version.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    },
+    {
+      "source": "/releases.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
     }
   ],
   "rewrites": [
     {
-      "source": "/((?!downloads/.*|assets/.*|brand/.*|icons/.*|favicon.*|sw\\.js|manifest\\.json).*)",
+      "source": "/((?!downloads/.*|assets/.*|brand/.*|icons/.*|favicon.*|sw\\.js|manifest\\.json|version\\.json|releases\\.json).*)",
       "destination": "/index.html"
     }
   ]

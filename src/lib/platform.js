@@ -47,30 +47,66 @@ export const hapticError = async () => {
 
 /**
  * Native Status Bar theme & style controller
+ * Top: Do NOT draw under the status bar or camera cutout.
+ * Sets status bar color and icon style matching active screen / theme.
  */
-export const setStatusBarTheme = async (theme = 'light', isLightBackground = false) => {
+let overlaysDisabled = false
+
+export const setStatusBarTheme = async (themeOrScreen = 'light', isLightBackground = false) => {
   if (!isNative()) return
   try {
-    let resolvedTheme = theme
-    if (theme === 'system' && typeof window !== 'undefined' && window.matchMedia) {
+    if (!overlaysDisabled) {
+      await StatusBar.setOverlaysWebView({ overlay: false })
+      overlaysDisabled = true
+    }
+
+    if (themeOrScreen === 'brand') {
+      // Login, Register, Get Started, Welcome gradient header
+      await StatusBar.setStyle({ style: Style.Dark })
+      await StatusBar.setBackgroundColor({ color: '#0040FF' })
+      return
+    }
+
+    if (themeOrScreen === 'splash' || isLightBackground) {
+      // Splash or clean light screen
+      await StatusBar.setStyle({ style: Style.Light })
+      await StatusBar.setBackgroundColor({ color: '#FFFFFF' })
+      return
+    }
+
+    let resolvedTheme = themeOrScreen
+    if (themeOrScreen === 'system' && typeof window !== 'undefined' && window.matchMedia) {
       resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     }
 
-    if (isLightBackground || resolvedTheme === 'light') {
-      // Light background: dark icons on light surface
+    if (resolvedTheme === 'light') {
+      // Top bar surface of Light theme: white with dark icons
       await StatusBar.setStyle({ style: Style.Light })
       await StatusBar.setBackgroundColor({ color: '#FFFFFF' })
     } else if (resolvedTheme === 'blue') {
-      // Navy Blue theme: light icons on navy surface
+      // Top bar surface of Blue theme: #0B1450 with light icons
       await StatusBar.setStyle({ style: Style.Dark })
-      await StatusBar.setBackgroundColor({ color: '#050B2E' })
+      await StatusBar.setBackgroundColor({ color: '#0B1450' })
     } else {
-      // Dark theme: light icons on pitch black
+      // Top bar surface of Dark theme: #12141C with light icons
       await StatusBar.setStyle({ style: Style.Dark })
-      await StatusBar.setBackgroundColor({ color: '#0A0B10' })
+      await StatusBar.setBackgroundColor({ color: '#12141C' })
     }
   } catch (e) {
     console.warn('Could not update native status bar:', e)
+  }
+}
+
+/**
+ * Configure screen safe area insets.
+ * When WebView is not overlaid, OS handles the status bar and nav bar.
+ * We set --safe-top to 0px and --safe-bottom to 8px to prevent double-padding.
+ */
+export const initScreenInsets = () => {
+  if (typeof document === 'undefined') return
+  if (isNative()) {
+    document.documentElement.style.setProperty('--safe-top', '0px')
+    document.documentElement.style.setProperty('--safe-bottom', '8px')
   }
 }
 

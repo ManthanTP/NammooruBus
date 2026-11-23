@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, LayoutGroup } from 'framer-motion'
-import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2, Bus, Sun, Moon, Laptop, Smartphone, Vibrate } from 'lucide-react'
+import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2, Bus, Sun, Moon, Laptop, Vibrate, Sparkles, RefreshCw, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
@@ -11,7 +11,10 @@ import { useToastStore, toast } from '@/components/ui/Toast'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import Button from '@/components/ui/Button'
 import { appStorage } from '@/lib/storage'
-import { hapticTick } from '@/lib/platform'
+import { hapticTick, isNative } from '@/lib/platform'
+import { checkAppUpdate } from '@/lib/versionCheck'
+import UpdateModal from '@/components/ui/UpdateModal'
+import { APK_VERSION } from '@/config/links'
 
 export default function ProfilePage() {
   const { t } = useTranslation()
@@ -30,6 +33,9 @@ export default function ProfilePage() {
   const [claimError, setClaimError] = useState(null)
   const [driverBus, setDriverBus] = useState(null)
   const [vibrationEnabled, setVibrationEnabled] = useState(() => appStorage.getItem('nb-vibration') !== 'false')
+  const [updateChecking, setUpdateChecking] = useState(false)
+  const [updateInfo, setUpdateInfo] = useState(null)
+  const [showUpdateModal, setShowUpdateModal] = useState(false)
 
   useEffect(() => {
     initData()
@@ -55,9 +61,28 @@ export default function ProfilePage() {
   }, [routes, selectedRouteId])
 
   const handleLogout = async () => {
+    appStorage.removeItem('nb-guest')
     await signOut()
     toast.info('toast.logged_out')
-    navigate(isDriverRoute ? '/login' : '/')
+    navigate(isNative() ? '/get-started' : (isDriverRoute ? '/login' : '/'))
+  }
+
+  const handleCheckForUpdates = async () => {
+    hapticTick()
+    setUpdateChecking(true)
+    try {
+      const result = await checkAppUpdate({ force: true })
+      setUpdateChecking(false)
+      if (result.hasUpdate && result.latest) {
+        setUpdateInfo(result)
+        setShowUpdateModal(true)
+      } else {
+        toast.success(t('settings.latest_version') || 'You are on the latest version')
+      }
+    } catch (_) {
+      setUpdateChecking(false)
+      toast.info('Could not check for updates right now')
+    }
   }
 
   const handleBack = () => {
@@ -268,23 +293,6 @@ export default function ProfilePage() {
             />
           </button>
         </div>
-
-        {/* Show intro again (Native & onboarding walkthrough - passenger only) */}
-        {!isDriverRoute && (
-          <>
-            <div className="h-[1px] bg-line/60" />
-            <div className="pt-0.5">
-              <button
-                type="button"
-                onClick={() => navigate('/welcome')}
-                className="w-full py-2.5 px-3 rounded-pill text-xs font-bold text-text bg-surface-2 hover:bg-line border border-line transition text-center flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Smartphone className="w-3.5 h-3.5 text-brand" />
-                <span>Show intro walkthrough again</span>
-              </button>
-            </div>
-          </>
-        )}
       </div>
 
       {/* 3. Driver Vehicle & Shift Status if already a driver */}
@@ -425,6 +433,53 @@ export default function ProfilePage() {
         </Link>
       </div>
 
+      {/* 4b. About App & Updates */}
+      <div className="p-4 bg-surface rounded-[20px] border border-line shadow-soft space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted font-heading">
+            About Nammooru Bus
+          </h3>
+          <span className="text-[11px] font-mono font-bold text-muted bg-surface-2 px-2 py-0.5 rounded-pill border border-line">
+            v{APK_VERSION || '1.0.0'} (Build 1)
+          </span>
+        </div>
+
+        <div className="pt-1 flex flex-col gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleCheckForUpdates}
+            loading={updateChecking}
+            className="w-full text-xs font-bold font-heading flex items-center justify-center gap-2"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-brand" />
+            <span>Check for updates</span>
+          </Button>
+
+          <div className="grid grid-cols-3 gap-2 pt-1">
+            <Link
+              to="/whats-new"
+              className="py-2 px-2 rounded-[12px] bg-surface-2 hover:bg-line border border-line text-[11px] font-bold text-text text-center transition flex items-center justify-center gap-1"
+            >
+              <Sparkles className="w-3 h-3 text-amber-500" />
+              <span>What's new</span>
+            </Link>
+            <Link
+              to="/terms"
+              className="py-2 px-2 rounded-[12px] bg-surface-2 hover:bg-line border border-line text-[11px] font-bold text-text text-center transition flex items-center justify-center gap-1"
+            >
+              <span>Terms</span>
+            </Link>
+            <Link
+              to="/privacy"
+              className="py-2 px-2 rounded-[12px] bg-surface-2 hover:bg-line border border-line text-[11px] font-bold text-text text-center transition flex items-center justify-center gap-1"
+            >
+              <span>Privacy</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* 5. Logout Button */}
       <Button
         variant="danger"
@@ -435,6 +490,13 @@ export default function ProfilePage() {
         <LogOut className="w-4 h-4 mr-1" />
         <span>{t('auth.logout') || 'Log out'}</span>
       </Button>
+
+      {/* Update Available Modal */}
+      <UpdateModal
+        isOpen={showUpdateModal}
+        updateInfo={updateInfo}
+        onClose={() => setShowUpdateModal(false)}
+      />
     </div>
   )
 }

@@ -155,6 +155,28 @@ Output: `android/app/build/outputs/apk/debug/app-debug.apk`
    # Output: Verified using v2 scheme (APK Signature Scheme v2): true
    ```
 
+### C. Publishing a New Release & In-App Update Notifications
+When publishing a new version of Nammooru Bus:
+1. **Build the APK**:
+   ```powershell
+   .\scripts\release-apk.ps1
+   ```
+2. **Verify APK placed in public downloads**:
+   Ensure `public/downloads/nammooru-bus.apk` reflects the new build.
+3. **Synchronize release notes and version numbers**:
+   Run the sync script to update `version.json`, `releases.json`, `docs/CHANGELOG.md`, `android/app/build.gradle`, and `package.json`:
+   ```bash
+   npm run release:notes -- --version 1.0.1 --code 2 --notes-en "Punch-hole camera insets fixed|First-launch setup flow" --notes-kn "ಕ್ಯಾಮೆರಾ ಇನ್‌ಸೆಟ್‌ಗಳು ಸರಿಪಡಿಸಲಾಗಿದೆ|ಮೊದಲ ಪ್ರಾರಂಭದ ಹಂತಗಳು"
+   ```
+4. **Deploy to Vercel**:
+   ```bash
+   git commit -am "release: v1.0.1"
+   git push origin main
+   ```
+
+> [!NOTE]
+> Older APKs installed before Phase 6.1 do not have the in-app update checking engine; the "Update available" pop-up automatically functions for users on this version (v1.0.0+) and above.
+
 ---
 
 ## 6. Deployment to Vercel

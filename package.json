@@ -1,7 +1,7 @@
 {
   "name": "nammooru-bus",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,6 +14,8 @@
     "icons:android": "node ./scripts/generate_android_icons.js",
     "build:android": "vite build && cap sync android",
     "open:android": "cap open android",
+    "release:notes": "node ./scripts/release_notes.cjs",
+    "test:whats-new": "node ./scripts/test_whats_new.js",
     "test:themes": "node ./scripts/test_themes.js",
     "test:landing": "node ./scripts/test_landing_scroll.js"
   },

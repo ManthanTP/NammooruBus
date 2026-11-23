@@ -9,6 +9,8 @@ import LanguageToggle from '@/components/ui/LanguageToggle'
 import RoadRibbon from '@/components/ui/RoadRibbon'
 import AuthSwitch from '@/components/ui/AuthSwitch'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import { setStatusBarTheme } from '@/lib/platform'
+import { appStorage } from '@/lib/storage'
 
 function formatAuthError(error) {
   if (!error) return null
@@ -51,6 +53,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     initData()
+    setStatusBarTheme('brand')
   }, [initData])
 
   useEffect(() => {
@@ -132,6 +135,8 @@ export default function RegisterPage() {
         }
       }
 
+      appStorage.setItem('nb-onboarded', 'true')
+      appStorage.removeItem('nb_onboarding_step')
       navigate('/explore')
     } catch (err) {
       setFormError(formatAuthError(err))

@@ -119,15 +119,15 @@ h6 {
 
 /* Safe area helpers for display cutouts and gesture bar */
 .pt-safe-top {
-  padding-top: max(20px, var(--safe-top));
+  padding-top: max(8px, var(--safe-top));
 }
 
 .pb-safe-bottom {
-  padding-bottom: max(16px, var(--safe-bottom));
+  padding-bottom: max(12px, var(--safe-bottom));
 }
 
 .mb-safe-bottom {
-  margin-bottom: max(16px, var(--safe-bottom));
+  margin-bottom: max(12px, var(--safe-bottom));
 }
 
 /* Phase 5.13: Scoped Landing Smooth Scroll */

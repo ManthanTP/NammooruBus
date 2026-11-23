@@ -23,6 +23,7 @@ import {
   ArrowRight,
   ArrowUp,
   Download,
+  Sparkles,
   ChevronDown,
   Globe,
   Github,
@@ -32,7 +33,6 @@ import {
   Bus,
   ShieldCheck,
   CheckCircle2,
-  Sparkles,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
@@ -127,6 +127,22 @@ export default function LandingPage() {
   const [showBackToTop, setShowBackToTop] = useState(false)
 
   const isIos = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const [appVersion, setAppVersion] = useState(APK_VERSION)
+  const [appSize, setAppSize] = useState(APK_SIZE)
+  const [appUrl, setAppUrl] = useState(APK_URL)
+
+  useEffect(() => {
+    fetch('/version.json')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.latest) {
+          if (data.latest.versionName) setAppVersion(data.latest.versionName)
+          if (data.latest.apkSize) setAppSize(data.latest.apkSize)
+          if (data.latest.apkUrl) setAppUrl(data.latest.apkUrl)
+        }
+      })
+      .catch(() => {})
+  }, [])
   const [dismissedBottomBar, setDismissedBottomBar] = useState(() => {
     if (typeof window === 'undefined') return true
     const saved = localStorage.getItem('nb_hide_download_bar')
@@ -471,10 +487,10 @@ export default function LandingPage() {
             {/* Desktop Download APK Button */}
             {!isIos && (
               <a
-                href={APK_URL}
+                href={appUrl}
                 download="nammooru-bus.apk"
                 className="hidden sm:inline-flex items-center justify-center min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-heading font-bold border border-line bg-surface-2 text-text hover:border-brand hover:text-brand transition active:scale-95 gap-1.5 cursor-pointer"
-                title={`Download Android APK (${APK_SIZE})`}
+                title={`Download Android APK (${appSize})`}
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download APK</span>
@@ -500,11 +516,11 @@ export default function LandingPage() {
             {/* Mobile Download Icon Button */}
             {!isIos && (
               <a
-                href={APK_URL}
+                href={appUrl}
                 download="nammooru-bus.apk"
                 className="sm:hidden p-2 rounded-full text-brand hover:bg-surface-2 transition"
                 aria-label="Download Nammooru Bus APK"
-                title={`Download Android APK (${APK_SIZE})`}
+                title={`Download Android APK (${appSize})`}
               >
                 <Download className="w-5 h-5" />
               </a>
@@ -539,14 +555,14 @@ export default function LandingPage() {
 
               {!isIos && (
                 <a
-                  href={APK_URL}
+                  href={appUrl}
                   download="nammooru-bus.apk"
                   onClick={() => setMobileMenuOpen(false)}
                   className="min-h-[44px] w-full flex items-center justify-center gap-2 rounded-full font-heading font-bold text-xs on-brand shadow-xs transition mb-1"
                   style={{ background: 'var(--grad-brand)', color: 'var(--on-brand)' }}
                 >
                   <Download className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
-                  <span>Download for Android ({APK_SIZE})</span>
+                  <span>Download for Android ({appSize})</span>
                 </a>
               )}
 
@@ -687,7 +703,7 @@ export default function LandingPage() {
                     <>
                       {/* Primary Download for Android Button with Shine Sweep */}
                       <a
-                        href={APK_URL}
+                        href={appUrl}
                         download="nammooru-bus.apk"
                         className="relative overflow-hidden min-h-[52px] px-7 py-3 rounded-full font-heading font-extrabold text-sm shadow-float flex items-center justify-center gap-2.5 transition active:scale-95 select-none hover:bg-white/95 group cursor-pointer"
                         style={{ backgroundColor: '#FFFFFF', color: '#00136E' }}
@@ -737,9 +753,9 @@ export default function LandingPage() {
                 {/* Subtext under hero buttons */}
                 <div className="mt-3.5 space-y-1 select-none">
                   <p className="text-xs font-medium text-white/90 flex items-center gap-2 flex-wrap">
-                    <span>Version {APK_VERSION}</span>
+                    <span>Version {appVersion}</span>
                     <span>•</span>
-                    <span>{APK_SIZE}</span>
+                    <span>{appSize}</span>
                     <span>•</span>
                     <span className="font-bold text-amber on-amber">Free</span>
                     <span>•</span>
@@ -1172,7 +1188,7 @@ export default function LandingPage() {
 
                 <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   <a
-                    href={APK_URL}
+                    href={appUrl}
                     download="nammooru-bus.apk"
                     className="relative overflow-hidden min-h-[48px] px-6 py-2.5 rounded-full text-xs font-bold on-brand flex items-center justify-center gap-2 shadow-soft transition active:scale-95 cursor-pointer"
                     style={{ background: 'var(--grad-brand)', color: 'var(--on-brand)' }}
@@ -1187,7 +1203,7 @@ export default function LandingPage() {
                     )}
                     <Download className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
                     <span style={{ color: 'var(--on-brand)' }}>
-                      Download APK ({APK_SIZE} • v{APK_VERSION})
+                      Download APK ({appSize} • v{appVersion})
                     </span>
                   </a>
                 </div>
@@ -1379,6 +1395,14 @@ export default function LandingPage() {
                     <Github className="w-3.5 h-3.5 text-text" />
                     <span>{t('landing.footer_github', 'GitHub')}</span>
                   </a>
+
+                  <Link
+                    to="/whats-new"
+                    className="min-h-[44px] px-3.5 py-1.5 rounded-full border border-line bg-surface-2 hover:border-brand text-text font-bold text-xs flex items-center gap-1.5 transition active:scale-95 hover:shadow-xs"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <span>What's new</span>
+                  </Link>
                 </div>
               </div>
 
@@ -1433,12 +1457,12 @@ export default function LandingPage() {
                 </div>
                 <div className="min-w-0">
                   <p className="font-heading font-extrabold text-xs text-text truncate">Nammooru Bus App</p>
-                  <p className="text-[10px] text-muted truncate">v{APK_VERSION} • {APK_SIZE} • Free</p>
+                  <p className="text-[10px] text-muted truncate">v{appVersion} • {appSize} • Free</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <a
-                  href={APK_URL}
+                  href={appUrl}
                   download="nammooru-bus.apk"
                   className="px-3.5 py-1.5 rounded-full text-xs font-heading font-bold on-brand flex items-center gap-1.5 shadow-soft active:scale-95 cursor-pointer"
                   style={{ background: 'var(--grad-brand)', color: 'var(--on-brand)' }}

@@ -29,6 +29,7 @@ import WelcomePage from '@/features/passenger/pages/WelcomePage'
 import GetStartedPage from '@/features/passenger/pages/GetStartedPage'
 import TermsPage from '@/features/passenger/pages/TermsPage'
 import PrivacyPage from '@/features/passenger/pages/PrivacyPage'
+import WhatsNewPage from '@/features/passenger/pages/WhatsNewPage'
 
 // Auth pages
 import LoginPage from '@/features/passenger/pages/LoginPage'
@@ -105,8 +106,13 @@ function RootEntry() {
     }
 
     const isOnboarded = appStorage.getItem('nb-onboarded') === 'true'
+    const isGuest = appStorage.getItem('nb-guest') === 'true'
+
     if (isOnboarded) {
-      return <Navigate to="/explore" replace />
+      if (isGuest) {
+        return <Navigate to="/explore" replace />
+      }
+      return <Navigate to="/get-started" replace />
     }
 
     return <Navigate to="/welcome" replace />
@@ -138,6 +144,10 @@ export const router = createBrowserRouter([
   {
     path: '/privacy',
     element: withBoundary(<PrivacyPage />),
+  },
+  {
+    path: '/whats-new',
+    element: withBoundary(<WhatsNewPage />),
   },
 
   // Passenger Portal Layout

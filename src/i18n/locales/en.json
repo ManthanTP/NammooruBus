@@ -65,7 +65,8 @@
   },
   "settings": {
     "preferences": "Preferences & Appearance",
-    "theme": "Theme"
+    "theme": "Theme",
+    "latest_version": "You are on the latest version"
   },
   "nav": {
     "explore": "Explore",

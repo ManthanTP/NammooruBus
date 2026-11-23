@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react'
@@ -6,6 +6,8 @@ import { useAuthStore } from '@/store/authStore'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import RoadRibbon from '@/components/ui/RoadRibbon'
 import AuthSwitch from '@/components/ui/AuthSwitch'
+import { setStatusBarTheme } from '@/lib/platform'
+import { appStorage } from '@/lib/storage'
 
 function formatAuthError(error) {
   if (!error) return null
@@ -41,6 +43,10 @@ export default function LoginPage() {
   const [formError, setFormError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
 
+  useEffect(() => {
+    setStatusBarTheme('brand')
+  }, [])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (submitting) return
@@ -60,6 +66,9 @@ export default function LoginPage() {
         setSubmitting(false)
         return
       }
+
+      appStorage.setItem('nb-onboarded', 'true')
+      appStorage.removeItem('nb_onboarding_step')
 
       if (profile?.role === 'admin') {
         navigate('/12345678/admin/dashboard')

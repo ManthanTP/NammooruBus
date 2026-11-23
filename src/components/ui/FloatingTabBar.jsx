@@ -24,8 +24,11 @@ export default function FloatingTabBar() {
   return (
     <nav
       aria-label="Main Navigation"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-[420px] h-16 bg-surface px-2 py-1.5 rounded-full flex items-center justify-around border border-line"
-      style={{ boxShadow: 'var(--shadow-float)' }}
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-[420px] h-16 bg-surface px-2 py-1.5 rounded-full flex items-center justify-around border border-line"
+      style={{
+        boxShadow: 'var(--shadow-float)',
+        marginBottom: 'max(12px, var(--safe-bottom))',
+      }}
     >
       {tabs.map((tab) => {
         const Icon = tab.icon

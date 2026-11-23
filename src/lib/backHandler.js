@@ -1,6 +1,7 @@
 import { App } from '@capacitor/app'
 import { isNative } from './platform'
 import { toast } from '@/components/ui/Toast'
+import { appStorage } from './storage'
 
 // Overlay layers stack (modals, dropdowns, full-screen map overlay, etc.)
 const overlayLayers = []
@@ -52,8 +53,11 @@ export function handleBackAction({ navigate, location, hasActiveTrip = false, is
     return 'minimized_driver_trip'
   }
 
-  // 5. Welcome carousel navigation
+  // 5. Welcome carousel & onboarding navigation
   if (path === '/welcome' || isWelcome) {
+    if (typeof window !== 'undefined' && window.__nbOnboardingBack && window.__nbOnboardingBack()) {
+      return 'welcome_custom_back'
+    }
     if (welcomeSlide > 0 && onWelcomePrevSlide) {
       onWelcomePrevSlide()
       return 'welcome_prev_slide'
@@ -66,6 +70,10 @@ export function handleBackAction({ navigate, location, hasActiveTrip = false, is
 
   // 5b. Get Started screen
   if (path === '/get-started') {
+    if (typeof window !== 'undefined' && appStorage.getItem('nb-onboarded') !== 'true') {
+      navigate('/welcome')
+      return 'back_to_welcome'
+    }
     if (isNative()) {
       Promise.resolve(App.exitApp?.()).catch(() => {})
     }
