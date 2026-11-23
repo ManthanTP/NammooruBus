@@ -126,6 +126,24 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false)
   const [showBackToTop, setShowBackToTop] = useState(false)
 
+  const isIos = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const [dismissedBottomBar, setDismissedBottomBar] = useState(() => {
+    if (typeof window === 'undefined') return true
+    const saved = localStorage.getItem('nb_hide_download_bar')
+    if (!saved) return false
+    const timestamp = parseInt(saved, 10)
+    return Date.now() - timestamp < 7 * 24 * 60 * 60 * 1000
+  })
+
+  const handleDismissBottomBar = () => {
+    setDismissedBottomBar(true)
+    try {
+      localStorage.setItem('nb_hide_download_bar', String(Date.now()))
+    } catch (e) {
+      // storage unavailable
+    }
+  }
+
   const ignoreObserverRef = useRef(0)
   const statsRef = useRef(null)
   const howItWorksRef = useRef(null)
@@ -450,6 +468,19 @@ export default function LandingPage() {
               <LanguageToggle />
             </div>
 
+            {/* Desktop Download APK Button */}
+            {!isIos && (
+              <a
+                href={APK_URL}
+                download="nammooru-bus.apk"
+                className="hidden sm:inline-flex items-center justify-center min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-heading font-bold border border-line bg-surface-2 text-text hover:border-brand hover:text-brand transition active:scale-95 gap-1.5 cursor-pointer"
+                title={`Download Android APK (${APK_SIZE})`}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download APK</span>
+              </a>
+            )}
+
             <Link
               to="/login"
               className="hidden md:inline-flex items-center justify-center min-h-[38px] px-3.5 py-1.5 rounded-full text-xs font-heading font-bold text-text hover:bg-surface-2 transition active:scale-95"
@@ -465,6 +496,19 @@ export default function LandingPage() {
               <span style={{ color: 'var(--on-brand)' }}>{t('landing.open_app', 'Open app')}</span>
               <ArrowRight className="w-3.5 h-3.5 ml-1" style={{ color: 'var(--on-brand)' }} />
             </Link>
+
+            {/* Mobile Download Icon Button */}
+            {!isIos && (
+              <a
+                href={APK_URL}
+                download="nammooru-bus.apk"
+                className="sm:hidden p-2 rounded-full text-brand hover:bg-surface-2 transition"
+                aria-label="Download Nammooru Bus APK"
+                title={`Download Android APK (${APK_SIZE})`}
+              >
+                <Download className="w-5 h-5" />
+              </a>
+            )}
 
             {/* Mobile Menu Button */}
             <button
@@ -492,6 +536,19 @@ export default function LandingPage() {
                 <span className="text-xs font-bold text-muted uppercase tracking-wider">Navigation</span>
                 <LanguageToggle />
               </div>
+
+              {!isIos && (
+                <a
+                  href={APK_URL}
+                  download="nammooru-bus.apk"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="min-h-[44px] w-full flex items-center justify-center gap-2 rounded-full font-heading font-bold text-xs on-brand shadow-xs transition mb-1"
+                  style={{ background: 'var(--grad-brand)', color: 'var(--on-brand)' }}
+                >
+                  <Download className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
+                  <span>Download for Android ({APK_SIZE})</span>
+                </a>
+              )}
 
               {navItems.map((item) => {
                 const isActive = activeSection === item.id
@@ -612,36 +669,87 @@ export default function LandingPage() {
                   transition={{ delay: 0.3, duration: 0.5 }}
                   className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto"
                 >
-                  <Link
-                    to="/explore"
-                    className="min-h-[48px] px-6 py-3 rounded-full font-heading font-extrabold text-sm shadow-soft flex items-center justify-center gap-2 transition active:scale-95 select-none hover:bg-white/95"
-                    style={{ backgroundColor: '#FFFFFF', color: '#00136E' }}
-                  >
-                    <Compass className="w-4 h-4" style={{ color: '#0040FF' }} />
-                    <span style={{ color: '#00136E' }}>{t('landing.continue_guest', 'Continue as guest')}</span>
-                  </Link>
+                  {isIos ? (
+                    <>
+                      <Link
+                        to="/explore"
+                        className="min-h-[52px] px-7 py-3 rounded-full font-heading font-extrabold text-sm shadow-soft flex items-center justify-center gap-2 transition active:scale-95 select-none hover:bg-white/95 cursor-pointer"
+                        style={{ backgroundColor: '#FFFFFF', color: '#00136E' }}
+                      >
+                        <Compass className="w-4 h-4" style={{ color: '#0040FF' }} />
+                        <span style={{ color: '#00136E' }}>{t('landing.continue_guest', 'Continue as guest')}</span>
+                      </Link>
+                      <span className="text-xs text-white/90 font-medium px-2 py-1 text-center sm:text-left">
+                        Android app only. Use the website on your iPhone.
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      {/* Primary Download for Android Button with Shine Sweep */}
+                      <a
+                        href={APK_URL}
+                        download="nammooru-bus.apk"
+                        className="relative overflow-hidden min-h-[52px] px-7 py-3 rounded-full font-heading font-extrabold text-sm shadow-float flex items-center justify-center gap-2.5 transition active:scale-95 select-none hover:bg-white/95 group cursor-pointer"
+                        style={{ backgroundColor: '#FFFFFF', color: '#00136E' }}
+                      >
+                        {!prefersReduced && (
+                          <div
+                            className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-blue-200/40 to-transparent skew-x-12 pointer-events-none"
+                            style={{ animation: 'shine-sweep 4s infinite' }}
+                          />
+                        )}
+                        <Download className="w-4 h-4 shrink-0" style={{ color: '#0040FF' }} />
+                        <span className="font-extrabold tracking-tight" style={{ color: '#00136E' }}>
+                          Download for Android
+                        </span>
+                      </a>
 
-                  <Link
-                    to="/login"
-                    className="min-h-[48px] px-5 py-3 rounded-full border-2 text-white font-heading font-bold text-sm flex items-center justify-center transition active:scale-95 select-none hover:bg-white/12"
-                    style={{ borderColor: '#FFFFFF', color: '#FFFFFF' }}
-                  >
-                    <span style={{ color: '#FFFFFF' }}>{t('auth.sign_in', 'Sign in')}</span>
-                  </Link>
+                      {/* Secondary: Continue as guest */}
+                      <Link
+                        to="/explore"
+                        className="min-h-[52px] px-6 py-3 rounded-full border-2 text-white font-heading font-bold text-sm flex items-center justify-center gap-2 transition active:scale-95 select-none hover:bg-white/12"
+                        style={{ borderColor: 'rgba(255, 255, 255, 0.45)', color: '#FFFFFF' }}
+                      >
+                        <Compass className="w-4 h-4 text-white" />
+                        <span>{t('landing.continue_guest', 'Continue as guest')}</span>
+                      </Link>
+                    </>
+                  )}
 
-                  <Link
-                    to="/register"
-                    className="min-h-[48px] px-5 py-3 rounded-full border-2 text-white font-heading font-bold text-sm flex items-center justify-center transition active:scale-95 select-none hover:bg-white/12"
-                    style={{ borderColor: '#FFFFFF', color: '#FFFFFF' }}
-                  >
-                    <span style={{ color: '#FFFFFF' }}>{t('auth.sign_up', 'Create account')}</span>
-                  </Link>
+                  {/* Tertiary: Sign In / Sign Up links */}
+                  <div className="flex items-center justify-center gap-3 pt-1 sm:pt-0 sm:pl-2">
+                    <Link
+                      to="/login"
+                      className="text-xs font-heading font-bold text-white/90 hover:text-white underline-offset-4 hover:underline"
+                    >
+                      {t('auth.sign_in', 'Sign in')}
+                    </Link>
+                    <span className="text-white/40 text-xs">•</span>
+                    <Link
+                      to="/register"
+                      className="text-xs font-heading font-bold text-white/90 hover:text-white underline-offset-4 hover:underline"
+                    >
+                      {t('auth.sign_up', 'Sign up')}
+                    </Link>
+                  </div>
                 </motion.div>
 
-                <p className="text-xs mt-3 flex items-center gap-1.5 select-none" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                  <span>{t('landing.no_signup_needed', 'No sign up needed to look up buses')}</span>
-                </p>
+                {/* Subtext under hero buttons */}
+                <div className="mt-3.5 space-y-1 select-none">
+                  <p className="text-xs font-medium text-white/90 flex items-center gap-2 flex-wrap">
+                    <span>Version {APK_VERSION}</span>
+                    <span>•</span>
+                    <span>{APK_SIZE}</span>
+                    <span>•</span>
+                    <span className="font-bold text-amber on-amber">Free</span>
+                    <span>•</span>
+                    <span>Android 7.0 and above</span>
+                  </p>
+                  <p className="text-[11px] text-white/75 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-white/80" />
+                    <span>{t('landing.no_signup_needed', 'No sign up needed to look up buses')}</span>
+                  </p>
+                </div>
               </div>
 
               {/* Right Column: Phone Frame App Preview with Floating & Rolling ETA */}
@@ -1038,7 +1146,7 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* 7. Android App Section with Shine Sweep Effect */}
+          {/* 7. Android App Section with Shine Sweep Effect & QR Code */}
           <section
             id="app"
             aria-labelledby="app-heading"
@@ -1063,60 +1171,54 @@ export default function LandingPage() {
                 </p>
 
                 <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                  {APK_URL ? (
-                    <a
-                      href={APK_URL}
-                      download="nammooru-bus.apk"
-                      className="relative overflow-hidden min-h-[44px] px-6 py-2.5 rounded-full text-xs font-bold on-brand flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
-                      style={{ background: 'var(--grad-brand)', color: 'var(--on-brand)' }}
-                    >
-                      {!prefersReduced && (
-                        <div
-                          className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 pointer-events-none"
-                          style={{
-                            animation: 'shine-sweep 6s infinite',
-                          }}
-                        />
-                      )}
-                      <Download className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
-                      <span style={{ color: 'var(--on-brand)' }}>
-                        {t('landing.app_download', 'Download APK')}{' '}
-                        {APK_VERSION && `(v${APK_VERSION})`}
-                        {APK_SIZE && ` • ${APK_SIZE}`}
-                      </span>
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled
-                      className="min-h-[44px] px-6 py-2.5 rounded-full text-xs font-bold bg-surface border border-line text-muted cursor-not-allowed flex items-center gap-2 opacity-75"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>{t('landing.app_coming_soon', 'Coming soon')}</span>
-                    </button>
-                  )}
+                  <a
+                    href={APK_URL}
+                    download="nammooru-bus.apk"
+                    className="relative overflow-hidden min-h-[48px] px-6 py-2.5 rounded-full text-xs font-bold on-brand flex items-center justify-center gap-2 shadow-soft transition active:scale-95 cursor-pointer"
+                    style={{ background: 'var(--grad-brand)', color: 'var(--on-brand)' }}
+                  >
+                    {!prefersReduced && (
+                      <div
+                        className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 pointer-events-none"
+                        style={{
+                          animation: 'shine-sweep 6s infinite',
+                        }}
+                      />
+                    )}
+                    <Download className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />
+                    <span style={{ color: 'var(--on-brand)' }}>
+                      Download APK ({APK_SIZE} • v{APK_VERSION})
+                    </span>
+                  </a>
                 </div>
 
-                <p className="text-[11px] text-muted mt-2.5">
-                  {APK_URL
-                    ? t('landing.app_install_note', 'Allow installs from this source, then open the file')
-                    : t('landing.app_note', 'Android app launching soon')}
-                </p>
+                {/* 3-Step Installation Note */}
+                <div className="mt-5 pt-4 border-t border-line/60 space-y-1.5">
+                  <p className="text-xs font-bold text-text">Easy 3-step install:</p>
+                  <ol className="text-[11px] text-muted space-y-1 pl-4 list-decimal leading-relaxed">
+                    <li>Download the signed APK file above.</li>
+                    <li>Allow "Install unknown apps" for your browser when prompted.</li>
+                    <li>Tap the download notification to open and ride!</li>
+                  </ol>
+                </div>
               </div>
 
-              {/* Phone Mockup with Soft Glow */}
+              {/* QR Code Card for Instant Phone Scanning */}
               <motion.div
                 whileHover={prefersReduced ? {} : { scale: 1.02 }}
-                className="w-40 h-40 sm:w-52 sm:h-52 rounded-[28px] bg-surface border border-line p-4 flex flex-col items-center justify-center text-center shadow-soft relative"
+                className="w-56 rounded-[28px] bg-surface border border-line p-5 flex flex-col items-center justify-center text-center shadow-soft relative shrink-0"
               >
-                <div
-                  className="w-16 h-16 rounded-[20px] flex items-center justify-center on-brand mb-3 shadow-xs"
-                  style={{ background: 'var(--grad-brand)', color: 'var(--on-brand)' }}
-                >
-                  <Bus className="w-8 h-8" style={{ color: 'var(--on-brand)' }} />
+                <div className="w-36 h-36 rounded-[16px] bg-white border border-line p-2 flex items-center justify-center shadow-xs overflow-hidden">
+                  <img
+                    src="/qr-download.svg"
+                    alt="Scan QR code to open and download Nammooru Bus on your phone"
+                    className="w-full h-full object-contain"
+                    width="144"
+                    height="144"
+                  />
                 </div>
-                <span className="font-heading font-extrabold text-xs text-text">Nammooru Bus APK</span>
-                <span className="text-[10px] text-muted mt-0.5">Built with Capacitor</span>
+                <span className="font-heading font-extrabold text-xs text-text mt-3">Scan with Phone</span>
+                <span className="text-[10px] text-muted mt-0.5">Instant Android download</span>
               </motion.div>
             </motion.div>
           </section>
@@ -1311,6 +1413,49 @@ export default function LandingPage() {
             >
               <ArrowUp className="w-5 h-5" style={{ color: 'var(--on-brand)' }} />
             </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* Sticky Mobile Download Bar (for Android/mobile web visitors) */}
+        <AnimatePresence>
+          {!isIos && !dismissedBottomBar && scrolled && (
+            <motion.div
+              initial={prefersReduced ? { opacity: 0 } : { y: 80, opacity: 0 }}
+              animate={prefersReduced ? { opacity: 1 } : { y: 0, opacity: 1 }}
+              exit={prefersReduced ? { opacity: 0 } : { y: 80, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed bottom-0 left-0 right-0 z-40 p-3 bg-surface/95 backdrop-blur-md border-t border-line shadow-float flex items-center justify-between gap-3 sm:hidden"
+              style={{ paddingBottom: 'max(0.75rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))' }}
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-[10px] bg-white overflow-hidden p-0.5 flex items-center justify-center shadow-xs shrink-0">
+                  <img src="/brand/logo-mark.png" alt="App" className="w-full h-full object-contain" width="32" height="32" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-heading font-extrabold text-xs text-text truncate">Nammooru Bus App</p>
+                  <p className="text-[10px] text-muted truncate">v{APK_VERSION} • {APK_SIZE} • Free</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={APK_URL}
+                  download="nammooru-bus.apk"
+                  className="px-3.5 py-1.5 rounded-full text-xs font-heading font-bold on-brand flex items-center gap-1.5 shadow-soft active:scale-95 cursor-pointer"
+                  style={{ background: 'var(--grad-brand)', color: 'var(--on-brand)' }}
+                >
+                  <Download className="w-3.5 h-3.5" style={{ color: 'var(--on-brand)' }} />
+                  <span>Download</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={handleDismissBottomBar}
+                  className="p-1.5 rounded-full text-muted hover:text-text hover:bg-surface-2 transition cursor-pointer"
+                  aria-label="Dismiss download prompt for 7 days"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>

@@ -1,5 +1,15 @@
--- Nammooru Bus: Sample seed data for Hubballi (run in Supabase SQL editor after schema.sql)
--- Idempotent: safe to run multiple times
+-- ============================================================================
+-- NAMMOORU BUS: SAMPLE / DEMO SEED DATA (HUBBALLI PILOT)
+-- ============================================================================
+-- NOTE: The stops, routes, GPS coordinates, schedules, and fares defined in
+-- this file are SAMPLE DEMONSTRATION DATA designed for development, testing,
+-- and feature verification.
+--
+-- TO REPLACE WITH REAL-WORLD MUNICIPAL / NWKRTC SURVEY DATA:
+-- Follow the instructions in docs/SURVEY_CHECKLIST.md. You can import accurate
+-- surveyed stops and bus routes directly using the Admin CSV Import tool
+-- (/12345678/admin/import), "Snap to road", and "Generate road path".
+-- ============================================================================
 
 -- 1. STOPS -------------------------------------------------------------
 insert into public.stops (id, name_en, name_kn, lat, lng, active)

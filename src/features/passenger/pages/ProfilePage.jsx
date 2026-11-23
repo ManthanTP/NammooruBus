@@ -141,18 +141,18 @@ export default function ProfilePage() {
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="font-heading font-extrabold text-lg truncate" style={{ color: 'var(--on-brand)' }}>
-              {profile?.full_name || (profile?.role === 'driver' ? 'NWKRTC Driver' : 'Nammooru Passenger')}
+              {profile?.full_name || (isDriverRoute || profile?.role === 'driver' ? 'NWKRTC Driver' : 'Nammooru Passenger')}
             </h2>
             <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
               {user?.email || 'user@example.com'}
             </p>
             <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-              {profile?.role === 'driver' ? (
+              {isDriverRoute || profile?.role === 'driver' ? (
                 <span
                   className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-500 on-amber shadow-xs"
                   style={{ color: 'var(--on-amber)' }}
                 >
-                  Driver
+                  NWKRTC Driver
                 </span>
               ) : profile?.role === 'admin' ? (
                 <span
@@ -271,18 +271,22 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* Show intro again (Native & onboarding walkthrough) */}
-        <div className="h-[1px] bg-line/60" />
-        <div className="pt-0.5">
-          <button
-            type="button"
-            onClick={() => navigate('/welcome')}
-            className="w-full py-2.5 px-3 rounded-pill text-xs font-bold text-text bg-surface-2 hover:bg-line border border-line transition text-center flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Smartphone className="w-3.5 h-3.5 text-brand" />
-            <span>Show intro walkthrough again</span>
-          </button>
-        </div>
+        {/* Show intro again (Native & onboarding walkthrough - passenger only) */}
+        {!isDriverRoute && (
+          <>
+            <div className="h-[1px] bg-line/60" />
+            <div className="pt-0.5">
+              <button
+                type="button"
+                onClick={() => navigate('/welcome')}
+                className="w-full py-2.5 px-3 rounded-pill text-xs font-bold text-text bg-surface-2 hover:bg-line border border-line transition text-center flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-brand" />
+                <span>Show intro walkthrough again</span>
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* 3. Driver Vehicle & Shift Status if already a driver */}
@@ -374,16 +378,42 @@ export default function ProfilePage() {
 
       {/* 4. Menu Links */}
       <div className="bg-surface rounded-[20px] border border-line shadow-soft divide-y divide-line overflow-hidden">
-        <Link
-          to="/complaints"
-          className="p-4 flex items-center justify-between hover:bg-surface-2 transition"
-        >
-          <div className="flex items-center gap-3">
-            <MessageSquare className="w-4 h-4 text-cobalt-500" />
-            <span className="text-xs font-bold text-text">{t('nav.complaints') || 'Feedback & Complaints'}</span>
-          </div>
-          <span className="text-xs text-muted">&rarr;</span>
-        </Link>
+        {isDriverRoute ? (
+          <>
+            <Link
+              to="/driver/bus"
+              className="p-4 flex items-center justify-between hover:bg-surface-2 transition"
+            >
+              <div className="flex items-center gap-3">
+                <Bus className="w-4 h-4 text-cobalt-500" />
+                <span className="text-xs font-bold text-text">Assigned Bus & Route</span>
+              </div>
+              <span className="text-xs text-muted">&rarr;</span>
+            </Link>
+
+            <Link
+              to="/driver/history"
+              className="p-4 flex items-center justify-between hover:bg-surface-2 transition"
+            >
+              <div className="flex items-center gap-3">
+                <KeyRound className="w-4 h-4 text-cobalt-500" />
+                <span className="text-xs font-bold text-text">Shift Reports & History</span>
+              </div>
+              <span className="text-xs text-muted">&rarr;</span>
+            </Link>
+          </>
+        ) : (
+          <Link
+            to="/complaints"
+            className="p-4 flex items-center justify-between hover:bg-surface-2 transition"
+          >
+            <div className="flex items-center gap-3">
+              <MessageSquare className="w-4 h-4 text-cobalt-500" />
+              <span className="text-xs font-bold text-text">{t('nav.complaints') || 'Feedback & Complaints'}</span>
+            </div>
+            <span className="text-xs text-muted">&rarr;</span>
+          </Link>
+        )}
 
         <Link
           to="/help"

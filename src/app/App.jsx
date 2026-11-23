@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { appStorage } from '@/lib/storage'
 import { initNativeBackButton } from '@/lib/backHandler'
+import { isNative } from '@/lib/platform'
 import OfflineBanner from '@/components/ui/OfflineBanner'
 import SplashScreen from '@/components/splash/SplashScreen'
 
@@ -25,6 +26,15 @@ export default function App() {
       navigate: router.navigate,
       location: router.state.location,
     }))
+
+    // Register Web PWA service worker on web only (never in native Capacitor app)
+    if (!isNative() && typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta.env.PROD) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch((err) => {
+          console.warn('PWA: Service Worker registration failed:', err)
+        })
+      })
+    }
 
     return () => {
       unbindBack?.()

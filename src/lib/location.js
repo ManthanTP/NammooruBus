@@ -86,7 +86,7 @@ export const GeolocationService = {
   startWatch: (onSuccess, onError, options = {}) => {
     if (isNative) {
       if (nativeWatchId !== null) {
-        Geolocation.clearWatch({ id: nativeWatchId }).catch(() => {})
+        Geolocation.clearWatch({ id: nativeWatchId }).catch(() => { })
         nativeWatchId = null
       }
 
@@ -147,7 +147,7 @@ export const GeolocationService = {
 
   clearWatch: () => {
     if (isNative && nativeWatchId !== null) {
-      Geolocation.clearWatch({ id: nativeWatchId }).catch(() => {})
+      Geolocation.clearWatch({ id: nativeWatchId }).catch(() => { })
       nativeWatchId = null
     }
     if (webWatchId !== null && typeof navigator !== 'undefined' && 'geolocation' in navigator) {

@@ -114,7 +114,7 @@ export default function AdminLayout() {
                   `flex items-center gap-3 px-3.5 py-2.5 text-xs rounded-pill transition-all cursor-pointer ${
                     isActive
                       ? 'on-brand font-bold shadow-soft'
-                      : 'text-muted hover:text-text hover:bg-surface-2 font-semibold'
+                      : 'text-text/75 hover:text-text hover:bg-surface-2 font-bold'
                   }`
                 }
                 style={({ isActive }) =>
@@ -179,7 +179,7 @@ export default function AdminLayout() {
                       `flex items-center gap-3 px-3.5 py-2.5 text-xs rounded-pill transition-all ${
                         isActive
                           ? 'on-brand font-bold shadow-soft'
-                          : 'text-muted hover:text-text hover:bg-surface-2 font-semibold'
+                          : 'text-text/75 hover:text-text hover:bg-surface-2 font-bold'
                       }`
                     }
                     style={({ isActive }) =>

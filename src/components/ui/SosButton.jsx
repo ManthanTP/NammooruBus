@@ -25,7 +25,7 @@ export default function SosButton({
     if (navigator.vibrate) {
       try {
         navigator.vibrate([100, 50, 100])
-      } catch (e) {}
+      } catch (e) { }
     }
 
     setTriggered(true)
@@ -121,13 +121,12 @@ export default function SosButton({
           onTouchEnd={cancelHolding}
           onTouchCancel={cancelHolding}
           onContextMenu={(e) => e.preventDefault()}
-          className={`w-full py-3.5 px-4 rounded-input font-bold text-xs flex items-center justify-center gap-2.5 transition active:scale-[0.98] ${
-            holding
-              ? 'bg-danger text-white shadow-soft ring-4 ring-danger/30'
-              : triggered
+          className={`w-full py-3.5 px-4 rounded-input font-bold text-xs flex items-center justify-center gap-2.5 transition active:scale-[0.98] ${holding
+            ? 'bg-danger text-white shadow-soft ring-4 ring-danger/30'
+            : triggered
               ? 'bg-success text-white'
               : 'bg-danger/10 text-danger border border-danger/30 hover:bg-danger/20'
-          }`}
+            }`}
         >
           <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
             {holding && (
@@ -163,8 +162,8 @@ export default function SosButton({
             {triggered
               ? 'Emergency Alert Shared'
               : holding
-              ? `Hold 1s for SOS... (${Math.round(progress)}%)`
-              : 'Hold for SOS (Share Live Location)'}
+                ? `Hold 1s for SOS... (${Math.round(progress)}%)`
+                : 'Hold for SOS (Share Live Location)'}
           </span>
         </button>
       </div>
@@ -184,13 +183,12 @@ export default function SosButton({
         onTouchCancel={cancelHolding}
         onContextMenu={(e) => e.preventDefault()}
         title="Press and hold 1 second for SOS Emergency Share"
-        className={`relative px-3.5 py-2.5 rounded-input font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-[0.97] ${
-          holding
-            ? 'bg-danger text-white ring-2 ring-danger/40'
-            : triggered
+        className={`relative px-3.5 py-2.5 rounded-input font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-[0.97] ${holding
+          ? 'bg-danger text-white ring-2 ring-danger/40'
+          : triggered
             ? 'bg-success text-white'
             : 'bg-danger/10 text-danger border border-danger/30 hover:bg-danger/20'
-        }`}
+          }`}
       >
         <div className="relative w-5 h-5 flex items-center justify-center shrink-0">
           {holding && (

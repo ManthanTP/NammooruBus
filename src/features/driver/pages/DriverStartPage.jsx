@@ -140,7 +140,7 @@ export default function DriverStartPage() {
     setErrorMsg(null)
 
     try {
-      const { data: newTrip, error } = await supabase
+      let { data: newTrip, error } = await supabase
         .from('trips')
         .insert({
           bus_id: driverRecord.bus_id,
@@ -153,6 +153,23 @@ export default function DriverStartPage() {
         })
         .select()
         .single()
+
+      if (error && (error.message?.includes('crowd_level') || error.code === '23514')) {
+        const retry = await supabase
+          .from('trips')
+          .insert({
+            bus_id: driverRecord.bus_id,
+            driver_id: driverRecord.id,
+            route_id: selectedRouteId,
+            direction: Number(direction) || 0,
+            status: 'active',
+            started_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+        newTrip = retry.data
+        error = retry.error
+      }
 
       if (error) throw error
 

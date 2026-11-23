@@ -41,7 +41,7 @@ async function acquireWebWakeLock() {
 
 export function releaseWakeLock() {
   if (wakeLock) {
-    wakeLock.release().catch(() => {})
+    wakeLock.release().catch(() => { })
     wakeLock = null
   }
 }
@@ -233,7 +233,7 @@ export async function stopTracking() {
           await Geolocation.clearWatch({ id: nativeWatcherId })
         }
       } catch (_) {
-        try { await Geolocation.clearWatch({ id: nativeWatcherId }) } catch (__) {}
+        try { await Geolocation.clearWatch({ id: nativeWatcherId }) } catch (__) { }
       }
       nativeWatcherId = null
     }

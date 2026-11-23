@@ -1,20 +1,38 @@
 # Nammooru Bus (ನಮ್ಮೂರು ಬಸ್)
 > **Our town. Our bus.**  
-> VTU College Project (1BCS308) — Local Public Transportation Information and Route Assistance System
+> VTU College Project (1BCS308) — Local Public Transportation Information and Route Assistance System  
+> Built by **Manthan Patel**
 
 ---
 
-## 1. Quick Start
+## 1. Features
+
+- **Live Real-Time Bus Tracking**: Sub-second bus positions transmitted via Supabase Realtime, with smooth heading rotation and live ETA counters.
+- **Smart Multimodal Journey Planning**: Automatic route calculations with walking directions to nearest stops, transfers, and departure times.
+- **Nearby Stops & Geolocation**: Instant discovery of nearest transit stops using GPS coordinates with walking distance and minutes.
+- **Fare Calculator**: Automatic fare computation based on NWKRTC stage distance brackets (e.g. ₹5 base, ₹5 per 2 km stage).
+- **Live Crowd Density Reporting**: Commuter and driver 3-level crowd reporting (Seats Free / Filling Up / Packed) with 5-minute per-user rate limiting.
+- **Saved Trips & Offline Timetables**: Client-side IndexedDB/localStorage and PWA Service Worker caching for seamless offline schedule queries.
+- **Full Bilingual Kannada & English**: Complete localized UI with Noto Sans Kannada font rendering at all standard viewport widths (320px, 360px, 430px+).
+- **Three High-Contrast Themes**: Light, Dark (true black #0A0B10), and Blue (navy #050B2E) themes with 4.5:1 WCAG contrast compliance.
+- **Native Android App (Capacitor)**: Edge-to-edge camera hole handling, custom animated splash, Android native back handler, and background GPS broadcasting.
+- **Dedicated Driver Shell**: Driver bus claiming, live shift management, transit status broadcasts (On Time / Delayed / Breakdown), and shift log export.
+- **Admin Control Panel**: Full management of stops, routes, timetables, fares, fleet, user roles, complaints, and audit logs. *(Accessible exclusively via the secret admin URL `/12345678/admin/login`)*.
+
+---
+
+## 2. Quick Start
 
 ### Prerequisites
-- Node.js 18+ (tested with Node 20+)
+- Node.js 18+ (tested with Node 20+ and Node 24)
 - npm 9+
 - A free [Supabase](https://supabase.com) project
+- Android Studio Hedgehog+ and JDK 17 / 21 (for Android builds)
 
 ### Installation
 ```bash
 # Clone and enter directory
-git clone <repo-url>
+git clone https://github.com/ManthanTP/NammooruBus.git
 cd NammooruBus
 
 # Install dependencies
@@ -24,80 +42,145 @@ npm install
 cp .env.example .env
 ```
 
-Fill in your Supabase credentials in `.env`:
+### Environment Variables (.env)
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key-here
+
+# Raster Tile configuration (OpenStreetMap Humanitarian - 100% free)
+VITE_TILE_URL=https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png
+VITE_TILE_ATTRIBUTION=&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors
+
+# Default Geolocation (Hubballi-Dharwad)
+VITE_DEFAULT_LAT=15.3647
+VITE_DEFAULT_LNG=75.1240
+
+# App URL and Secret Admin Key
+VITE_APP_URL=https://nammoorubus.vercel.app/
 VITE_ADMIN_SECRET_KEY=nammooru-admin-secret-2026
 ```
 
 ---
 
-## 2. Supabase Database Setup
+## 3. Database Setup Order
 
-1. Open your Supabase Project Dashboard and go to the **SQL Editor**.
-2. Run `supabase/schema.sql` (or `schema.sql`) to create tables, functions, triggers, and Row Level Security (RLS) policies.
-3. Run `supabase/seed.sql` to populate sample stops, routes, schedules, fares, and buses for Hubballi.
-4. (Optional) Disable email confirmation under **Authentication > Providers > Email** ("Confirm email" toggle OFF) for instant local registration on the free plan.
+Run the SQL scripts in your Supabase SQL Editor in the following exact sequence:
+
+1. `supabase/schema.sql`: Core schema (tables, constraints, RLS policies, audit logs, and functions).
+2. `supabase/driver_signup.sql`: Driver key attempt tracking, secret configuration, and role promotion RPCs.
+3. `supabase/driver_bus.sql`: Bus registration linking and driver reporting RPCs (`driver_report`).
+4. `supabase/route_geometry.sql`: OSRM road snapped geometry column on routes (`geometry jsonb`).
+5. `supabase/seed.sql`: Sample/demo data for Hubballi stops, routes, fares, and initial timetable. *(Note: sample data for demonstration; see `docs/SURVEY_CHECKLIST.md` for actual field survey procedures).*
 
 ### Creating the First Admin
-1. Register a new user in the app at `/register` (e.g. `admin@nammooru.in`).
+1. Register an account in the web app at `/register` (e.g. `admin@nammooru.in`).
 2. Run this query in the Supabase SQL editor:
-```sql
-update public.profiles
-set role = 'admin'
-where id = (select id from auth.users where email = 'admin@nammooru.in');
-```
-3. Navigate to `/12345678/admin/login` and log in using your email, password, and `VITE_ADMIN_SECRET_KEY`.
-
-### Configuring & Rotating the Driver Registration Secret Key (Phase 5.5)
-1. Run `supabase/driver_signup.sql` once in your Supabase SQL Editor to install the `claim_driver_role` RPC and security tables.
-2. Insert or rotate your driver registration key directly in Supabase:
-```sql
--- Set or rotate your active driver registration key:
-INSERT INTO public.driver_signup_config (driver_key, is_active)
-VALUES ('CHANGE-ME-driver-key', true);
-```
-3. To disable driver self-registration or rotate keys:
-```sql
--- Deactivate all old keys:
-UPDATE public.driver_signup_config SET is_active = false;
--- Insert new secret:
-INSERT INTO public.driver_signup_config (driver_key, is_active)
-VALUES ('your-new-secure-driver-key', true);
-```
-4. Drivers can now register using the "I am a driver" toggle at `/register`, or passengers can unlock driver status in their `/profile` page. Key verification runs strictly inside Postgres via `claim_driver_role(p_key)`. The key is never exposed to the frontend.
+   ```sql
+   UPDATE public.profiles
+   SET role = 'admin'
+   WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@nammooru.in');
+   ```
+3. Navigate to `/12345678/admin/login` (admin panel link is kept private and never exposed on public pages) and log in using your email, password, and `VITE_ADMIN_SECRET_KEY`.
 
 ---
 
-## 3. Running & Building the App
+## 4. Running & Building the Web App
 
 ```bash
 # Start development server
 npm run dev
 
-# Run production build
+# Run production build (verifies APK exists in public/downloads/ and generates optimized chunks)
 npm run build
 
-# Preview production build
+# Preview production build locally
 npm run preview
+
+# Run automated test suites
+npm run test
+
+# Check i18n translation key consistency
+npm run i18n:check
+
+# Run theme contrast verification
+npm run test:themes
 ```
 
 ---
 
-## 4. Verification Steps
+## 5. Building the Android App (Capacitor)
 
-1. **Dev Server & Routing**:
-   - Run `npm run dev` and open `http://localhost:5173`.
-   - The Home screen opens with live data badges and quick tiles.
-2. **Auth & Role Redirects**:
-   - Go to `/register` and sign up a passenger. It will log you in and redirect to `/`.
-   - Go to `/login` with an admin account: it shows a warning to use the admin portal.
-   - Go to `/12345678/admin/login` and log in with an admin account: redirects to `/12345678/admin/dashboard`.
-3. **Data Caching**:
-   - On initial load, stops and routes are fetched from Supabase and stored in `localStorage` (`nb_stops`, `nb_routes`, `nb_version`).
-   - On refresh, data loads instantly from `localStorage` without re-fetching unless `meta.data_version` changes.
-4. **Language Toggle**:
+### A. Debug APK
+```bash
+# 1. Generate adaptive icons and splash assets
+npm run icons:android
+
+# 2. Build web bundle and sync Capacitor native project
+npm run build:android
+
+# 3. Compile debug APK
+cd android
+./gradlew assembleDebug
+```
+Output: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+### B. Signed Release Production APK
+1. Create `android/keystore.properties` (based on `android/keystore.properties.example`):
+   ```properties
+   storeFile=C:/path/to/nammooru-release-key.keystore
+   storePassword=your_keystore_password
+   keyAlias=nammooru
+   keyPassword=your_key_password
+   ```
+2. Build and sign the production release APK:
+   - On Windows (PowerShell):
+     ```powershell
+     .\scripts\release-apk.ps1
+     ```
+   - On Linux/macOS:
+     ```bash
+     chmod +x ./scripts/release-apk.sh
+     ./scripts/release-apk.sh
+     ```
+   Or manually:
+   ```bash
+   cd android
+   ./gradlew assembleRelease
+   ```
+3. The script automatically copies the signed APK to `public/downloads/nammooru-bus.apk` (15.1 MB) for direct one-tap download on the landing page (`/`).
+4. Verify signature scheme:
+   ```bash
+   apksigner verify --verbose public/downloads/nammooru-bus.apk
+   # Output: Verified using v2 scheme (APK Signature Scheme v2): true
+   ```
+
+---
+
+## 6. Deployment to Vercel
+
+The application is deployed on Vercel at [https://nammoorubus.vercel.app](https://nammoorubus.vercel.app).
+
+`vercel.json` is configured with:
+- Strict download headers for `.apk` files (`application/vnd.android.package-archive`, `attachment; filename="nammooru-bus.apk"`).
+- SPA routing rewrites that explicitly exclude `/downloads/` so the APK file downloads directly without getting caught by `index.html`.
+- Production caching policies for static assets.
+
+To deploy your own instance:
+```bash
+npm install -g vercel
+vercel --prod
+```
+
+---
+
+## 7. Credits & License
+
+- **Developer**: Manthan Patel
+- **Institution**: VTU College Project (Course code: 1BCS308)
+- **Map & Routing Data**: OpenStreetMap, OpenStreetMap Humanitarian (HOT), OSRM
+- **Icons**: Lucide Icons
+- **Fonts**: Outfit, Figtree, Noto Sans Kannada, DotGothic16
    - Click the sliding pill in the top bar to toggle between `EN` and `ಕನ್ನಡ`.
    - UI strings switch immediately and selection persists across refreshes (`nb_lang` in localStorage and `profiles.lang` for logged-in users).
 5. **Admin Lockout**:

@@ -31,14 +31,13 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
-*.md
 *.pptx
-
-/docs
 
 # Android / Capacitor
 *.keystore
 *.jks
+keystore.properties
+android/keystore.properties
 local.properties
 .gradle/
 android/.gradle/
