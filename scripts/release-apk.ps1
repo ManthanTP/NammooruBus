@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
   Builds, signs, and packages the production release APK for Nammooru Bus.
 #>
