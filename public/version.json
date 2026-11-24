@@ -11,18 +11,18 @@
   "minSupportedVersionCode": 1,
   "releaseNotes": {
     "en": [
-      "Top service alert banner: properly themed for dark mode with contrast fix",
-      "Notification bell in top header: live service alerts with unread badge and dim/read history",
-      "Complaints & grievance page: full dark mode theme styling",
-      "Journey details: fixed bottom padding and spacer so Destination card is never cut off",
-      "Search page: pinned 'Find buses' button at bottom and independent stop list scroll"
+      "Driver Portal & Isolation: Fixed driver profile crash; added strict role separation and dedicated Driver Help & Support",
+      "In-App Update System: Fullscreen viewport modal (no longer clipped by bottom bar); accurate web checking with build comparison",
+      "Live Service Alerts: Top banner contrast fix for dark mode; notification bell in header with unread badge and read tracking",
+      "Complaints & Grievance: Full dark mode and blue theme styling with high accessibility",
+      "Journey Details & Search: Fixed bottom padding so Destination cards are never cut off; pinned 'Find buses' button"
     ],
     "kn": [
-      "ಮೇಲ್ಭಾಗದ ಸೇವಾ ಎಚ್ಚರಿಕೆ ಬ್ಯಾನರ್: ಡಾರ್ಕ್ ಮೋಡ್‌ಗೆ ಸೂಕ್ತವಾದ ವಿನ್ಯಾಸ",
-      "ಮೇಲಿನ ಹೆಡರ್‌ನಲ್ಲಿ ನೋಟಿಫಿಕೇಶನ್ ಬೆಲ್: ಓದದ ಎಚ್ಚರಿಕೆಗಳ ಸಂಖ್ಯೆ ಹಾಗೂ ಸ್ಪಷ್ಟ ನೋಟ",
-      "ದೂರು ಪುಟ: ಡಾರ್ಕ್ ಮೋಡ್‌ನಲ್ಲಿ ಸುಲಭವಾಗಿ ಓದಲು ಸೂಕ್ತ ಬಣ್ಣಗಳ ವಿನ್ಯಾಸ",
-      "ಪ್ರಯಾಣದ ವಿವರ: ತಲುಪುವ ನಿಲ್ದಾಣ (ಡೆಸ್ಟಿನೇಶನ್) ಮರೆಯಾಗದಂತೆ ಕೆಳಭಾಗದ ಅಂತರ ಸರಿಪಡಿಸಲಾಗಿದೆ",
-      "ಹುಡುಕಾಟ ಪುಟ: 'ಬಸ್‌ಗಳನ್ನು ಹುಡುಕಿ' ಬಟನ್ ಕೆಳಭಾಗದಲ್ಲೇ ಪಿನ್ ಮಾಡಲಾಗಿದೆ"
+      "ಚಾಲಕರ ಪೋರ್ಟಲ್: ಚಾಲಕರ ಪ್ರೊಫೈಲ್ ದೋಷ ಸರಿಪಡಿಸಲಾಗಿದೆ; ಚಾಲಕರಿಗೆ ಪ್ರತ್ಯೇಕ ಸಹಾಯ ಪುಟ ಮತ್ತು ಸುರಕ್ಷಿತ ಪ್ರವೇಶ",
+      "ಆ್ಯಪ್ ನವೀಕರಣ ವ್ಯವಸ್ಥೆ: ಅಪ್‌ಡೇಟ್ ವಿಂಡೋ ಕೆಳಭಾಗದ ಮೆನುವಿನಿಂದ ಮುಚ್ಚಿಹೋಗದಂತೆ ಸರಿಪಡಿಸಲಾಗಿದೆ; ನಿಖರ ಆವೃತ್ತಿ ತಪಾಸಣೆ",
+      "ಲೈವ್ ಸೇವಾ ಎಚ್ಚರಿಕೆಗಳು: ಡಾರ್ಕ್ ಮೋಡ್‌ಗೆ ಸೂಕ್ತ ಬಣ್ಣಗಳ ವಿನ್ಯಾಸ; ಹೆಡರ್‌ನಲ್ಲಿ ಓದದ ಎಚ್ಚರಿಕೆಗಳ ಸಂಖ್ಯೆ ತೋರಿಸುವ ನೋಟಿಫಿಕೇಶನ್ ಬೆಲ್",
+      "ದೂರು ಮತ್ತು ಸಲಹೆ ಪುಟ: ಡಾರ್ಕ್ ಮತ್ತು ಬ್ಲೂ ಮೋಡ್‌ಗೆ ಸಂಪೂರ್ಣ ಹೊಂದಾಣಿಕೆ",
+      "ಪ್ರಯಾಣದ ವಿವರ ಮತ್ತು ಹುಡುಕಾಟ: ತಲುಪುವ ನಿಲ್ದಾಣ ಮರೆಯಾಗದಂತೆ ಅಂತರ ಸರಿಪಡಿಸಲಾಗಿದೆ; 'ಬಸ್‌ಗಳನ್ನು ಹುಡುಕಿ' ಬಟನ್ ಕೆಳಭಾಗದಲ್ಲೇ ಪಿನ್ ಮಾಡಲಾಗಿದೆ"
     ]
   }
 }

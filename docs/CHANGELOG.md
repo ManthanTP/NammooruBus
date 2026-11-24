@@ -4,6 +4,18 @@ All notable releases and updates to Nammooru Bus are documented in this file.
 
 ---
 
+## [v1.0.4] - 2026-11-24
+
+### Release v1.0.4
+
+- **Driver Portal & Isolation**: Fixed driver profile loading crash; added strict role separation ensuring drivers stay in driver console with dedicated Driver Help & Support.
+- **In-App Update System**: Teleported update modal over bottom navigation bar via React Portal; accurate web version checking with build comparison (`Build 2 → Build 5`).
+- **Live Service Alerts & Notifications**: Top banner dark/blue mode high contrast fix; notification bell in top header with unread count badge and read history tracking.
+- **Complaints & Grievance Page**: Full dark & blue mode styling parity with accessible form fields and status tracking.
+- **Journey Details & Search Layout**: Pinned 'Find buses' button and fixed bottom padding so destination cards and route details are never cut off.
+
+---
+
 ## [v1.0.1] - 2026-11-23
 
 ### Release v1.0.1
