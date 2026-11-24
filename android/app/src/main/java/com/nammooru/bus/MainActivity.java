@@ -19,14 +19,15 @@ public class MainActivity extends BridgeActivity {
         final View contentView = findViewById(android.R.id.content);
         if (contentView != null) {
             final int fallbackHeight = getStatusBarHeightFallback();
-            // Apply immediate padding so the webview begins strictly below the status bar on first render
+            // Apply immediate padding so the webview begins strictly below the status bar
+            // on first render
             contentView.setPadding(0, fallbackHeight, 0, 0);
 
-            // Listen for window insets (handles punch-hole cameras, display cutouts, and dynamic status bars)
+            // Listen for window insets (handles punch-hole cameras, display cutouts, and
+            // dynamic status bars)
             ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
                 Insets insets = windowInsets.getInsets(
-                    WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout()
-                );
+                        WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout());
                 int topPadding = Math.max(insets.top, fallbackHeight);
                 v.setPadding(0, topPadding, 0, 0);
                 return windowInsets;

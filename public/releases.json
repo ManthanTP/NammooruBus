@@ -1,5 +1,32 @@
 [
   {
+    "versionName": "1.0.2",
+    "versionCode": 3,
+    "releasedAt": "2026-11-24",
+    "apkUrl": "/downloads/nammooru-bus.apk",
+    "apkSize": "7.3 MB",
+    "downloadPage": "/#app",
+    "whatsNewPage": "/whats-new",
+    "title": {
+      "en": "Release v1.0.2",
+      "kn": "ಆವೃತ್ತಿ v1.0.2"
+    },
+    "notes": {
+      "en": [
+        "Native Android status bar insets: content ends strictly below status bar",
+        "Ultra-lightweight APK: reduced app size from 31 MB to 7.3 MB",
+        "Fixed What's New changelog download button styling and contrast",
+        "Live over-the-air update notifications enabled"
+      ],
+      "kn": [
+        "ಸ್ಥಳೀಯ ಆಂಡ್ರಾಯ್ಡ್ ಸ್ಟೇಟಸ್ ಬಾರ್ ಅಡಚಣೆ ಸಂಪೂರ್ಣವಾಗಿ ಸರಿಪಡಿಸಲಾಗಿದೆ",
+        "ಅಪ್ಲಿಕೇಶನ್ ಗಾತ್ರ 31 MB ಯಿಂದ 7.3 MB ಗೆ ಇಳಿಸಲಾಗಿದೆ",
+        "ಡೌನ್‌ಲೋಡ್ ಬಟನ್ ವಿನ್ಯಾಸ ಮತ್ತು ಕಾಂಟ್ರಾಸ್ಟ್ ಸರಿಪಡಿಸಲಾಗಿದೆ",
+        "ಲೈವ್ ಅಪ್‌ಡೇಟ್ ಸೂಚನೆಗಳು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"
+      ]
+    }
+  },
+  {
     "versionName": "1.0.1",
     "versionCode": 2,
     "releasedAt": "2026-11-23",

@@ -46,8 +46,12 @@ export async function checkAppUpdate({ force = false } = {}) {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000)
 
-    // Cache-busting query to always retrieve the latest version.json
-    const url = `/version.json?t=${Date.now()}`
+    // On native, always fetch from the live production domain so we query the actual released version
+    const remoteOrigin = 'https://nammoorubus.vercel.app'
+    const url = isNative()
+      ? `${remoteOrigin}/version.json?t=${Date.now()}`
+      : `/version.json?t=${Date.now()}`
+
     const response = await fetch(url, {
       signal: controller.signal,
       cache: 'no-store',

@@ -1,8 +1,8 @@
 {
   "latest": {
-    "versionName": "1.0.1",
-    "versionCode": 2,
-    "releasedAt": "2026-11-23",
+    "versionName": "1.0.2",
+    "versionCode": 3,
+    "releasedAt": "2026-11-24",
     "apkUrl": "/downloads/nammooru-bus.apk",
     "apkSize": "7.3 MB",
     "downloadPage": "/#app",
@@ -11,16 +11,16 @@
   "minSupportedVersionCode": 1,
   "releaseNotes": {
     "en": [
-      "Screen insets fixed for punch-hole camera and status bar visibility",
-      "Polished first-launch flow: Language selection, 3 walkthrough slides, Theme setup",
-      "In-app update notifications for new releases",
-      "Dedicated What's New changelog page"
+      "Native Android status bar insets: content ends strictly below status bar",
+      "Ultra-lightweight APK: reduced app size from 31 MB to 7.3 MB",
+      "Fixed What's New changelog download button styling and contrast",
+      "Live over-the-air update notifications enabled"
     ],
     "kn": [
-      "ಪಂಚ್-ಹೋಲ್ ಕ್ಯಾಮೆರಾ ಮತ್ತು ಸ್ಟೇಟಸ್ ಬಾರ್ ಅಡಚಣೆ ಸರಿಪಡಿಸಲಾಗಿದೆ",
-      "ಹೊಸ ಪ್ರಾರಂಭದ ಹಂತಗಳು: ಭಾಷೆ ಆಯ್ಕೆ, 3 ಪರಿಚಯ ಸ್ಲೈಡ್‌ಗಳು, ಥೀಮ್ ಸೆಟಪ್",
-      "ಹೊಸ ಆವೃತ್ತಿಯ ಅಪ್‌ಡೇಟ್ ಸೂಚನೆಗಳು",
-      "ಹೊಸ ವೈಶಿಷ್ಟ್ಯಗಳ ವಿವರ ಪುಟ (/whats-new)"
+      "ಸ್ಥಳೀಯ ಆಂಡ್ರಾಯ್ಡ್ ಸ್ಟೇಟಸ್ ಬಾರ್ ಅಡಚಣೆ ಸಂಪೂರ್ಣವಾಗಿ ಸರಿಪಡಿಸಲಾಗಿದೆ",
+      "ಅಪ್ಲಿಕೇಶನ್ ಗಾತ್ರ 31 MB ಯಿಂದ 7.3 MB ಗೆ ಇಳಿಸಲಾಗಿದೆ",
+      "ಡೌನ್‌ಲೋಡ್ ಬಟನ್ ವಿನ್ಯಾಸ ಮತ್ತು ಕಾಂಟ್ರಾಸ್ಟ್ ಸರಿಪಡಿಸಲಾಗಿದೆ",
+      "ಲೈವ್ ಅಪ್‌ಡೇಟ್ ಸೂಚನೆಗಳು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"
     ]
   }
 }

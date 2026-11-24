@@ -36,6 +36,22 @@ export default function ProfilePage() {
   const [updateChecking, setUpdateChecking] = useState(false)
   const [updateInfo, setUpdateInfo] = useState(null)
   const [showUpdateModal, setShowUpdateModal] = useState(false)
+  const [appInfo, setAppInfo] = useState({ version: APK_VERSION || '1.0.1', build: '2' })
+
+  useEffect(() => {
+    if (isNative()) {
+      App.getInfo?.()
+        .then((info) => {
+          if (info) {
+            setAppInfo({
+              version: info.version || APK_VERSION || '1.0.1',
+              build: info.build || '2',
+            })
+          }
+        })
+        .catch(() => {})
+    }
+  }, [])
 
   useEffect(() => {
     initData()
@@ -440,7 +456,7 @@ export default function ProfilePage() {
             About Nammooru Bus
           </h3>
           <span className="text-[11px] font-mono font-bold text-muted bg-surface-2 px-2 py-0.5 rounded-pill border border-line">
-            v{APK_VERSION || '1.0.0'} (Build 1)
+            v{appInfo.version} (Build {appInfo.build})
           </span>
         </div>
 
