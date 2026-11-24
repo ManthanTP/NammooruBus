@@ -53,9 +53,6 @@ export const hapticError = async () => {
 export const setStatusBarTheme = async (themeOrScreen = 'light', isLightBackground = false) => {
   if (!isNative()) return
   try {
-    // Keep transparent status bar overlay so app header color flows seamlessly behind it
-    await StatusBar.setOverlaysWebView({ overlay: true })
-
     if (themeOrScreen === 'brand') {
       // Light text/icons on brand gradient (#0040FF)
       await StatusBar.setStyle({ style: Style.Dark })
@@ -74,7 +71,7 @@ export const setStatusBarTheme = async (themeOrScreen = 'light', isLightBackgrou
     }
 
     if (resolvedTheme === 'light') {
-      // Dark icons on white header
+      // Dark icons on white header (#FFFFFF)
       await StatusBar.setStyle({ style: Style.Light })
     } else {
       // Light icons on dark/blue header (#12141C / #0B1450)
@@ -88,19 +85,13 @@ export const setStatusBarTheme = async (themeOrScreen = 'light', isLightBackgrou
 /**
  * Configure screen safe area insets.
  * Dynamic insets are injected directly from Android window cutouts via MainActivity.
- * Sets fallback insets immediately on native startup so headers never start at 0px.
+ * On web or initial load, ensures safe-top and safe-bottom are clean 0px.
  */
 export const initScreenInsets = () => {
   if (typeof document === 'undefined') return
-  if (isNative()) {
-    const currentSafeTop = getComputedStyle(document.documentElement).getPropertyValue('--safe-top')
-    if (!currentSafeTop || currentSafeTop.trim() === '0px' || currentSafeTop.trim() === '') {
-      document.documentElement.style.setProperty('--safe-top', '36px')
-    }
-    const currentSafeBottom = getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom')
-    if (!currentSafeBottom || currentSafeBottom.trim() === '') {
-      document.documentElement.style.setProperty('--safe-bottom', '12px')
-    }
+  if (!isNative()) {
+    document.documentElement.style.setProperty('--safe-top', '0px')
+    document.documentElement.style.setProperty('--safe-bottom', '0px')
   }
 }
 
