@@ -65,7 +65,31 @@ Screenshots captured for cutout and no-cutout devices:
 ---
 
 ## 3. Item 5: Native-Only Integer Version Update Engine (Locked)
-*(To be recorded in Item 5)*
+
+### Decisions & Architecture:
+1. **Web Isolation**:
+   - The web platform is always up to date by definition.
+   - On the web, `checkAppUpdate()` immediately returns `{ hasUpdate: false, isWeb: true }`.
+   - The update modal NEVER fires on web browsers.
+   - On the Web Profile page, the "Check for updates" button is hidden and replaced by a clear badge: `"Website, always up to date"`.
+2. **Pure Integer Comparison**:
+   - Compares integer `versionCode` values, never string `versionName` (e.g. `1.0.10` vs `1.0.4` string comparisons previously failed).
+   - An update is flagged ONLY if `installedVersionCode < latestVersionCode`.
+   - If `installedVersionCode < minSupportedVersionCode`, the update is flagged as `isRequired: true`, which removes the "Remind me later" button and forces the passenger to update.
+   - `versionName` is treated strictly as display-only text.
+3. **Network & Cache Invalidation**:
+   - `public/sw.js` explicitly skips `/version.json`, `/releases.json`, `/downloads/*`, and any `.apk` file, making them strictly network-only so the Service Worker never serves stale update manifests.
+   - Native checks use `CapacitorHttp.get` (bypassing WebView cache and CORS) with an 8-second timeout, falling back to `fetch` with `cache: 'no-store'` and a `?t=Date.now()` timestamp query parameter.
+4. **Non-Intrusive Execution**:
+   - Checked automatically ONCE per app launch, 1.5 seconds after the first interactive screen renders.
+   - Never checks repeatedly on tab switches or route changes.
+5. **On-Device Diagnostics (`ProfilePage.jsx`)**:
+   - In native mode, an expandable "Update diagnostics" group under About shows live values:
+     - Installed: `versionCode <N> (v<name>)`
+     - Remote: `latest <N>, min supported <N>`
+     - Last check: `<timestamp>, status: <ok | failed | timeout | offline>`
+     - Decision: `<up to date | optional update | required update>`
+     - "Force re-check" button to bypass guards and refresh status instantly.
 
 ---
 

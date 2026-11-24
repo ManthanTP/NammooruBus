@@ -4,6 +4,9 @@ import {
   dismissUpdateReminder,
   isDismissedThisRun,
   resetDismissedForTesting,
+  compareVersions,
+  getUpdateDiagnostics,
+  resetDiagnosticsForTesting,
 } from '../versionCheck'
 import { App } from '@capacitor/app'
 
@@ -26,6 +29,7 @@ describe('App Versioning & In-App Update Checker', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     resetDismissedForTesting()
+    resetDiagnosticsForTesting()
     App.getInfo.mockResolvedValue({
       version: '1.0.0',
       build: '1',
@@ -161,5 +165,78 @@ describe('App Versioning & In-App Update Checker', () => {
     const invalidJsonResult = await checkAppUpdate()
     expect(invalidJsonResult.hasUpdate).toBe(false)
     expect(invalidJsonResult.error).toBe(true)
+  })
+
+  describe('Pure Integer Version Comparison (compareVersions)', () => {
+    it('returns hasUpdate: true when installedCode < latestCode', () => {
+      const result = compareVersions(5, 6, 1)
+      expect(result.hasUpdate).toBe(true)
+      expect(result.isRequired).toBe(false)
+      expect(result.isUpToDate).toBe(false)
+    })
+
+    it('returns isUpToDate: true when installedCode === latestCode', () => {
+      const result = compareVersions(5, 5, 1)
+      expect(result.hasUpdate).toBe(false)
+      expect(result.isRequired).toBe(false)
+      expect(result.isUpToDate).toBe(true)
+    })
+
+    it('returns isUpToDate: true when installedCode > latestCode (developer/testing build)', () => {
+      const result = compareVersions(10, 5, 1)
+      expect(result.hasUpdate).toBe(false)
+      expect(result.isRequired).toBe(false)
+      expect(result.isUpToDate).toBe(true)
+    })
+
+    it('returns isRequired: true when installedCode < minSupportedCode', () => {
+      const result = compareVersions(3, 10, 5)
+      expect(result.hasUpdate).toBe(true)
+      expect(result.isRequired).toBe(true)
+      expect(result.isUpToDate).toBe(false)
+    })
+
+    it('handles numeric strings properly', () => {
+      const result = compareVersions('5', '6', '1')
+      expect(result.hasUpdate).toBe(true)
+      expect(result.isRequired).toBe(false)
+    })
+
+    it('handles invalid or non-numeric arguments gracefully', () => {
+      const result = compareVersions('abc', 5, 1)
+      expect(result.hasUpdate).toBe(false)
+      expect(result.isUpToDate).toBe(true)
+      expect(result.isRequired).toBe(false)
+    })
+  })
+
+  describe('Update Diagnostics Tracking', () => {
+    it('records diagnostics upon checking', async () => {
+      App.getInfo.mockResolvedValue({
+        version: '1.0.4',
+        build: '5',
+      })
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          latest: {
+            versionName: '1.0.5',
+            versionCode: 6,
+          },
+          minSupportedVersionCode: 4,
+        }),
+      })
+
+      await checkAppUpdate({ force: true })
+      const diag = getUpdateDiagnostics()
+
+      expect(diag.installedCode).toBe(5)
+      expect(diag.installedName).toBe('1.0.4')
+      expect(diag.remoteCode).toBe(6)
+      expect(diag.remoteMinCode).toBe(4)
+      expect(diag.status).toBe('ok')
+      expect(diag.decision).toBe('optional update')
+      expect(diag.lastCheckedAt).toBeTruthy()
+    })
   })
 })

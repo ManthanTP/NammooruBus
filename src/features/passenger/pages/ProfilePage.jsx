@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, LayoutGroup } from 'framer-motion'
-import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2, Bus, Sun, Moon, Laptop, Vibrate, Sparkles, RefreshCw, FileText } from 'lucide-react'
+import { User, LogOut, ArrowLeft, MessageSquare, HelpCircle, Shield, KeyRound, AlertCircle, CheckCircle2, Bus, Sun, Moon, Laptop, Vibrate, Sparkles, RefreshCw, FileText, ChevronDown, ChevronUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { useDataStore } from '@/store/dataStore'
@@ -12,7 +12,7 @@ import LanguageToggle from '@/components/ui/LanguageToggle'
 import Button from '@/components/ui/Button'
 import { appStorage } from '@/lib/storage'
 import { hapticTick, isNative } from '@/lib/platform'
-import { checkAppUpdate } from '@/lib/versionCheck'
+import { checkAppUpdate, getUpdateDiagnostics } from '@/lib/versionCheck'
 import UpdateModal from '@/components/ui/UpdateModal'
 import { APK_VERSION, APK_BUILD } from '@/config/links'
 import { App } from '@capacitor/app'
@@ -39,6 +39,8 @@ export default function ProfilePage() {
   const [updateInfo, setUpdateInfo] = useState(null)
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   const [appInfo, setAppInfo] = useState({ version: APK_VERSION || '1.0.4', build: APK_BUILD || '5' })
+  const [showDiagnostics, setShowDiagnostics] = useState(false)
+  const [diagnostics, setDiagnostics] = useState(() => getUpdateDiagnostics())
 
   useEffect(() => {
     if (isNative()) {
@@ -121,6 +123,7 @@ export default function ProfilePage() {
     try {
       const result = await checkAppUpdate({ force: true })
       setUpdateChecking(false)
+      setDiagnostics(getUpdateDiagnostics())
       if (result.error) {
         toast.info('Unable to reach update server. Please check connection.')
       } else if (result.hasUpdate && result.latest) {
@@ -131,6 +134,7 @@ export default function ProfilePage() {
       }
     } catch (_) {
       setUpdateChecking(false)
+      setDiagnostics(getUpdateDiagnostics())
       toast.info('Could not check for updates right now')
     }
   }
@@ -489,22 +493,88 @@ export default function ProfilePage() {
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted font-heading">
             About Nammooru Bus
           </h3>
-          <span className="text-[11px] font-mono font-bold text-muted bg-surface-2 px-2 py-0.5 rounded-pill border border-line">
-            v{appInfo.version} (Build {appInfo.build})
-          </span>
+          {isNative() ? (
+            <span className="text-[11px] font-mono font-bold text-muted bg-surface-2 px-2 py-0.5 rounded-pill border border-line">
+              v{appInfo.version} (Build {appInfo.build})
+            </span>
+          ) : (
+            <span className="text-[11px] font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-pill border border-emerald-500/20">
+              Website, always up to date
+            </span>
+          )}
         </div>
 
         <div className="pt-1 flex flex-col gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleCheckForUpdates}
-            loading={updateChecking}
-            className="w-full text-xs font-bold font-heading flex items-center justify-center gap-2"
-          >
-            <RefreshCw className="w-3.5 h-3.5 text-brand" />
-            <span>Check for updates</span>
-          </Button>
+          {isNative() && (
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleCheckForUpdates}
+                loading={updateChecking}
+                className="w-full text-xs font-bold font-heading flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-brand" />
+                <span>Check for updates</span>
+              </Button>
+
+              {/* Expandable Update Diagnostics */}
+              <div className="border border-line rounded-[14px] bg-surface-2 overflow-hidden text-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowDiagnostics(!showDiagnostics)}
+                  className="w-full px-3 py-2 flex items-center justify-between font-semibold text-text text-left hover:bg-line/40 transition cursor-pointer"
+                >
+                  <span className="text-[11px] text-muted font-heading">Update diagnostics</span>
+                  {showDiagnostics ? (
+                    <ChevronUp className="w-3.5 h-3.5 text-muted" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5 text-muted" />
+                  )}
+                </button>
+
+                {showDiagnostics && (
+                  <div className="p-3 border-t border-line space-y-1.5 font-mono text-[11px]">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted">Installed:</span>
+                      <span className="text-text font-bold">versionCode {diagnostics.installedCode} (v{diagnostics.installedName})</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted">Remote:</span>
+                      <span className="text-text">
+                        {diagnostics.remoteCode != null ? `latest ${diagnostics.remoteCode}, min supported ${diagnostics.remoteMinCode}` : 'none'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted">Last check:</span>
+                      <span className="text-text">{diagnostics.lastCheckedAt || 'never'}, status: {diagnostics.status}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted">Decision:</span>
+                      <span className={`font-bold ${
+                        diagnostics.decision === 'required update' ? 'text-danger' :
+                        diagnostics.decision === 'optional update' ? 'text-amber-500' :
+                        diagnostics.decision === 'up to date' ? 'text-emerald-500' : 'text-text'
+                      }`}>
+                        {diagnostics.decision}
+                      </span>
+                    </div>
+                    <div className="pt-1.5">
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={handleCheckForUpdates}
+                        loading={updateChecking}
+                        className="w-full text-[11px] font-sans"
+                      >
+                        Force re-check
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           <div className="grid grid-cols-2 gap-2 pt-1">
             <Link

@@ -40,8 +40,13 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // 1. NEVER intercept APK downloads or files in /downloads/
-  if (url.pathname.startsWith('/downloads/') || url.pathname.endsWith('.apk')) {
+  // 1. NEVER intercept APK downloads, version.json, releases.json or files in /downloads/
+  if (
+    url.pathname.startsWith('/downloads/') ||
+    url.pathname.endsWith('.apk') ||
+    url.pathname.endsWith('/version.json') ||
+    url.pathname.endsWith('/releases.json')
+  ) {
     return;
   }
 
