@@ -191,10 +191,12 @@ a[role="button"]:active {
 }
 
 /* Leaflet Tile Pane Theme Filters (Dark and Blue) */
+.dark .leaflet-tile-pane,
 [data-theme="dark"] .leaflet-tile-pane {
   filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.7);
 }
 
+.blue .leaflet-tile-pane,
 [data-theme="blue"] .leaflet-tile-pane {
   filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(0.95) saturate(0.8) sepia(0.2) hue-rotate(185deg);
 }

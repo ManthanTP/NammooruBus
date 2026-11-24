@@ -1,11 +1,11 @@
-import { useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { MapContainer, TileLayer, Polyline, Marker, Circle, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useMapStore } from '@/store/mapStore'
 import { useLiveStore } from '@/store/liveStore'
 import { useLocationStore } from '@/store/locationStore'
 import { useThemeStore } from '@/store/themeStore'
-import { getTileUrl, TILE_ATTRIBUTION } from '@/lib/mapConfig'
+import { TILE_PROVIDERS, DEFAULT_PROVIDER } from '@/lib/mapConfig'
 import BusMarker from './BusMarker'
 
 // Helper to create clean custom HTML markers with SVG per Section 5 Design Language
@@ -172,6 +172,47 @@ function MapController() {
   return null
 }
 
+function TileLayerWithFallback() {
+  const [providerIndex, setProviderIndex] = useState(0)
+  const errorTimestampsRef = useRef([])
+  const provider = TILE_PROVIDERS[providerIndex] || DEFAULT_PROVIDER
+
+  const eventHandlers = useMemo(
+    () => ({
+      tileerror: () => {
+        const now = Date.now()
+        errorTimestampsRef.current = errorTimestampsRef.current.filter((t) => now - t <= 10000)
+        errorTimestampsRef.current.push(now)
+
+        if (errorTimestampsRef.current.length >= 5) {
+          errorTimestampsRef.current = []
+          if (providerIndex < TILE_PROVIDERS.length - 1) {
+            console.warn(
+              `Tile provider ${provider.name} encountered 5 errors in 10s. Silently falling back to ${TILE_PROVIDERS[providerIndex + 1].name}`
+            )
+            setProviderIndex((prev) => prev + 1)
+          }
+        }
+      },
+    }),
+    [providerIndex, provider.name]
+  )
+
+  return (
+    <TileLayer
+      key={provider.id}
+      url={provider.url}
+      attribution={provider.attribution}
+      maxZoom={provider.maxZoom || 19}
+      keepBuffer={6}
+      updateWhenIdle={true}
+      updateWhenZooming={false}
+      crossOrigin="anonymous"
+      eventHandlers={eventHandlers}
+    />
+  )
+}
+
 export default function MapView({ showUserBusLink = true }) {
   const { polyline, routeColor, isApproximateRoute, journeyLegs, markers, circle } = useMapStore()
   const { trips, selectedTripId, setSelectedTripId } = useLiveStore()
@@ -184,8 +225,6 @@ export default function MapView({ showUserBusLink = true }) {
   const parsedLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG)
   const defaultLat = !Number.isNaN(parsedLat) && Number.isFinite(parsedLat) ? parsedLat : 15.3647
   const defaultLng = !Number.isNaN(parsedLng) && Number.isFinite(parsedLng) ? parsedLng : 75.1240
-  const tileUrl = getTileUrl()
-  const attribution = TILE_ATTRIBUTION
 
   const casingColor = isDarkOrBlue ? (isDark ? '#0A0B10' : '#050B2E') : '#FFFFFF'
   const activeRouteColor = isDarkOrBlue ? '#4C7DFF' : (routeColor || '#0040FF')
@@ -239,17 +278,7 @@ export default function MapView({ showUserBusLink = true }) {
         markerZoomAnimation={true}
         fadeAnimation={true}
       >
-        <TileLayer
-          key={tileUrl}
-          url={tileUrl}
-          attribution={attribution}
-          subdomains={['a', 'b', 'c']}
-          maxZoom={19}
-          keepBuffer={12}
-          updateWhenZooming={false}
-          updateWhenIdle={true}
-          crossOrigin="anonymous"
-        />
+        <TileLayerWithFallback />
         <MapController />
 
         {/* 1. Single Route Polyline (Route detail / selected route) */}

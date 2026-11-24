@@ -40,7 +40,27 @@ Screenshots captured for cutout and no-cutout devices:
 ---
 
 ## 2. Item 3: Map Tile Provider & Latency Fallback (Locked)
-*(To be recorded in Item 3)*
+
+### Latency Measurement (From Hubballi z14-z16, 10 tiles):
+- **OSM Standard (`tile.openstreetmap.org`)**:
+  - Success Rate: 10/10 (100% 200 OK)
+  - Median Latency: **19.5 ms**
+  - Latency Range: 15 ms – 524 ms (Average: 70 ms)
+- **OSM Humanitarian HOT (`tile.openstreetmap.fr/hot`)**:
+  - Success Rate: 10/10 returned 404 HTML errors
+  - Median Latency: **137 ms**
+  - Latency Range: 134 ms – 794 ms (Average: 206 ms)
+- **Outcome**: OSM Standard is **7.0x faster** with 100% valid tile delivery.
+
+### Decision
+1. **Default Provider**: OpenStreetMap Standard (`https://tile.openstreetmap.org/{z}/{x}/{y}.png`) configured in `src/lib/mapConfig.js` with proper attribution: `© OpenStreetMap contributors`.
+2. **Automatic Silent Fallback**: Handled via `TileLayerWithFallback` in `MapView.jsx`. Listens for `tileerror` events; if 5 errors occur within any 10-second rolling window, it silently switches the tile provider to the next provider in the chain with zero alerts, toasts, or UI disruption to the user.
+3. **Smooth Zoom & Memory**:
+   - `keepBuffer`: set to `6` (reduced from 12 to prevent phone memory crashes and tile thrashing).
+   - `updateWhenIdle`: `true`
+   - `updateWhenZooming`: `false`
+4. **Theme Filters**: Dark and Blue modes keep custom Leaflet tile pane CSS filters in `src/styles/index.css`.
+5. **Locked**: Provider configuration is locked and must not be altered.
 
 ---
 
