@@ -28,6 +28,7 @@ export default function HomePage() {
   const { savedTrips, initSaved } = useSavedStore()
 
   const liveCount = getActiveCount()
+  const isKn = i18n.language?.startsWith('kn')
   const [fromStop, setFromStop] = useState(null)
   const [toStop, setToStop] = useState(null)
   const [recentSearches, setRecentSearches] = useState([])
@@ -99,31 +100,38 @@ export default function HomePage() {
 
       {/* 1. Hero Block */}
       <HeroBlock
-        greeting="ನಮಸ್ಕಾರ 👋"
+        greeting={isKn ? 'ನಮಸ್ಕಾರ 👋' : 'Namaskara 👋'}
         title="Nammooru Bus"
-        subtitle="Our town. Our bus. • Hubballi-Dharwad"
+        subtitle={isKn ? 'ನಮ್ಮ ಊರು. ನಮ್ಮ ಬಸ್. • ಹುಬ್ಬಳ್ಳಿ-ಧಾರವಾಡ' : 'Our town. Our bus. • Hubballi-Dharwad'}
       />
 
-      {/* 2. Search Card */}
+      {/* 2. Search Card — Stacked normally below Hero with 16px gap, zero negative margin */}
       <div
-        className="bg-surface rounded-[20px] p-5 -mt-5 relative z-10 border border-line"
-        style={{ boxShadow: 'var(--shadow-soft)' }}
+        className="bg-surface rounded-[24px] p-4 sm:p-5 border border-line shadow-soft"
       >
+        {/* Title row: "Where to?" / "ಎಲ್ಲಿಗೆ?" */}
+        <div className="flex items-center justify-between mb-3">
+          <h2 data-testid="where-to-heading" className="text-base font-extrabold font-heading text-text tracking-tight">
+            {isKn ? 'ಎಲ್ಲಿಗೆ?' : 'Where to?'}
+          </h2>
+        </div>
+
         <div className="relative space-y-2">
           {/* FROM Input */}
           <div
+            data-testid="from-stop-card"
             onClick={() => navigate('/search')}
             role="button"
             tabIndex={0}
-            className="flex items-center gap-2.5 px-4 py-3 bg-sky-50 dark:bg-surface-2 rounded-[12px] border border-line hover:border-cobalt-500 transition cursor-pointer"
+            className="flex items-center gap-2.5 px-4 py-3 bg-sky-50 dark:bg-surface-2 rounded-[14px] border border-line hover:border-cobalt-500 transition cursor-pointer"
           >
             <div className="w-2.5 h-2.5 rounded-full bg-cobalt-500 shrink-0" />
             <div className="flex-1 min-w-0">
               <span className="text-[10px] uppercase font-bold text-muted block tracking-wider">
                 {t('common.from')}
               </span>
-              <p className="text-sm font-semibold text-ink-950 truncate">
-                {fromStop ? localName(fromStop, i18n.language) : 'Select starting stop...'}
+              <p className="text-sm font-semibold text-text truncate">
+                {fromStop ? localName(fromStop, i18n.language) : (isKn ? 'ಪ್ರಾರಂಭದ ನಿಲ್ದಾಣ ಆಯ್ಕೆಮಾಡಿ...' : 'Select starting stop...')}
               </p>
             </div>
           </div>
@@ -133,28 +141,28 @@ export default function HomePage() {
             <button
               type="button"
               onClick={handleSwap}
-              className="w-8 h-8 rounded-full bg-surface border-2 border-cobalt-500 text-cobalt-500 flex items-center justify-center hover:bg-sky-50 dark:hover:bg-surface-2 active:rotate-180 transition-all"
-              style={{ boxShadow: 'var(--shadow-soft)' }}
+              className="w-8 h-8 rounded-full bg-surface border-2 border-cobalt-500 text-cobalt-500 flex items-center justify-center hover:bg-sky-50 dark:hover:bg-surface-2 active:rotate-180 transition-all cursor-pointer shadow-soft"
               title="Swap From and To"
             >
               <ArrowUpDown className="w-4 h-4" />
             </button>
           </div>
 
-          {/* TO Input */}
+          {/* TO Input (Placeholder is 'Choose destination', never repeating 'Where to?') */}
           <div
+            data-testid="to-stop-card"
             onClick={() => navigate('/search')}
             role="button"
             tabIndex={0}
-            className="flex items-center gap-2.5 px-4 py-3 bg-sky-50 dark:bg-surface-2 rounded-[12px] border border-line hover:border-cobalt-500 transition cursor-pointer"
+            className="flex items-center gap-2.5 px-4 py-3 bg-sky-50 dark:bg-surface-2 rounded-[14px] border border-line hover:border-cobalt-500 transition cursor-pointer"
           >
             <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
             <div className="flex-1 min-w-0">
               <span className="text-[10px] uppercase font-bold text-muted block tracking-wider">
                 {t('common.to')}
               </span>
-              <p className="text-sm font-semibold text-ink-950 truncate">
-                {toStop ? localName(toStop, i18n.language) : t('passenger.where_to')}
+              <p className="text-sm font-semibold text-text truncate">
+                {toStop ? localName(toStop, i18n.language) : (isKn ? 'ಗಮ್ಯಸ್ಥಾನವನ್ನು ಆಯ್ಕೆಮಾಡಿ' : 'Choose destination')}
               </p>
             </div>
           </div>
@@ -162,9 +170,10 @@ export default function HomePage() {
 
         {/* Find buses button */}
         <button
+          data-testid="find-buses-btn"
           type="button"
           onClick={handleFindBuses}
-          className="mt-3 w-full h-12 px-4 rounded-full on-brand font-heading font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform cursor-pointer shadow-soft"
+          className="mt-3.5 w-full h-12 px-4 rounded-full on-brand font-heading font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform cursor-pointer shadow-soft"
           style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
           <Search className="w-4 h-4" style={{ color: 'var(--on-brand)' }} />

@@ -14,7 +14,7 @@ export default function HeroBlock({
 }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-[28px] on-brand pt-8 pb-10 px-5 ${className}`}
+      className={`relative rounded-[28px] on-brand pt-6 pb-8 px-5 overflow-hidden min-h-[120px] flex flex-col justify-center ${className}`}
       style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
     >
       {/* Background overlapping rounded slabs echoing the "N" of the logo */}
@@ -28,7 +28,7 @@ export default function HeroBlock({
       />
 
       {/* Hero content */}
-      <div className="relative z-10 space-y-1.5">
+      <div className="relative z-10 space-y-1">
         <span
           className="text-xs font-semibold uppercase tracking-wider block"
           style={{ color: 'var(--on-brand)' }}
@@ -51,7 +51,7 @@ export default function HeroBlock({
         )}
       </div>
 
-      {children && <div className="relative z-10 mt-4">{children}</div>}
+      {children && <div className="relative z-10 mt-3">{children}</div>}
 
       {/* Signature smooth RoadRibbon SVG */}
       <RoadRibbon />
