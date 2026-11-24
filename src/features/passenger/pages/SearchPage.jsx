@@ -148,11 +148,11 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="h-[100dvh] max-h-[100dvh] flex flex-col bg-surface text-text font-body p-4 pt-2 overflow-hidden">
-      {/* Top Header & Inputs Block (Pinned at Top) */}
-      <div className="shrink-0 space-y-2 pb-1">
+    <div className="h-full max-h-full flex flex-col bg-surface text-text font-body overflow-hidden">
+      {/* Top Header & Inputs Block (Pinned at Top - NON-SCROLLABLE) */}
+      <div className="shrink-0 px-4 pt-3 pb-2 space-y-2.5 bg-surface border-b border-line/60 z-20">
         {/* Top Header */}
-        <header className="flex items-center justify-between pb-2 border-b border-line">
+        <header className="flex items-center justify-between pb-1 border-b border-line">
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -290,7 +290,7 @@ export default function SearchPage() {
       </div>
 
       {/* Stop List (Scrolls independently between Top and Pinned Button) */}
-      <div className="flex-1 overflow-y-auto min-h-0 py-1 space-y-1.5 overscroll-contain">
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-2 space-y-1.5 overscroll-contain">
         {filteredStops.length === 0 ? (
           <div className="py-8 text-center text-xs text-muted">
             No stops match &quot;{searchQuery}&quot;
@@ -341,15 +341,20 @@ export default function SearchPage() {
         )}
       </div>
 
-      {/* Pinned Bottom Action Button (Always Visible at bottom of screen!) */}
-      <div className="shrink-0 pt-2 pb-safe bg-surface/95 backdrop-blur-md border-t border-line z-30 flex justify-center">
+      {/* Pinned Bottom Action Button (Always Visible, moved above bottom gesture bar) */}
+      <div
+        className="shrink-0 px-4 pt-2.5 bg-surface/95 backdrop-blur-md border-t border-line z-30 flex justify-center"
+        style={{
+          paddingBottom: 'max(16px, calc(10px + env(safe-area-inset-bottom, 0px)))',
+        }}
+      >
         <button
           type="button"
           onClick={handleFindBuses}
           disabled={!fromStop || !toStop}
-          className={`w-full max-w-md py-3 px-4 font-extrabold text-sm rounded-pill shadow-soft transition flex items-center justify-center gap-2 ${!fromStop || !toStop
-            ? 'bg-surface-2 text-muted cursor-not-allowed border border-line'
-            : 'on-brand cursor-pointer'
+          className={`w-full max-w-md h-12 px-4 font-extrabold text-sm rounded-pill shadow-soft transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${!fromStop || !toStop
+            ? 'bg-surface-2 text-muted cursor-not-allowed border border-line opacity-75'
+            : 'on-brand cursor-pointer hover:brightness-105 shadow-md'
             }`}
           style={
             !fromStop || !toStop

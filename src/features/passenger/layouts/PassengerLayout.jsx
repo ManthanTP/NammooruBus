@@ -233,13 +233,25 @@ export default function PassengerLayout() {
       >
         {/* Left Column (Content) */}
         <main
-          className={`flex-1 md:w-[460px] md:max-w-[460px] md:flex-none min-h-screen pb-24 md:pb-8 px-4 md:px-5 overflow-y-auto md:border-r md:border-line md:bg-surface md:m-3 md:rounded-[28px] md:shadow-soft transition-all ${isSearchPage ? 'bg-surface' : ''
-            }`}
-          style={{
-            paddingBottom: 'calc(96px + env(safe-area-inset-bottom))',
-          }}
+          className={`flex-1 md:w-[460px] md:max-w-[460px] md:flex-none transition-all ${
+            isSearchPage
+              ? 'h-[calc(100dvh-3.5rem-var(--safe-top,0px))] max-h-[calc(100dvh-3.5rem-var(--safe-top,0px))] overflow-hidden flex flex-col p-0 bg-surface md:border-r md:border-line md:m-3 md:rounded-[28px] md:shadow-soft'
+              : 'min-h-screen pb-24 md:pb-8 px-4 md:px-5 overflow-y-auto md:border-r md:border-line md:bg-surface md:m-3 md:rounded-[28px] md:shadow-soft'
+          }`}
+          style={
+            isSearchPage
+              ? { paddingBottom: 0 }
+              : { paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }
+          }
         >
-          <div key={location.pathname} className="max-w-lg mx-auto md:max-w-none pt-2 page-enter">
+          <div
+            key={location.pathname}
+            className={`page-enter ${
+              isSearchPage
+                ? 'h-full flex flex-col overflow-hidden max-w-lg mx-auto md:max-w-none w-full'
+                : 'max-w-lg mx-auto md:max-w-none pt-2'
+            }`}
+          >
             <Outlet />
           </div>
         </main>
