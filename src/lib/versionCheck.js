@@ -1,6 +1,6 @@
 import { App } from '@capacitor/app'
 import { isNative } from './platform'
-import { APK_VERSION } from '@/config/links'
+import { APK_VERSION, APK_BUILD } from '@/config/links'
 
 // In-memory dismissal flag: kept only for the current app run (cold start resets this)
 let dismissedThisRun = false
@@ -29,13 +29,14 @@ export async function checkAppUpdate({ force = false } = {}) {
     return { hasUpdate: false, isRequired: false, latest: null, installed: null, releaseNotes: null, error: false }
   }
 
-  let installedVersionCode = 1
-  let installedVersionName = APK_VERSION || '1.0.0'
+  // Default to project's current release configuration (e.g. Web is always running current build)
+  let installedVersionCode = Number(APK_BUILD || 5)
+  let installedVersionName = APK_VERSION || '1.0.4'
 
   if (isNative()) {
     try {
       const info = await App.getInfo()
-      if (info?.build) installedVersionCode = parseInt(info.build, 10) || 1
+      if (info?.build) installedVersionCode = parseInt(info.build, 10) || installedVersionCode
       if (info?.version) installedVersionName = info.version
     } catch (_) {
       // Keep defaults
@@ -84,8 +85,12 @@ export async function checkAppUpdate({ force = false } = {}) {
     const installedName = (installedVersionName || '').trim()
     const minCode = Number(data.minSupportedVersionCode || 1)
 
-    // An update is available if the version code is lower OR version name doesn't match
-    const hasUpdate = (installedVersionCode < latestCode) || (installedName && latestName && installedName !== latestName)
+    // Strictly check if an update is available:
+    // 1. latestCode is strictly higher than installedVersionCode (e.g. 5 > 2)
+    // 2. OR latestName is different from installedName AND latestCode >= installedVersionCode
+    const isCodeOutdated = installedVersionCode < latestCode
+    const isNameChanged = Boolean(installedName && latestName && installedName !== latestName && latestCode >= installedVersionCode)
+    const hasUpdate = isCodeOutdated || isNameChanged
     const isRequired = installedVersionCode < minCode
 
     return {

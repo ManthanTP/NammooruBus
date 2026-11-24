@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Download, ExternalLink, Sparkles, AlertTriangle } from 'lucide-react'
@@ -57,9 +58,9 @@ export default function UpdateModal({ isOpen, updateInfo, onClose }) {
     openExternalUrl(`https://nammoorubus.vercel.app${latest.whatsNewPage || '/whats-new'}`)
   }
 
-  return (
+  const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[5000] flex items-end sm:items-center justify-center p-0 sm:p-4 select-none">
+      <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 select-none">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -75,14 +76,14 @@ export default function UpdateModal({ isOpen, updateInfo, onClose }) {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-          className="relative w-full max-w-lg bg-surface text-text rounded-t-[32px] sm:rounded-[32px] border border-line shadow-float p-6 overflow-hidden z-10"
+          className="relative w-full max-w-lg bg-surface text-text rounded-t-[32px] sm:rounded-[32px] border border-line shadow-float p-6 overflow-hidden z-10 max-h-[88dvh] flex flex-col"
           style={{
-            paddingBottom: 'max(24px, calc(16px + var(--safe-bottom)))',
+            paddingBottom: 'max(24px, calc(16px + env(safe-area-inset-bottom, 0px)))',
           }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Top Decorative Header */}
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-4 shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-[16px] bg-white border border-line p-1 shadow-xs flex items-center justify-center shrink-0">
                 <img src="/brand/logo-mark.png" alt="Nammooru Bus" className="w-full h-full object-contain" />
@@ -100,7 +101,9 @@ export default function UpdateModal({ isOpen, updateInfo, onClose }) {
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs font-mono font-bold text-muted bg-surface-2 px-2 py-0.5 rounded-pill border border-line">
-                    v{installed?.versionName || '1.0.0'} &rarr; v{latest.versionName}
+                    {installed?.versionName === latest.versionName
+                      ? `v${latest.versionName} (Build ${installed?.versionCode || 1} \u2192 Build ${latest.versionCode})`
+                      : `v${installed?.versionName || '1.0.0'} \u2192 v${latest.versionName}`}
                   </span>
                   {latest.apkSize && (
                     <span className="text-[11px] font-semibold text-muted">
@@ -113,8 +116,8 @@ export default function UpdateModal({ isOpen, updateInfo, onClose }) {
           </div>
 
           {/* What's New Section */}
-          <div className="mt-5 space-y-2">
-            <div className="flex items-center justify-between">
+          <div className="mt-5 space-y-2 flex-1 min-h-0 flex flex-col">
+            <div className="flex items-center justify-between shrink-0">
               <span className="text-xs font-heading font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-brand" />
                 <span>{lang === 'kn' ? 'ಹೊಸತೇನಿದೆ?' : "What's new"}</span>
@@ -129,7 +132,7 @@ export default function UpdateModal({ isOpen, updateInfo, onClose }) {
               </button>
             </div>
 
-            <div className="max-h-48 overflow-y-auto rounded-[16px] bg-surface-2 p-3.5 border border-line space-y-2">
+            <div className="max-h-44 overflow-y-auto rounded-[16px] bg-surface-2 p-3.5 border border-line space-y-2">
               {displayNotes.length > 0 ? (
                 displayNotes.map((note, idx) => (
                   <div key={idx} className="flex items-start gap-2 text-xs text-text leading-relaxed">
@@ -146,7 +149,7 @@ export default function UpdateModal({ isOpen, updateInfo, onClose }) {
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-6 flex flex-col gap-2.5">
+          <div className="mt-5 flex flex-col gap-2.5 shrink-0">
             <Button
               variant="primary"
               size="lg"
@@ -171,4 +174,9 @@ export default function UpdateModal({ isOpen, updateInfo, onClose }) {
       </div>
     </AnimatePresence>
   )
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body)
+  }
+  return modalContent
 }
