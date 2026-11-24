@@ -446,7 +446,7 @@ export default function JourneyPage() {
   const currentRedirect = encodeURIComponent(location.pathname + location.search)
 
   return (
-    <div className="space-y-3.5 pt-1 pb-16">
+    <div className="space-y-3.5 pt-1 pb-40">
       {/* Header */}
       <div className="flex items-center justify-between pb-2 border-b border-line">
         <button
@@ -559,7 +559,7 @@ export default function JourneyPage() {
             <span className="text-[10px] uppercase font-bold text-muted block tracking-wider">
               Board Stop
             </span>
-            <h4 className="text-sm font-bold text-ink-950 font-heading">
+            <h4 className="text-sm font-bold text-text font-heading">
               {fromStop ? localName(fromStop, i18n.language) : 'Origin Stop'}
             </h4>
             <p className="text-xs text-muted">Board your bus here</p>
@@ -588,7 +588,7 @@ export default function JourneyPage() {
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 block">
                       Transfer Stop
                     </span>
-                    <h4 className="text-sm font-bold text-ink-950 font-heading">
+                    <h4 className="text-sm font-bold text-text font-heading">
                       {localName(leg.fromStop, i18n.language)}
                     </h4>
                     <p className="text-xs text-muted">
@@ -611,12 +611,12 @@ export default function JourneyPage() {
                     }}
                   />
                 </div>
-                <div className="pb-3 flex-1 min-w-0 bg-sky-50 p-3.5 rounded-[16px] border border-line space-y-2">
+                <div className="pb-3 flex-1 min-w-0 bg-surface-2 p-3.5 rounded-[16px] border border-line space-y-2">
                   <div className="flex items-center justify-between">
                     <RouteBadge code={leg.route?.code} size="sm" />
                     <CrowdMeter level="moderate" />
                   </div>
-                  <p className="text-xs font-bold text-ink-950 font-heading">
+                  <p className="text-xs font-bold text-text font-heading">
                     Board Route {leg.route?.code} ({localName(leg.route, i18n.language)})
                   </p>
                   <p className="text-xs text-muted">
@@ -639,12 +639,15 @@ export default function JourneyPage() {
             <span className="text-[10px] uppercase font-bold text-muted block tracking-wider">
               Destination
             </span>
-            <h4 className="text-sm font-bold text-ink-950 font-heading">
+            <h4 className="text-sm font-bold text-text font-heading">
               {toStop ? localName(toStop, i18n.language) : 'Destination Stop'}
             </h4>
             <p className="text-xs text-muted">Arrive at destination</p>
           </div>
         </div>
+
+        {/* Bottom spacer so Destination card is completely clear of floating action bar */}
+        <div className="h-28" aria-hidden="true" />
       </div>
 
       {/* Sticky Bottom Action Bar above tab bar: Save, Share, Track Live, compact SOS */}

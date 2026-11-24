@@ -145,12 +145,11 @@ export default function ComplaintsPage() {
   }
 
   return (
-    <div className="space-y-6 pb-20">
-      {/* Header */}
+    <div className="space-y-6 pb-20 text-text">
       {/* Top Header */}
       <div>
-        <h2 className="text-xl font-extrabold text-ink-950 font-heading flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-cobalt-500" />
+        <h2 className="text-xl font-extrabold text-text font-heading flex items-center gap-2">
+          <MessageSquare className="w-5 h-5 text-brand" />
           {t('complaints.title') || 'Feedback & Complaints'}
         </h2>
         <p className="text-xs text-muted mt-0.5">
@@ -160,13 +159,13 @@ export default function ComplaintsPage() {
 
       {/* Guest Login Banner */}
       {!user ? (
-        <div className="p-5 bg-white rounded-[20px] border border-line shadow-soft space-y-3">
+        <div className="p-5 bg-surface rounded-[20px] border border-line shadow-soft space-y-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-sky-100 text-cobalt-500 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-full bg-surface-2 text-brand flex items-center justify-center shrink-0">
               <LogIn className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold font-heading text-ink-950">
+              <h3 className="text-sm font-bold font-heading text-text">
                 {t('complaints.login_required_title') || 'Login required to submit feedback'}
               </h3>
               <p className="text-xs text-muted">
@@ -185,7 +184,7 @@ export default function ComplaintsPage() {
         </div>
       ) : (
         /* Complaint Submission Form */
-        <div className="bg-white rounded-[20px] border border-line p-5 shadow-soft space-y-4">
+        <div className="bg-surface rounded-[20px] border border-line p-5 shadow-soft space-y-4">
           <h3 className="text-xs font-extrabold text-muted uppercase tracking-wider">
             {t('complaints.submit_title') || 'Submit New Feedback'}
           </h3>
@@ -200,13 +199,13 @@ export default function ComplaintsPage() {
 
             {/* Route Selector (Optional) */}
             <div>
-              <label className="block text-xs font-bold text-ink-950 mb-1 font-heading">
+              <label className="block text-xs font-bold text-text mb-1 font-heading">
                 {t('complaints.route_label') || 'Route (Optional)'}
               </label>
               <select
                 value={routeId}
                 onChange={(e) => setRouteId(e.target.value)}
-                className="w-full h-11 px-3 bg-sky-50 border border-line rounded-[12px] text-xs font-bold text-ink-950 focus:outline-none focus:border-cobalt-500"
+                className="w-full h-11 px-3 bg-surface-2 border border-line rounded-[12px] text-xs font-bold text-text focus:outline-none focus:border-brand"
               >
                 <option value="">{t('complaints.route_placeholder') || 'General feedback (no specific route)'}</option>
                 {routes.map((r) => (
@@ -219,7 +218,7 @@ export default function ComplaintsPage() {
 
             {/* Category Selector */}
             <div>
-              <label className="block text-xs font-bold text-ink-950 mb-1.5 font-heading">
+              <label className="block text-xs font-bold text-text mb-1.5 font-heading">
                 {t('complaints.category_label') || 'Category'}
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -229,8 +228,8 @@ export default function ComplaintsPage() {
                     type="button"
                     onClick={() => setCategory(cat.value)}
                     className={`py-2 px-3 rounded-full text-xs font-semibold border transition text-center active:scale-95 ${category === cat.value
-                      ? 'bg-cobalt-500 border-cobalt-500 text-white font-bold shadow-xs'
-                      : 'bg-sky-50 border-line text-ink-950 hover:bg-sky-100'
+                      ? 'bg-brand border-brand text-on-brand font-bold shadow-xs'
+                      : 'bg-surface-2 border-line text-text hover:bg-surface'
                       }`}
                   >
                     {t(cat.key)}
@@ -241,7 +240,7 @@ export default function ComplaintsPage() {
 
             {/* Star Rating */}
             <div>
-              <label className="block text-xs font-bold text-ink-950 mb-1 font-heading">
+              <label className="block text-xs font-bold text-text mb-1 font-heading">
                 {t('complaints.rating_label') || 'Rating'}
               </label>
               <div className="flex items-center gap-1.5 pt-0.5">
@@ -250,7 +249,7 @@ export default function ComplaintsPage() {
                     key={star}
                     type="button"
                     onClick={() => setRating(star)}
-                    className="p-1 hover:scale-110 transition-transform"
+                    className="p-1 hover:scale-110 transition-transform cursor-pointer"
                     title={`${star} star`}
                   >
                     <Star
@@ -270,7 +269,7 @@ export default function ComplaintsPage() {
             {/* Message Area */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-ink-950 font-heading">
+                <label className="text-xs font-bold text-text font-heading">
                   {t('complaints.message_label') || 'Your Message'} <span className="text-danger">*</span>
                 </label>
                 <span className="text-[10px] text-muted font-mono">
@@ -285,7 +284,7 @@ export default function ComplaintsPage() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder={t('complaints.message_placeholder') || 'Describe your experience...'}
-                className="w-full p-3.5 bg-sky-50 border border-line rounded-[12px] text-xs text-ink-950 placeholder:text-muted focus:outline-none focus:border-cobalt-500"
+                className="w-full p-3.5 bg-surface-2 border border-line rounded-[12px] text-xs text-text placeholder:text-muted focus:outline-none focus:border-brand"
               />
             </div>
 
@@ -307,13 +306,13 @@ export default function ComplaintsPage() {
       {user && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-extrabold text-ink uppercase tracking-wider">
+            <h3 className="text-xs font-extrabold text-muted uppercase tracking-wider">
               {t('complaints.my_complaints')} ({myComplaints.length})
             </h3>
             <button
               type="button"
               onClick={fetchMyComplaints}
-              className="text-text-secondary hover:text-ink p-1 rounded transition"
+              className="text-muted hover:text-text p-1 rounded transition cursor-pointer"
               title="Refresh my complaints"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loadingList ? 'animate-spin' : ''}`} />
@@ -321,7 +320,7 @@ export default function ComplaintsPage() {
           </div>
 
           {myComplaints.length === 0 ? (
-            <div className="p-8 text-center bg-surface border border-line rounded-card shadow-soft text-xs text-text-secondary">
+            <div className="p-8 text-center bg-surface border border-line rounded-card shadow-soft text-xs text-muted">
               {t('complaints.no_complaints')}
             </div>
           ) : (
@@ -334,7 +333,7 @@ export default function ComplaintsPage() {
                   {/* Top line: Category, Route, Status */}
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="capitalize font-bold text-xs text-cobalt bg-cobalt-tint px-2 py-0.5 rounded-full">
+                      <span className="capitalize font-bold text-xs text-brand bg-brand/10 border border-brand/20 px-2 py-0.5 rounded-full">
                         {item.category}
                       </span>
                       {item.routes && (
@@ -346,9 +345,9 @@ export default function ComplaintsPage() {
                           />
                         </div>
                       )}
-                      <div className="flex items-center gap-0.5 text-warning text-xs">
+                      <div className="flex items-center gap-0.5 text-amber-500 text-xs">
                         {Array.from({ length: item.rating || 0 }).map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-warning text-warning" />
+                          <Star key={i} className="w-3 h-3 fill-amber-500 text-amber-500" />
                         ))}
                       </div>
                     </div>
@@ -357,26 +356,26 @@ export default function ComplaintsPage() {
                   </div>
 
                   {/* Passenger Message */}
-                  <p className="text-xs text-ink leading-relaxed whitespace-pre-wrap">
+                  <p className="text-xs text-text leading-relaxed whitespace-pre-wrap">
                     "{item.message}"
                   </p>
 
                   {/* Submission date */}
-                  <div className="text-[10px] text-text-secondary font-mono">
+                  <div className="text-[10px] text-muted font-mono">
                     Submitted on {new Date(item.created_at).toLocaleString()}
                   </div>
 
                   {/* Admin Reply Box */}
                   {item.admin_reply && (
-                    <div className="p-3 bg-cobalt-tint/30 border border-cobalt/20 rounded-input space-y-1">
-                      <span className="text-[11px] font-bold text-cobalt block">
+                    <div className="p-3 bg-brand/10 border border-brand/20 rounded-input space-y-1">
+                      <span className="text-[11px] font-bold text-brand block">
                         {t('complaints.admin_reply_title')}
                       </span>
-                      <p className="text-xs text-ink leading-relaxed">
+                      <p className="text-xs text-text leading-relaxed">
                         {item.admin_reply}
                       </p>
                       {item.updated_at && (
-                        <span className="text-[10px] text-text-secondary block font-mono">
+                        <span className="text-[10px] text-muted block font-mono">
                           Responded on {new Date(item.updated_at).toLocaleString()}
                         </span>
                       )}

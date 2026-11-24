@@ -1,5 +1,34 @@
 [
   {
+    "versionName": "1.0.4",
+    "versionCode": 5,
+    "releasedAt": "2026-11-24",
+    "apkUrl": "/downloads/nammooru-bus.apk",
+    "apkSize": "7.3 MB",
+    "downloadPage": "/#app",
+    "whatsNewPage": "/whats-new",
+    "title": {
+      "en": "Release v1.0.4",
+      "kn": "ಆವೃತ್ತಿ v1.0.4"
+    },
+    "notes": {
+      "en": [
+        "Top service alert banner: properly themed for dark mode with contrast fix",
+        "Notification bell in top header: live service alerts with unread badge and dim/read history",
+        "Complaints & grievance page: full dark mode theme styling",
+        "Journey details: fixed bottom padding and spacer so Destination card is never cut off",
+        "Search page: pinned 'Find buses' button at bottom and independent stop list scroll"
+      ],
+      "kn": [
+        "ಮೇಲ್ಭಾಗದ ಸೇವಾ ಎಚ್ಚರಿಕೆ ಬ್ಯಾನರ್: ಡಾರ್ಕ್ ಮೋಡ್‌ಗೆ ಸೂಕ್ತವಾದ ವಿನ್ಯಾಸ",
+        "ಮೇಲಿನ ಹೆಡರ್‌ನಲ್ಲಿ ನೋಟಿಫಿಕೇಶನ್ ಬೆಲ್: ಓದದ ಎಚ್ಚರಿಕೆಗಳ ಸಂಖ್ಯೆ ಹಾಗೂ ಸ್ಪಷ್ಟ ನೋಟ",
+        "ದೂರು ಪುಟ: ಡಾರ್ಕ್ ಮೋಡ್‌ನಲ್ಲಿ ಸುಲಭವಾಗಿ ಓದಲು ಸೂಕ್ತ ಬಣ್ಣಗಳ ವಿನ್ಯಾಸ",
+        "ಪ್ರಯಾಣದ ವಿವರ: ತಲುಪುವ ನಿಲ್ದಾಣ (ಡೆಸ್ಟಿನೇಶನ್) ಮರೆಯಾಗದಂತೆ ಕೆಳಭಾಗದ ಅಂತರ ಸರಿಪಡಿಸಲಾಗಿದೆ",
+        "ಹುಡುಕಾಟ ಪುಟ: 'ಬಸ್‌ಗಳನ್ನು ಹುಡುಕಿ' ಬಟನ್ ಕೆಳಭಾಗದಲ್ಲೇ ಪಿನ್ ಮಾಡಲಾಗಿದೆ"
+      ]
+    }
+  },
+  {
     "versionName": "1.0.3",
     "versionCode": 4,
     "releasedAt": "2026-11-24",

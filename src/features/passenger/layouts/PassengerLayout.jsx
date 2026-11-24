@@ -1,7 +1,9 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { User, LogIn, RefreshCw, Compass, Radio, MapPin, Route, Bookmark } from 'lucide-react'
+import { User, LogIn, RefreshCw, Compass, Radio, MapPin, Route, Bookmark, Bell } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { getReadAlertIds } from '@/lib/alertsStorage'
 import MapView from '@/components/map/MapView'
 import FloatingTabBar from '@/components/ui/FloatingTabBar'
 import LanguageToggle from '@/components/ui/LanguageToggle'
@@ -32,6 +34,51 @@ export default function PassengerLayout() {
   const liveCount = getActiveCount()
   const isSearchPage = location.pathname === '/search'
   const isHomePage = location.pathname === '/'
+
+  const [unreadAlertsCount, setUnreadAlertsCount] = useState(0)
+
+  const checkUnreadAlerts = async () => {
+    try {
+      const now = new Date().toISOString()
+      const { data, error } = await supabase
+        .from('alerts')
+        .select('id, expires_at')
+        .lte('starts_at', now)
+
+      if (error) throw error
+
+      const readIds = getReadAlertIds()
+      const unread = (data || []).filter((a) => {
+        if (readIds.includes(a.id)) return false
+        if (!a.expires_at) return true
+        return new Date(a.expires_at) > new Date()
+      })
+      setUnreadAlertsCount(unread.length)
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  useEffect(() => {
+    checkUnreadAlerts()
+
+    const channel = supabase
+      .channel('passenger_header_alerts_channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'alerts' },
+        () => checkUnreadAlerts()
+      )
+      .subscribe()
+
+    const handleLocalUpdate = () => checkUnreadAlerts()
+    window.addEventListener('nb_alerts_updated', handleLocalUpdate)
+
+    return () => {
+      supabase.removeChannel(channel)
+      window.removeEventListener('nb_alerts_updated', handleLocalUpdate)
+    }
+  }, [])
 
   const navLinks = [
     { key: 'explore', label: t('nav.explore'), path: '/explore', icon: Compass },
@@ -100,8 +147,22 @@ export default function PassengerLayout() {
           })}
         </nav>
 
-        {/* Right side actions (Live pill, Theme, Language on Desktop, Profile) */}
+        {/* Right side actions (Notification bell, Live pill, Theme, Language on Desktop, Profile) */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          {/* Live Service Alerts Notification Bell */}
+          <Link
+            to="/alerts"
+            className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-surface border border-line text-muted hover:text-text flex items-center justify-center transition active:scale-95 shadow-xs shrink-0"
+            title="Live Service Alerts"
+          >
+            <Bell className="w-4 h-4 text-text" />
+            {unreadAlertsCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-navy-900 text-[10px] font-black flex items-center justify-center shadow-xs animate-pulse">
+                {unreadAlertsCount}
+              </span>
+            )}
+          </Link>
+
           {/* Live Bus Count Pill */}
           <Link
             to="/live"

@@ -94,6 +94,9 @@ export default function HomePage() {
   return (
     <div className="space-y-4 pb-4">
 
+      {/* Top Live Service Alert Banner */}
+      <AlertBanner />
+
       {/* 1. Hero Block */}
       <HeroBlock
         greeting="ನಮಸ್ಕಾರ 👋"
@@ -285,9 +288,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-
-      {/* 7. Alert Banner */}
-      <AlertBanner />
     </div>
   )
 }

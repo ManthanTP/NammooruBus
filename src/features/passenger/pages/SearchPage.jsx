@@ -148,146 +148,151 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-surface text-ink font-body p-4 pt-2">
-      {/* Top Header */}
-      <header className="flex items-center justify-between pb-3 border-b border-line">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-ink transition p-1"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>{t('common.back')}</span>
-        </button>
-        <span className="font-extrabold text-sm font-heading">{t('passenger.where_to')}</span>
-        <div className="w-12" />
-      </header>
-
-      {/* From / To Inputs with Animated Swap */}
-      <div className="relative my-3 p-3 bg-page rounded-card border border-line flex flex-col gap-2">
-        {/* From Field */}
-        <div
-          onClick={() => {
-            setActiveField('from')
-            setSearchQuery('')
-          }}
-          className={`flex items-center gap-2.5 p-3 rounded-input border transition cursor-pointer ${activeField === 'from' ? 'bg-surface border-cobalt shadow-xs' : 'bg-surface/70 border-line'
-            }`}
-        >
-          <div className="w-3 h-3 rounded-full bg-success shrink-0" />
-          <div className="flex-1 min-w-0">
-            <span className="block text-[10px] font-bold uppercase text-text-secondary">
-              {t('passenger.from')}
-            </span>
-            <span className={`block text-xs font-semibold truncate ${fromStop ? 'text-ink' : 'text-text-secondary'}`}>
-              {fromStop ? localName(fromStop, i18n.language) : t('passenger.pick_from')}
-            </span>
-          </div>
-          {fromStop && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                setFromStop(null)
-              }}
-              className="text-text-secondary hover:text-ink p-1"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Swap Button (Floating) */}
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 z-10">
-          <motion.button
-            type="button"
-            onClick={handleSwap}
-            animate={{ rotate: isSwapping ? 180 : 0 }}
-            transition={{ duration: 0.25 }}
-            className="w-8 h-8 rounded-full bg-surface border border-line shadow-soft text-ink flex items-center justify-center hover:text-cobalt active:scale-95 transition"
-            title="Swap stops"
-          >
-            <ArrowUpDown className="w-4 h-4" />
-          </motion.button>
-        </div>
-
-        {/* To Field */}
-        <div
-          onClick={() => {
-            setActiveField('to')
-            setSearchQuery('')
-          }}
-          className={`flex items-center gap-2.5 p-3 rounded-input border transition cursor-pointer ${activeField === 'to' ? 'bg-surface border-cobalt shadow-xs' : 'bg-surface/70 border-line'
-            }`}
-        >
-          <div className="w-3 h-3 rounded-full bg-danger shrink-0" />
-          <div className="flex-1 min-w-0">
-            <span className="block text-[10px] font-bold uppercase text-text-secondary">
-              {t('passenger.to')}
-            </span>
-            <span className={`block text-xs font-semibold truncate ${toStop ? 'text-ink' : 'text-text-secondary'}`}>
-              {toStop ? localName(toStop, i18n.language) : t('passenger.pick_to')}
-            </span>
-          </div>
-          {toStop && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                setToStop(null)
-              }}
-              className="text-text-secondary hover:text-ink p-1"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Error message if validation fails */}
-      {errorMessage && (
-        <div className="mb-2 p-2.5 bg-danger/10 border border-danger/30 rounded-input flex items-center gap-2 text-xs font-semibold text-danger">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {/* "Your location" Option (Part C.6) */}
-      <button
-        type="button"
-        onClick={handleUseLocation}
-        className="flex items-center gap-2 px-3 py-2.5 mb-2 bg-surface-2 hover:bg-surface border border-line rounded-input text-xs font-bold text-text transition text-left cursor-pointer"
-      >
-        <Navigation className="w-4 h-4 shrink-0 text-brand" />
-        <span>{t('passenger.your_location')} (Pick nearest stop)</span>
-      </button>
-
-      {/* Search Filter Box */}
-      <div className="relative mb-3">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={`Search ${activeField === 'from' ? 'starting' : 'destination'} stop...`}
-          className="w-full pl-9 pr-8 py-2.5 text-xs bg-page border border-line rounded-input focus:border-cobalt focus:bg-surface outline-none transition"
-          autoFocus
-        />
-        {searchQuery && (
+    <div className="h-[100dvh] max-h-[100dvh] flex flex-col bg-surface text-text font-body p-4 pt-2 overflow-hidden">
+      {/* Top Header & Inputs Block (Pinned at Top) */}
+      <div className="shrink-0 space-y-2 pb-1">
+        {/* Top Header */}
+        <header className="flex items-center justify-between pb-2 border-b border-line">
           <button
             type="button"
-            onClick={() => setSearchQuery('')}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary hover:text-ink p-1"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-text transition p-1"
           >
-            <X className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-5 h-5" />
+            <span>{t('common.back')}</span>
           </button>
+          <span className="font-extrabold text-sm font-heading text-text">{t('passenger.where_to')}</span>
+          <div className="w-12" />
+        </header>
+
+        {/* From / To Inputs with Animated Swap */}
+        <div className="relative p-2.5 bg-surface-2 rounded-card border border-line flex flex-col gap-2">
+          {/* From Field */}
+          <div
+            onClick={() => {
+              setActiveField('from')
+              setSearchQuery('')
+            }}
+            className={`flex items-center gap-2.5 p-2.5 rounded-input border transition cursor-pointer ${activeField === 'from' ? 'bg-surface border-brand shadow-xs' : 'bg-surface/80 border-line'
+              }`}
+          >
+            <div className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <span className="block text-[10px] font-bold uppercase text-muted">
+                {t('passenger.from')}
+              </span>
+              <span className={`block text-xs font-semibold truncate ${fromStop ? 'text-text' : 'text-muted'}`}>
+                {fromStop ? localName(fromStop, i18n.language) : t('passenger.pick_from')}
+              </span>
+            </div>
+            {fromStop && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setFromStop(null)
+                }}
+                className="text-muted hover:text-text p-1"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Swap Button (Floating) */}
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 z-10">
+            <motion.button
+              type="button"
+              onClick={handleSwap}
+              animate={{ rotate: isSwapping ? 180 : 0 }}
+              transition={{ duration: 0.25 }}
+              className="w-8 h-8 rounded-full bg-surface border border-line shadow-soft text-text flex items-center justify-center hover:text-brand active:scale-95 transition"
+              title="Swap stops"
+            >
+              <ArrowUpDown className="w-4 h-4" />
+            </motion.button>
+          </div>
+
+          {/* To Field */}
+          <div
+            onClick={() => {
+              setActiveField('to')
+              setSearchQuery('')
+            }}
+            className={`flex items-center gap-2.5 p-2.5 rounded-input border transition cursor-pointer ${activeField === 'to' ? 'bg-surface border-brand shadow-xs' : 'bg-surface/80 border-line'
+              }`}
+          >
+            <div className="w-3 h-3 rounded-full bg-danger shrink-0" />
+            <div className="flex-1 min-w-0">
+              <span className="block text-[10px] font-bold uppercase text-muted">
+                {t('passenger.to')}
+              </span>
+              <span className={`block text-xs font-semibold truncate ${toStop ? 'text-text' : 'text-muted'}`}>
+                {toStop ? localName(toStop, i18n.language) : t('passenger.pick_to')}
+              </span>
+            </div>
+            {toStop && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setToStop(null)
+                }}
+                className="text-muted hover:text-text p-1"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Error message if validation fails */}
+        {errorMessage && (
+          <div className="p-2 bg-danger/10 border border-danger/30 rounded-input flex items-center gap-2 text-xs font-semibold text-danger">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
         )}
+
+        {/* "Your location" Option & Search Filter */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={`Search ${activeField === 'from' ? 'starting' : 'destination'} stop...`}
+              className="w-full pl-9 pr-8 py-2 text-xs bg-surface-2 text-text border border-line rounded-input focus:border-brand focus:bg-surface outline-none transition"
+              autoFocus
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-text p-1"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleUseLocation}
+            className="flex items-center gap-1.5 px-3 py-2 bg-surface-2 hover:bg-surface border border-line rounded-input text-xs font-bold text-text transition text-left cursor-pointer shrink-0"
+            title="Use current location"
+          >
+            <Navigation className="w-3.5 h-3.5 shrink-0 text-brand" />
+            <span className="hidden sm:inline">Nearest</span>
+          </button>
+        </div>
       </div>
 
-      {/* Stop List */}
-      <div className="flex-1 overflow-y-auto space-y-1.5 pb-20">
+      {/* Stop List (Scrolls independently between Top and Pinned Button) */}
+      <div className="flex-1 overflow-y-auto min-h-0 py-1 space-y-1.5 overscroll-contain">
         {filteredStops.length === 0 ? (
-          <div className="py-8 text-center text-xs text-text-secondary">
+          <div className="py-8 text-center text-xs text-muted">
             No stops match &quot;{searchQuery}&quot;
           </div>
         ) : (
@@ -304,12 +309,12 @@ export default function SearchPage() {
                 role="button"
                 tabIndex={0}
                 className={`p-3 rounded-input border transition flex items-center justify-between cursor-pointer ${isSelected
-                  ? 'bg-cobalt-tint border-cobalt text-cobalt'
-                  : 'bg-surface hover:bg-page border-line text-ink'
+                  ? 'bg-sky-50 dark:bg-surface-2 border-brand text-brand shadow-xs'
+                  : 'bg-surface hover:bg-surface-2 border-line text-text'
                   }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <MapPin className={`w-4 h-4 shrink-0 ${isSelected ? 'text-cobalt' : 'text-text-secondary'}`} />
+                  <MapPin className={`w-4 h-4 shrink-0 ${isSelected ? 'text-brand' : 'text-muted'}`} />
                   <div className="truncate">
                     <p className="text-xs font-bold truncate">
                       {localName(stop, i18n.language)}
@@ -320,7 +325,7 @@ export default function SearchPage() {
                           <RouteBadge key={code} code={code} size="xs" />
                         ))}
                         {badges.length > 3 && (
-                          <span className="text-[9px] text-text-secondary font-medium">
+                          <span className="text-[9px] text-muted font-medium">
                             +{badges.length - 3}
                           </span>
                         )}
@@ -329,24 +334,23 @@ export default function SearchPage() {
                   </div>
                 </div>
 
-                {isSelected && <Check className="w-4 h-4 text-cobalt shrink-0" />}
+                {isSelected && <Check className="w-4 h-4 text-brand shrink-0" />}
               </div>
             )
           })
         )}
       </div>
 
-      {/* Sticky Bottom Action Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface/95 backdrop-blur-md border-t border-line z-30 flex justify-center">
+      {/* Pinned Bottom Action Button (Always Visible at bottom of screen!) */}
+      <div className="shrink-0 pt-2 pb-safe bg-surface/95 backdrop-blur-md border-t border-line z-30 flex justify-center">
         <button
           type="button"
           onClick={handleFindBuses}
           disabled={!fromStop || !toStop}
-          className={`w-full max-w-md py-3 px-4 font-extrabold text-sm rounded-pill shadow-soft transition flex items-center justify-center gap-2 ${
-            !fromStop || !toStop
-              ? 'bg-surface-2 text-muted cursor-not-allowed border border-line'
-              : 'on-brand cursor-pointer'
-          }`}
+          className={`w-full max-w-md py-3 px-4 font-extrabold text-sm rounded-pill shadow-soft transition flex items-center justify-center gap-2 ${!fromStop || !toStop
+            ? 'bg-surface-2 text-muted cursor-not-allowed border border-line'
+            : 'on-brand cursor-pointer'
+            }`}
           style={
             !fromStop || !toStop
               ? {}
