@@ -1,28 +1,29 @@
 {
   "latest": {
-    "versionName": "1.0.4",
-    "versionCode": 5,
+    "versionName": "1.0.5",
+    "versionCode": 6,
     "releasedAt": "2026-11-24",
     "apkUrl": "/downloads/nammooru-bus.apk",
     "apkSize": "7.3 MB",
     "downloadPage": "/#app",
-    "whatsNewPage": "/whats-new"
+    "whatsNewPage": "/whats-new",
+    "sha256": "7a8dd06734139510d0db525b6d47f3ea25b67eb25205ad6488cb1a22c01155f4"
   },
   "minSupportedVersionCode": 1,
   "releaseNotes": {
     "en": [
-      "Driver Portal & Isolation: Fixed driver profile crash; added strict role separation and dedicated Driver Help & Support",
-      "In-App Update System: Fullscreen viewport modal (no longer clipped by bottom bar); accurate web checking with build comparison",
-      "Live Service Alerts: Top banner contrast fix for dark mode; notification bell in header with unread badge and read tracking",
-      "Complaints & Grievance: Full dark mode and blue theme styling with high accessibility",
-      "Journey Details & Search: Fixed bottom padding so Destination cards are never cut off; pinned 'Find buses' button"
+      "Status bar: Unified edge-to-edge architecture with adaptive icon contrast across Android 8 through 15+",
+      "Map tiles: Fast, reliable OpenStreetMap standard tiles (19.5ms median) with automatic silent fallback",
+      "Search: Indestructible layout with always-visible 'Where to?' header, FROM/TO cards, scrollable stops, and pinned 'Find buses' button",
+      "Updates: Native-only integer version engine, bypassed on web, with on-device live diagnostics drawer",
+      "Crash prevention: ESLint zero-undef enforcement and 78-route Playwright smoke testing"
     ],
     "kn": [
-      "ಚಾಲಕರ ಪೋರ್ಟಲ್: ಚಾಲಕರ ಪ್ರೊಫೈಲ್ ದೋಷ ಸರಿಪಡಿಸಲಾಗಿದೆ; ಚಾಲಕರಿಗೆ ಪ್ರತ್ಯೇಕ ಸಹಾಯ ಪುಟ ಮತ್ತು ಸುರಕ್ಷಿತ ಪ್ರವೇಶ",
-      "ಆ್ಯಪ್ ನವೀಕರಣ ವ್ಯವಸ್ಥೆ: ಅಪ್‌ಡೇಟ್ ವಿಂಡೋ ಕೆಳಭಾಗದ ಮೆನುವಿನಿಂದ ಮುಚ್ಚಿಹೋಗದಂತೆ ಸರಿಪಡಿಸಲಾಗಿದೆ; ನಿಖರ ಆವೃತ್ತಿ ತಪಾಸಣೆ",
-      "ಲೈವ್ ಸೇವಾ ಎಚ್ಚರಿಕೆಗಳು: ಡಾರ್ಕ್ ಮೋಡ್‌ಗೆ ಸೂಕ್ತ ಬಣ್ಣಗಳ ವಿನ್ಯಾಸ; ಹೆಡರ್‌ನಲ್ಲಿ ಓದದ ಎಚ್ಚರಿಕೆಗಳ ಸಂಖ್ಯೆ ತೋರಿಸುವ ನೋಟಿಫಿಕೇಶನ್ ಬೆಲ್",
-      "ದೂರು ಮತ್ತು ಸಲಹೆ ಪುಟ: ಡಾರ್ಕ್ ಮತ್ತು ಬ್ಲೂ ಮೋಡ್‌ಗೆ ಸಂಪೂರ್ಣ ಹೊಂದಾಣಿಕೆ",
-      "ಪ್ರಯಾಣದ ವಿವರ ಮತ್ತು ಹುಡುಕಾಟ: ತಲುಪುವ ನಿಲ್ದಾಣ ಮರೆಯಾಗದಂತೆ ಅಂತರ ಸರಿಪಡಿಸಲಾಗಿದೆ; 'ಬಸ್‌ಗಳನ್ನು ಹುಡುಕಿ' ಬಟನ್ ಕೆಳಭಾಗದಲ್ಲೇ ಪಿನ್ ಮಾಡಲಾಗಿದೆ"
+      "ಸ್ಟೇಟಸ್ ಬಾರ್: ಆಂಡ್ರಾಯ್ಡ್ 8 ರಿಂದ 15+ ವರೆಗೆ ಹೊಂದಿಕೊಳ್ಳುವ ಏಕೀಕೃತ ಎಡ್ಜ್-ಟು-ಎಡ್ಜ್ ವಿನ್ಯಾಸ ಮತ್ತು ಐಕಾನ್ ಕಾಂಟ್ರಾಸ್ಟ್",
+      "ನಕ್ಷೆ: ವೇಗವಾದ ಅಧಿಕೃತ ಓಪನ್‌ಸ್ಟ್ರೀಟ್‌ಮ್ಯಾಪ್ ಟೈಲ್ಸ್ (19.5ms ಮಧ್ಯಸ್ಥಿಕೆ) ಮತ್ತು ತಡೆರಹಿತ ಸ್ವಯಂಚಾಲಿತ ಫಾಲ್‌ಬ್ಯಾಕ್",
+      "ಹುಡುಕಾಟ: 'ಎಲ್ಲಿಗೆ?' ಶೀರ್ಷಿಕೆ ಮತ್ತು ನಿಲ್ದಾಣಗಳ ನಿಖರ ವಿನ್ಯಾಸ, ಸ್ಕ್ರೋಲ್ ಮಾಡಬಹುದಾದ ಪಟ್ಟಿ ಹಾಗೂ ಪಿನ್ ಮಾಡಿದ 'ಬಸ್‌ಗಳನ್ನು ಹುಡುಕಿ' ಬಟನ್",
+      "ಆ್ಯಪ್ ನವೀಕರಣ: ಕೇವಲ ಮೊಬೈಲ್ ಆ್ಯಪ್‌ಗೆ ಮಾತ್ರ ಅನ್ವಯವಾಗುವ ನಿಖರ ಆವೃತ್ತಿ ತಪಾಸಣೆ ಮತ್ತು ಆನ್-ಡಿವೈಸ್ ಡಯಾಗ್ನೋಸ್ಟಿಕ್ಸ್",
+      "ದೋಷ ತಡೆಗಟ್ಟುವಿಕೆ: ಕೋಡ್ ಸುರಕ್ಷತೆ ಮತ್ತು 78 ಮಾರ್ಗಗಳ ಸಮಗ್ರ ಪರೀಕ್ಷೆ"
     ]
   }
 }

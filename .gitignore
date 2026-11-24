@@ -41,6 +41,7 @@ android/keystore.properties
 local.properties
 .gradle/
 android/.gradle/
+android/.kotlin/
 android/app/build/
 android/build/
 android/app/release/

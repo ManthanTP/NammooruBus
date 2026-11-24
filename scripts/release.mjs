@@ -124,8 +124,8 @@ async function main() {
     downloadPage: '/#app',
     whatsNewPage: '/whats-new',
     title: {
-      en: `Release v${targetVersion}`,
-      kn: `ಆವೃತ್ತಿ v${targetVersion}`,
+      en: `Release v${targetVersion} - Stabilize`,
+      kn: `ಆವೃತ್ತಿ v${targetVersion} - ಸ್ಥಿರ ಆವೃತ್ತಿ`,
     },
     notes: versionJson.releaseNotes || {
       en: [`Release v${targetVersion}: Stability and performance updates`],
