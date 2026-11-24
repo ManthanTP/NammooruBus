@@ -43,9 +43,13 @@ export default function PassengerLayout() {
 
   return (
     <div className="relative w-full min-h-screen bg-bg font-body text-text flex flex-col md:flex-row overflow-x-hidden">
-      {/* 1. Global Top App Bar: 56px height, solid surface on all pages, line border */}
+      {/* 1. Global Top App Bar: 56px content + safe top padding, solid surface on all pages, line border */}
       <header
-        className="fixed top-0 left-0 right-0 z-40 h-14 px-2.5 sm:px-4 md:px-6 flex items-center justify-between bg-surface border-b border-line shadow-xs transition-colors"
+        className="fixed top-0 left-0 right-0 z-40 px-2.5 sm:px-4 md:px-6 flex items-center justify-between bg-surface border-b border-line shadow-xs transition-colors"
+        style={{
+          paddingTop: 'var(--safe-top, 0px)',
+          height: 'calc(3.5rem + var(--safe-top, 0px))',
+        }}
       >
         <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
           <Link to="/explore" className="flex items-center gap-2 select-none shrink-0 group">
@@ -155,7 +159,12 @@ export default function PassengerLayout() {
       <ToastContainer />
 
       {/* 3. Main Content Area */}
-      <div className="flex-1 w-full flex flex-col md:flex-row min-h-screen pt-14">
+      <div
+        className="flex-1 w-full flex flex-col md:flex-row min-h-screen"
+        style={{
+          paddingTop: 'calc(3.5rem + var(--safe-top, 0px))',
+        }}
+      >
         {/* Left Column (Content) */}
         <main
           className={`flex-1 md:w-[460px] md:max-w-[460px] md:flex-none min-h-screen pb-24 md:pb-8 px-4 md:px-5 overflow-y-auto md:border-r md:border-line md:bg-surface md:m-3 md:rounded-[28px] md:shadow-soft transition-all ${isSearchPage ? 'bg-surface' : ''

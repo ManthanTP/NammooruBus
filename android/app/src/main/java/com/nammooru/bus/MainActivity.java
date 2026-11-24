@@ -1,7 +1,9 @@
 package com.nammooru.bus;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -13,26 +15,36 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Ensure Android window decor does not overlay system bars
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        Window window = getWindow();
 
-        final View contentView = findViewById(android.R.id.content);
-        if (contentView != null) {
-            final int fallbackHeight = getStatusBarHeightFallback();
-            // Apply immediate padding so the webview begins strictly below the status bar
-            // on first render
-            contentView.setPadding(0, fallbackHeight, 0, 0);
+        // 1. Enable true edge-to-edge drawing so app background flows under status bar (like Instagram)
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+        window.setStatusBarColor(Color.TRANSPARENT);
+        window.setNavigationBarColor(Color.TRANSPARENT);
 
-            // Listen for window insets (handles punch-hole cameras, display cutouts, and
-            // dynamic status bars)
-            ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, windowInsets) -> {
-                Insets insets = windowInsets.getInsets(
-                        WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout());
-                int topPadding = Math.max(insets.top, fallbackHeight);
-                v.setPadding(0, topPadding, 0, 0);
-                return windowInsets;
-            });
-        }
+        final View decorView = window.getDecorView();
+
+        // 2. Measure status bar + punch-hole cutout and dynamically inject into WebView CSS (--safe-top)
+        ViewCompat.setOnApplyWindowInsetsListener(decorView, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout()
+            );
+            int topPx = Math.max(insets.top, getStatusBarHeightFallback());
+            float density = getResources().getDisplayMetrics().density;
+            int topDp = Math.round(topPx / density);
+
+            Insets navInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars());
+            int bottomDp = Math.round(navInsets.bottom / density);
+
+            if (bridge != null && bridge.getWebView() != null) {
+                bridge.getWebView().post(() -> {
+                    String js = "document.documentElement.style.setProperty('--safe-top', '" + topDp + "px');"
+                              + "document.documentElement.style.setProperty('--safe-bottom', '" + bottomDp + "px');";
+                    bridge.getWebView().evaluateJavascript(js, null);
+                });
+            }
+            return windowInsets;
+        });
     }
 
     private int getStatusBarHeightFallback() {

@@ -9,7 +9,8 @@ import LanguageToggle from '@/components/ui/LanguageToggle'
 import RoadRibbon from '@/components/ui/RoadRibbon'
 import AuthSwitch from '@/components/ui/AuthSwitch'
 import SegmentedControl from '@/components/ui/SegmentedControl'
-import { setStatusBarTheme } from '@/lib/platform'
+import { ToastContainer, toast } from '@/components/ui/Toast'
+import { setStatusBarTheme, hapticError } from '@/lib/platform'
 import { appStorage } from '@/lib/storage'
 
 function formatAuthError(error) {
@@ -26,7 +27,7 @@ function formatAuthError(error) {
   if (lower.includes('rate limit') || lower.includes('too many requests')) {
     return 'Too many attempts. Please wait a few minutes before trying again.'
   }
-  if (lower.includes('network') || lower.includes('fetch')) {
+  if (lower.includes('network') || lower.includes('fetch') || lower.includes('failed to fetch')) {
     return 'Network connection issue. Please check your internet connection.'
   }
   return msg || 'Registration failed. Please try again.'
@@ -69,17 +70,26 @@ export default function RegisterPage() {
     setNoticeMessage(null)
 
     if (password.length < 8) {
-      setFormError(t('auth.password_hint') || 'Password must be at least 8 characters')
+      const err = t('auth.password_hint') || 'Password must be at least 8 characters'
+      setFormError(err)
+      toast.error(err)
+      hapticError()
       return
     }
 
     if (isDriver) {
       if (!driverKey.trim()) {
-        setFormError('Please enter your driver secret key')
+        const err = 'Please enter your driver secret key'
+        setFormError(err)
+        toast.error(err)
+        hapticError()
         return
       }
       if (!busRegNo.trim()) {
-        setFormError('Please enter your bus registration number (e.g. KA25 F 1234)')
+        const err = 'Please enter your bus registration number (e.g. KA25 F 1234)'
+        setFormError(err)
+        toast.error(err)
+        hapticError()
         return
       }
     }
@@ -94,7 +104,10 @@ export default function RegisterPage() {
       const { error } = await signUp(email, password, fullName, preferredLang)
 
       if (error) {
-        setFormError(formatAuthError(error))
+        const errorMsg = formatAuthError(error)
+        setFormError(errorMsg)
+        toast.error(errorMsg)
+        hapticError()
         setSubmitting(false)
         return
       }
@@ -110,26 +123,42 @@ export default function RegisterPage() {
             type: 'warning',
             text: 'That driver key is not correct. Your account was created as a passenger. You can try the key again anytime on your Profile page.',
           })
+          toast.info('Account created as passenger. Driver key was incorrect.')
           setSubmitting(false)
           return
         } else if (status === 'locked') {
-          setFormError('Too many wrong keys. Try again in 15 minutes.')
+          const err = 'Too many wrong keys. Try again in 15 minutes.'
+          setFormError(err)
+          toast.error(err)
+          hapticError()
           setSubmitting(false)
           return
         } else if (status === 'not_configured') {
-          setFormError('Driver sign-up is not set up yet. Ask the admin.')
+          const err = 'Driver sign-up is not set up yet. Ask the admin.'
+          setFormError(err)
+          toast.error(err)
+          hapticError()
           setSubmitting(false)
           return
         } else if (status === 'bus_taken') {
-          setFormError('This bus is already assigned to another driver. Please contact admin.')
+          const err = 'This bus is already assigned to another driver. Please contact admin.'
+          setFormError(err)
+          toast.error(err)
+          hapticError()
           setSubmitting(false)
           return
         } else if (status === 'bus_required') {
-          setFormError('Please enter your bus registration number.')
+          const err = 'Please enter your bus registration number.'
+          setFormError(err)
+          toast.error(err)
+          hapticError()
           setSubmitting(false)
           return
         } else if (status === 'login_required') {
-          setFormError('Account created. Please log in and claim driver role on your profile.')
+          const err = 'Account created. Please log in and claim driver role on your profile.'
+          setFormError(err)
+          toast.error(err)
+          hapticError()
           setSubmitting(false)
           return
         }
@@ -139,19 +168,30 @@ export default function RegisterPage() {
       appStorage.removeItem('nb_onboarding_step')
       navigate('/explore')
     } catch (err) {
-      setFormError(formatAuthError(err))
+      const errorMsg = formatAuthError(err)
+      setFormError(errorMsg)
+      toast.error(errorMsg)
+      hapticError()
       setSubmitting(false)
     }
   }
 
   return (
     <div className="min-h-screen bg-bg flex flex-col justify-between font-body text-ink-950 transition-colors">
+      <ToastContainer />
       {/* 1. Top Half: Signature Gradient with logo-full */}
       <div
-        className="pt-10 pb-16 px-6 on-brand flex flex-col items-center justify-center relative overflow-hidden shrink-0"
-        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
+        className="pb-16 px-6 on-brand flex flex-col items-center justify-center relative overflow-hidden shrink-0"
+        style={{
+          paddingTop: 'calc(2.5rem + var(--safe-top, 0px))',
+          background: 'var(--gradient-brand)',
+          color: 'var(--on-brand)',
+        }}
       >
-        <div className="absolute top-4 right-4 z-10">
+        <div
+          className="absolute right-4 z-10"
+          style={{ top: 'calc(1rem + var(--safe-top, 0px))' }}
+        >
           <LanguageToggle />
         </div>
 

@@ -47,30 +47,24 @@ export const hapticError = async () => {
 
 /**
  * Native Status Bar theme & style controller
- * Top: Do NOT draw under the status bar or camera cutout.
- * Sets status bar color and icon style matching active screen / theme.
+ * Seamless edge-to-edge status bar flow (like Instagram) with transparent overlay
+ * and adaptive icon contrast.
  */
-let overlaysDisabled = false
-
 export const setStatusBarTheme = async (themeOrScreen = 'light', isLightBackground = false) => {
   if (!isNative()) return
   try {
-    if (!overlaysDisabled) {
-      await StatusBar.setOverlaysWebView({ overlay: false })
-      overlaysDisabled = true
-    }
+    // Keep transparent status bar overlay so app header color flows seamlessly behind it
+    await StatusBar.setOverlaysWebView({ overlay: true })
 
     if (themeOrScreen === 'brand') {
-      // Login, Register, Get Started, Welcome gradient header
+      // Light text/icons on brand gradient (#0040FF)
       await StatusBar.setStyle({ style: Style.Dark })
-      await StatusBar.setBackgroundColor({ color: '#0040FF' })
       return
     }
 
     if (themeOrScreen === 'splash' || isLightBackground) {
-      // Splash or clean light screen
+      // Dark text/icons on white/light background
       await StatusBar.setStyle({ style: Style.Light })
-      await StatusBar.setBackgroundColor({ color: '#FFFFFF' })
       return
     }
 
@@ -80,17 +74,11 @@ export const setStatusBarTheme = async (themeOrScreen = 'light', isLightBackgrou
     }
 
     if (resolvedTheme === 'light') {
-      // Top bar surface of Light theme: white with dark icons
+      // Dark icons on white header
       await StatusBar.setStyle({ style: Style.Light })
-      await StatusBar.setBackgroundColor({ color: '#FFFFFF' })
-    } else if (resolvedTheme === 'blue') {
-      // Top bar surface of Blue theme: #0B1450 with light icons
-      await StatusBar.setStyle({ style: Style.Dark })
-      await StatusBar.setBackgroundColor({ color: '#0B1450' })
     } else {
-      // Top bar surface of Dark theme: #12141C with light icons
+      // Light icons on dark/blue header (#12141C / #0B1450)
       await StatusBar.setStyle({ style: Style.Dark })
-      await StatusBar.setBackgroundColor({ color: '#12141C' })
     }
   } catch (e) {
     console.warn('Could not update native status bar:', e)
@@ -99,14 +87,20 @@ export const setStatusBarTheme = async (themeOrScreen = 'light', isLightBackgrou
 
 /**
  * Configure screen safe area insets.
- * When WebView is not overlaid, OS handles the status bar and nav bar.
- * We set --safe-top to 0px and --safe-bottom to 8px to prevent double-padding.
+ * Dynamic insets are injected directly from Android window cutouts via MainActivity.
+ * Sets fallback insets immediately on native startup so headers never start at 0px.
  */
 export const initScreenInsets = () => {
   if (typeof document === 'undefined') return
   if (isNative()) {
-    document.documentElement.style.setProperty('--safe-top', '0px')
-    document.documentElement.style.setProperty('--safe-bottom', '8px')
+    const currentSafeTop = getComputedStyle(document.documentElement).getPropertyValue('--safe-top')
+    if (!currentSafeTop || currentSafeTop.trim() === '0px' || currentSafeTop.trim() === '') {
+      document.documentElement.style.setProperty('--safe-top', '36px')
+    }
+    const currentSafeBottom = getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom')
+    if (!currentSafeBottom || currentSafeBottom.trim() === '') {
+      document.documentElement.style.setProperty('--safe-bottom', '12px')
+    }
   }
 }
 

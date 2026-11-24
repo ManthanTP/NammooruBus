@@ -103,7 +103,13 @@ export default function DriverLayout() {
   return (
     <div className="min-h-screen bg-bg font-body text-text flex flex-col select-none transition-colors">
       {/* 1. Global Top App Bar: 56px height, solid surface matching passenger style */}
-      <header className="sticky top-0 z-40 h-14 px-3 sm:px-5 flex items-center justify-between bg-surface border-b border-line shadow-xs transition-colors">
+      <header
+        className="sticky top-0 z-40 px-3 sm:px-5 flex items-center justify-between bg-surface border-b border-line shadow-xs transition-colors"
+        style={{
+          paddingTop: 'var(--safe-top, 0px)',
+          height: 'calc(3.5rem + var(--safe-top, 0px))',
+        }}
+      >
         {/* Left: Logo mark + "Nammooru Bus" + Driver tag */}
         <div className="flex items-center gap-2 min-w-0">
           <Link to="/driver" className="flex items-center gap-2 select-none shrink-0 group">

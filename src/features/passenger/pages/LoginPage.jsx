@@ -6,7 +6,8 @@ import { useAuthStore } from '@/store/authStore'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import RoadRibbon from '@/components/ui/RoadRibbon'
 import AuthSwitch from '@/components/ui/AuthSwitch'
-import { setStatusBarTheme } from '@/lib/platform'
+import { ToastContainer, toast } from '@/components/ui/Toast'
+import { setStatusBarTheme, hapticError } from '@/lib/platform'
 import { appStorage } from '@/lib/storage'
 
 function formatAuthError(error) {
@@ -14,8 +15,14 @@ function formatAuthError(error) {
   const msg = typeof error === 'string' ? error : (error.message || '')
   const lower = msg.toLowerCase()
 
-  if (lower.includes('invalid login credentials') || lower.includes('invalid credentials') || lower.includes('wrong password')) {
+  if (lower.includes('invalid login credentials') || lower.includes('invalid credentials') || lower.includes('wrong password') || lower.includes('invalid_grant')) {
     return 'Incorrect email or password. Please try again.'
+  }
+  if (lower.includes('user not found') || lower.includes('no user')) {
+    return 'No account found with this email. Please sign up.'
+  }
+  if (lower.includes('email not confirmed')) {
+    return 'Please confirm your email address before signing in.'
   }
   if (lower.includes('already registered') || lower.includes('already in use') || lower.includes('already exists')) {
     return 'An account with this email already exists. Please sign in.'
@@ -26,7 +33,7 @@ function formatAuthError(error) {
   if (lower.includes('rate limit') || lower.includes('too many requests')) {
     return 'Too many attempts. Please wait a few minutes before trying again.'
   }
-  if (lower.includes('network') || lower.includes('fetch')) {
+  if (lower.includes('network') || lower.includes('fetch') || lower.includes('failed to fetch')) {
     return 'Network connection issue. Please check your internet connection.'
   }
   return msg || 'Invalid email or password'
@@ -53,7 +60,10 @@ export default function LoginPage() {
     setFormError(null)
 
     if (!email || !password) {
-      setFormError('Please enter both email and password.')
+      const err = 'Please enter both email and password.'
+      setFormError(err)
+      toast.error(err)
+      hapticError()
       return
     }
 
@@ -62,7 +72,10 @@ export default function LoginPage() {
       const { profile, error } = await signIn(email, password)
 
       if (error) {
-        setFormError(formatAuthError(error))
+        const errorMsg = formatAuthError(error)
+        setFormError(errorMsg)
+        toast.error(errorMsg)
+        hapticError()
         setSubmitting(false)
         return
       }
@@ -78,19 +91,30 @@ export default function LoginPage() {
         navigate('/explore')
       }
     } catch (err) {
-      setFormError(formatAuthError(err))
+      const errorMsg = formatAuthError(err)
+      setFormError(errorMsg)
+      toast.error(errorMsg)
+      hapticError()
       setSubmitting(false)
     }
   }
 
   return (
     <div className="min-h-screen bg-bg flex flex-col justify-between font-body text-ink-950 transition-colors">
+      <ToastContainer />
       {/* 1. Top Half: Signature Gradient with logo-full on white plate */}
       <div
-        className="pt-10 pb-16 px-6 on-brand flex flex-col items-center justify-center relative overflow-hidden shrink-0"
-        style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
+        className="pb-16 px-6 on-brand flex flex-col items-center justify-center relative overflow-hidden shrink-0"
+        style={{
+          paddingTop: 'calc(2.5rem + var(--safe-top, 0px))',
+          background: 'var(--gradient-brand)',
+          color: 'var(--on-brand)',
+        }}
       >
-        <div className="absolute top-4 right-4 z-10">
+        <div
+          className="absolute right-4 z-10"
+          style={{ top: 'calc(1rem + var(--safe-top, 0px))' }}
+        >
           <LanguageToggle />
         </div>
 

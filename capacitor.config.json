@@ -13,7 +13,7 @@
       "androidScaleType": "CENTER"
     },
     "StatusBar": {
-      "overlaysWebView": false
+      "overlaysWebView": true
     }
   }
 }

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Bus, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import LanguageToggle from '@/components/ui/LanguageToggle'
+import { ToastContainer, toast } from '@/components/ui/Toast'
+import { hapticError, hapticSuccess } from '@/lib/platform'
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation()
@@ -19,14 +21,20 @@ export default function ForgotPasswordPage() {
 
     const { error } = await resetPassword(email)
     if (error) {
-      setErrorMsg(error.message)
+      const msg = error.message || 'Failed to send reset email'
+      setErrorMsg(msg)
+      toast.error(msg)
+      hapticError()
     } else {
       setSuccess(true)
+      toast.success(t('auth.reset_email_sent') || 'Password reset email sent')
+      hapticSuccess()
     }
   }
 
   return (
     <div className="min-h-screen bg-page flex flex-col justify-between p-6">
+      <ToastContainer />
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-input bg-cobalt text-white flex items-center justify-center shadow-soft">

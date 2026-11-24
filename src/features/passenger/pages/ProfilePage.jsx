@@ -83,6 +83,22 @@ export default function ProfilePage() {
     navigate(isNative() ? '/get-started' : (isDriverRoute ? '/login' : '/'))
   }
 
+  const handleResetApp = async () => {
+    const confirmed = window.confirm(
+      'Reset all app preferences, saved data, and restart onboarding setup?'
+    )
+    if (!confirmed) return
+    hapticTick()
+    appStorage.removeItem('nb-onboarded')
+    appStorage.removeItem('nb-guest')
+    appStorage.removeItem('nb_onboarding_step')
+    appStorage.removeItem('nb-saved-trips')
+    appStorage.removeItem('nb-recent-searches')
+    await signOut()
+    toast.info('App reset successfully')
+    navigate(isNative() ? '/welcome' : '/get-started')
+  }
+
   const handleCheckForUpdates = async () => {
     hapticTick()
     setUpdateChecking(true)
@@ -472,14 +488,7 @@ export default function ProfilePage() {
             <span>Check for updates</span>
           </Button>
 
-          <div className="grid grid-cols-3 gap-2 pt-1">
-            <Link
-              to="/whats-new"
-              className="py-2 px-2 rounded-[12px] bg-surface-2 hover:bg-line border border-line text-[11px] font-bold text-text text-center transition flex items-center justify-center gap-1"
-            >
-              <Sparkles className="w-3 h-3 text-amber-500" />
-              <span>What's new</span>
-            </Link>
+          <div className="grid grid-cols-2 gap-2 pt-1">
             <Link
               to="/terms"
               className="py-2 px-2 rounded-[12px] bg-surface-2 hover:bg-line border border-line text-[11px] font-bold text-text text-center transition flex items-center justify-center gap-1"
@@ -506,6 +515,15 @@ export default function ProfilePage() {
         <LogOut className="w-4 h-4 mr-1" />
         <span>{t('auth.logout') || 'Log out'}</span>
       </Button>
+
+      {/* 6. Reset App & Restart Onboarding */}
+      <button
+        type="button"
+        onClick={handleResetApp}
+        className="w-full py-2.5 text-xs text-muted hover:text-danger text-center transition font-semibold cursor-pointer -mt-2"
+      >
+        Reset App & Restart Setup
+      </button>
 
       {/* Update Available Modal */}
       <UpdateModal

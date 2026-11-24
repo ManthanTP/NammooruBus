@@ -32,7 +32,13 @@ export default function WhatsNewPage() {
   return (
     <div className="min-h-screen bg-bg text-text font-body transition-colors pb-12">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 h-14 bg-surface/90 backdrop-blur-md border-b border-line px-4 md:px-6 flex items-center justify-between shadow-xs">
+      <header
+        className="sticky top-0 z-30 bg-surface/90 backdrop-blur-md border-b border-line px-4 md:px-6 flex items-center justify-between shadow-xs"
+        style={{
+          paddingTop: 'var(--safe-top, 0px)',
+          height: 'calc(3.5rem + var(--safe-top, 0px))',
+        }}
+      >
         <div className="flex items-center gap-3">
           <button
             type="button"
