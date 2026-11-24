@@ -73,6 +73,13 @@ export default function SearchPage() {
 
   const handleSelectStop = (stop) => {
     setErrorMessage(null)
+    if (!fromStop) {
+      setFromStop(stop)
+      setSearchQuery('')
+      setActiveField('to')
+      return
+    }
+
     if (activeField === 'from') {
       if (toStop && toStop.id === stop.id) {
         setErrorMessage(t('passenger.same_stop_error'))
@@ -148,20 +155,22 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="h-full max-h-full flex flex-col bg-surface text-text font-body overflow-hidden">
+    <div className="flex-1 min-h-0 flex flex-col bg-surface text-text font-body overflow-hidden">
       {/* Top Header & Inputs Block (Pinned at Top - NON-SCROLLABLE) */}
-      <div className="shrink-0 px-4 pt-3 pb-2 space-y-2.5 bg-surface border-b border-line/60 z-20">
+      <div className="shrink-0 px-4 pt-2.5 pb-2 space-y-2.5 bg-surface border-b border-line/60 z-20">
         {/* Top Header */}
-        <header className="flex items-center justify-between pb-1 border-b border-line">
+        <header data-testid="search-header" className="flex items-center justify-between pb-1 border-b border-line">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-text transition p-1"
+            className="flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-text transition p-1 cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>{t('common.back')}</span>
           </button>
-          <span className="font-extrabold text-sm font-heading text-text">{t('passenger.where_to')}</span>
+          <h1 data-testid="where-to-title" className="font-extrabold text-sm font-heading text-text">
+            {t('passenger.where_to')}
+          </h1>
           <div className="w-12" />
         </header>
 
@@ -343,12 +352,14 @@ export default function SearchPage() {
 
       {/* Pinned Bottom Action Button (Always Visible, moved above bottom gesture bar) */}
       <div
+        data-testid="find-buses-bar"
         className="shrink-0 px-4 pt-2.5 bg-surface/95 backdrop-blur-md border-t border-line z-30 flex justify-center"
         style={{
-          paddingBottom: 'max(16px, calc(10px + env(safe-area-inset-bottom, 0px)))',
+          paddingBottom: 'max(16px, calc(10px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))))',
         }}
       >
         <button
+          data-testid="search-find-buses-btn"
           type="button"
           onClick={handleFindBuses}
           disabled={!fromStop || !toStop}

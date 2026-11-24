@@ -226,16 +226,18 @@ export default function PassengerLayout() {
 
       {/* 3. Main Content Area */}
       <div
-        className="flex-1 w-full flex flex-col md:flex-row min-h-screen"
+        className={`flex-1 w-full flex flex-col md:flex-row ${
+          isSearchPage ? 'h-[100dvh] max-h-[100dvh] overflow-hidden' : 'min-h-screen'
+        }`}
         style={{
           paddingTop: 'calc(3.5rem + var(--safe-top, 0px))',
         }}
       >
         {/* Left Column (Content) */}
         <main
-          className={`flex-1 md:w-[460px] md:max-w-[460px] md:flex-none transition-all ${
+          className={`flex-1 min-h-0 md:w-[460px] md:max-w-[460px] md:flex-none transition-all ${
             isSearchPage
-              ? 'h-[calc(100dvh-3.5rem-var(--safe-top,0px))] max-h-[calc(100dvh-3.5rem-var(--safe-top,0px))] overflow-hidden flex flex-col p-0 bg-surface md:border-r md:border-line md:m-3 md:rounded-[28px] md:shadow-soft'
+              ? 'h-full overflow-hidden flex flex-col p-0 bg-surface md:border-r md:border-line md:m-3 md:rounded-[28px] md:shadow-soft'
               : 'min-h-screen pb-24 md:pb-8 px-4 md:px-5 overflow-y-auto md:border-r md:border-line md:bg-surface md:m-3 md:rounded-[28px] md:shadow-soft'
           }`}
           style={
@@ -248,7 +250,7 @@ export default function PassengerLayout() {
             key={location.pathname}
             className={`page-enter ${
               isSearchPage
-                ? 'h-full flex flex-col overflow-hidden max-w-lg mx-auto md:max-w-none w-full'
+                ? 'flex-1 min-h-0 flex flex-col overflow-hidden max-w-lg mx-auto md:max-w-none w-full'
                 : 'max-w-lg mx-auto md:max-w-none pt-2'
             }`}
           >
