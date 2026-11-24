@@ -261,6 +261,14 @@ export const router = createBrowserRouter([
         element: <DriverTripPage />,
       },
       {
+        path: 'live',
+        element: <Navigate to="/driver/trip" replace />,
+      },
+      {
+        path: 'reports',
+        element: <Navigate to="/driver/history" replace />,
+      },
+      {
         path: 'history',
         element: <DriverHistoryPage />,
       },
