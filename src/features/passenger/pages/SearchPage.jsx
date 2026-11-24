@@ -109,10 +109,13 @@ export default function SearchPage() {
       }
     }
 
-    if (nearest && minDist <= 1.0) {
+    if (nearest && minDist <= 5.0) {
       handleSelectStop(nearest)
+    } else if (nearest) {
+      handleSelectStop(nearest)
+      setErrorMessage(`You are ${Math.round(minDist)} km away. Selected nearest hub: ${localName(nearest, i18n.language)}`)
     } else {
-      setErrorMessage('No stop within 1 km of you. Pick a start stop.')
+      setErrorMessage('No stop found. Pick a start stop.')
     }
   }
 

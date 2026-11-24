@@ -9,6 +9,7 @@ import { useMapStore } from '@/store/mapStore'
 import { useSavedStore } from '@/store/savedStore'
 import { useAuthStore } from '@/store/authStore'
 import { localName } from '@/lib/formatters'
+import { haversine } from '@/lib/geo'
 import RouteBadge from '@/components/ui/RouteBadge'
 import AlertBanner from '@/features/passenger/components/AlertBanner'
 import MapCard from '@/components/map/MapCard'
@@ -55,19 +56,18 @@ export default function HomePage() {
   // Auto-set nearest stop as default From if user location is available and not set yet
   useEffect(() => {
     if (userPos && stops.length > 0 && !fromStop) {
-      // Find closest stop within 1 km
       let nearest = null
       let minDist = Infinity
       for (const s of stops) {
         if (s.lat && s.lng) {
-          const d = Math.hypot(s.lat - userPos.lat, s.lng - userPos.lng)
+          const d = haversine(userPos.lat, userPos.lng, s.lat, s.lng)
           if (d < minDist) {
             minDist = d
             nearest = s
           }
         }
       }
-      if (nearest) {
+      if (nearest && minDist <= 15) {
         setFromStop(nearest)
       }
     }

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { Capacitor } from '@capacitor/core'
 import { GeolocationService } from '@/lib/location'
 
 export const useLocationStore = create((set, get) => ({
@@ -10,7 +11,7 @@ export const useLocationStore = create((set, get) => ({
   lastUpdated: null,
   errorMessage: null,
 
-  start: () => {
+  start: async () => {
     if (!GeolocationService.isSupported()) {
       set({ status: 'unavailable', errorMessage: 'Geolocation not supported' })
       return
@@ -18,8 +19,45 @@ export const useLocationStore = create((set, get) => ({
 
     if (get().status === 'asking') return
 
+    // On native Android, proactively request runtime permission dialog if not yet granted
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const hasPermission = await GeolocationService.checkPermission()
+        if (!hasPermission) {
+          const granted = await GeolocationService.requestPermission()
+          if (!granted) {
+            set({ status: 'denied', errorMessage: 'Location permission denied' })
+            return
+          }
+        }
+      } catch (_) { }
+    }
+
     set({ status: 'asking', errorMessage: null })
 
+    // Step 1: Immediate Position Fix (with automatic high -> low accuracy fallback)
+    GeolocationService.getCurrentPosition()
+      .then((pos) => {
+        if (pos?.coords) {
+          const { latitude, longitude, accuracy, heading, speed } = pos.coords
+          set({
+            position: { lat: latitude, lng: longitude },
+            accuracy,
+            heading,
+            speed,
+            status: 'granted',
+            lastUpdated: Date.now(),
+            errorMessage: null,
+          })
+        }
+      })
+      .catch((err) => {
+        if (err.code === 1 || err.message?.toLowerCase().includes('denied')) {
+          set({ status: 'denied', errorMessage: err.message || 'Location permission denied' })
+        }
+      })
+
+    // Step 2: Continuous Watch (with automatic fallback to low accuracy if GPS times out)
     GeolocationService.startWatch(
       (pos) => {
         const { latitude, longitude, accuracy, heading, speed } = pos.coords
@@ -34,8 +72,11 @@ export const useLocationStore = create((set, get) => ({
         })
       },
       (err) => {
+        // If we already have a valid position, keep it; do not set unavailable on transient watch glitches
+        if (get().position) return
+
         let status = 'unavailable'
-        if (err.code === 1) { // PERMISSION_DENIED
+        if (err.code === 1 || err.message?.toLowerCase().includes('denied')) {
           status = 'denied'
         }
         set({

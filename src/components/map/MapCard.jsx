@@ -4,6 +4,8 @@ import { Maximize2, Navigation, AlertCircle, X } from 'lucide-react'
 import MapView from './MapView'
 import { useLocationStore } from '@/store/locationStore'
 import { useMapStore } from '@/store/mapStore'
+import { GeolocationService } from '@/lib/location'
+import { hapticTick } from '@/lib/platform'
 
 /**
  * MapCard — mobile in-page map container with full-screen portal expand.
@@ -18,8 +20,9 @@ export default function MapCard({ height = 220, isSticky = false, title = 'Explo
   const { position, accuracy, start } = useLocationStore()
   const { setCenter, setView } = useMapStore()
 
-  const handleLocateMe = (e) => {
+  const handleLocateMe = async (e) => {
     if (e) e.stopPropagation()
+    hapticTick()
     const pLat = Number(position?.lat)
     const pLng = Number(position?.lng)
     if (!Number.isNaN(pLat) && !Number.isNaN(pLng) && Number.isFinite(pLat) && Number.isFinite(pLng)) {
@@ -29,6 +32,15 @@ export default function MapCard({ height = 220, isSticky = false, title = 'Explo
       }
     } else {
       start()
+      try {
+        const freshPos = await GeolocationService.getCurrentPosition()
+        if (freshPos?.coords) {
+          const centerFn = setView || setCenter
+          if (typeof centerFn === 'function') {
+            centerFn([freshPos.coords.latitude, freshPos.coords.longitude], 15)
+          }
+        }
+      } catch (_) { }
     }
   }
 
