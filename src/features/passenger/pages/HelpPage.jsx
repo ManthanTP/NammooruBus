@@ -1,11 +1,21 @@
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, HelpCircle, MessageSquare } from 'lucide-react'
-import Button from '@/components/ui/Button'
+import { ArrowLeft, MessageSquare } from 'lucide-react'
+import { useAuthStore } from '@/store/authStore'
 
 export default function HelpPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { profile } = useAuthStore()
+  const isDriver = profile?.role === 'driver'
+
+  const handleBack = () => {
+    if (isDriver) {
+      navigate('/driver/profile', { replace: true })
+    } else {
+      navigate(-1)
+    }
+  }
 
   const faqs = [
     {
@@ -36,7 +46,7 @@ export default function HelpPage() {
         <div className="w-full flex items-center justify-between mb-2">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center transition active:scale-95 cursor-pointer"
             style={{ color: 'var(--on-brand)' }}
             title="Back"
@@ -49,8 +59,8 @@ export default function HelpPage() {
           <div className="w-8" />
         </div>
 
-        {/* Logo full on white plate */}
-        <div className="bg-white rounded-[20px] p-3 shadow-float mb-3 flex items-center justify-center max-w-[170px]">
+        {/* Logo plate */}
+        <div className="bg-surface rounded-[20px] p-3 shadow-float mb-3 flex items-center justify-center max-w-[170px] border border-line">
           <img
             src="/brand/logo-full.png"
             alt="Nammooru Bus"
@@ -73,27 +83,31 @@ export default function HelpPage() {
         {faqs.map((faq, idx) => (
           <div
             key={idx}
-            className="p-4 bg-white rounded-[20px] border border-line shadow-soft space-y-1.5 text-left"
+            className="p-4 bg-surface rounded-[20px] border border-line shadow-soft space-y-1.5 text-left"
           >
-            <h3 className="text-xs font-bold font-heading text-ink-950">{faq.q}</h3>
+            <h3 className="text-xs font-bold font-heading text-text">{faq.q}</h3>
             <p className="text-xs text-muted leading-relaxed">{faq.a}</p>
           </div>
         ))}
       </div>
 
-      {/* 3. Feedback CTA */}
-      <div className="p-4 bg-white rounded-[20px] border border-line shadow-soft flex items-center justify-between gap-3">
-        <div>
-          <h3 className="text-xs font-bold font-heading text-ink-950">Have a grievance or complaint?</h3>
-          <p className="text-xs text-muted mt-0.5">Submit feedback directly to transit support.</p>
+      {/* 3. Feedback CTA (Passengers only) */}
+      {!isDriver && (
+        <div className="p-4 bg-surface rounded-[20px] border border-line shadow-soft flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-xs font-bold font-heading text-text">Have a grievance or complaint?</h3>
+            <p className="text-xs text-muted mt-0.5">Submit feedback directly to transit support.</p>
+          </div>
+          <Link
+            to="/complaints"
+            className="px-4 py-2 on-brand text-xs font-bold rounded-full transition shrink-0 active:scale-95 shadow-xs flex items-center gap-1.5"
+            style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>{t('nav.complaints') || 'Feedback'}</span>
+          </Link>
         </div>
-        <Link
-          to="/complaints"
-          className="px-4 py-2 bg-cobalt-500 text-white text-xs font-bold rounded-full hover:bg-cobalt-600 transition shrink-0 active:scale-95 shadow-xs"
-        >
-          {t('nav.complaints') || 'Feedback'}
-        </Link>
-      </div>
+      )}
     </div>
   )
 }

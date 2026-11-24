@@ -222,16 +222,6 @@ export default function DriverLayout() {
 
                 <div className="h-[1px] bg-line/60" />
 
-                {/* Switch to Passenger View */}
-                <Link
-                  to="/"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-[12px] text-xs font-bold text-text hover:bg-surface-2 transition"
-                >
-                  <Compass className="w-4 h-4 text-brand" />
-                  <span>Switch to Passenger View</span>
-                </Link>
-
                 {/* Log Out */}
                 <button
                   type="button"

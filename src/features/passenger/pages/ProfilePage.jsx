@@ -457,7 +457,7 @@ export default function ProfilePage() {
         )}
 
         <Link
-          to="/help"
+          to={isDriver ? '/driver/help' : '/help'}
           className="p-4 flex items-center justify-between hover:bg-surface-2 transition"
         >
           <div className="flex items-center gap-3">

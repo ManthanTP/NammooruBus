@@ -132,6 +132,12 @@ export default function LandingPage() {
   const [appUrl, setAppUrl] = useState(APK_URL)
 
   useEffect(() => {
+    if (user && profile?.role === 'driver') {
+      navigate('/driver', { replace: true })
+    }
+  }, [user, profile, navigate])
+
+  useEffect(() => {
     fetch('/version.json')
       .then((res) => res.json())
       .then((data) => {

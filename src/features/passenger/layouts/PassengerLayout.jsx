@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { User, LogIn, RefreshCw, Compass, Radio, MapPin, Route, Bookmark, Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -18,7 +18,12 @@ import { useDataStore } from '@/store/dataStore'
 export default function PassengerLayout() {
   const { t } = useTranslation()
   const location = useLocation()
-  const { user } = useAuthStore()
+  const { user, profile } = useAuthStore()
+
+  // Strict role separation: drivers should NEVER access the passenger portal
+  if (user && profile?.role === 'driver') {
+    return <Navigate to="/driver" replace />
+  }
   const { subscribe, unsubscribe, isReconnecting, getActiveCount } = useLiveStore()
   const { start: startLocationWatcher } = useLocationStore()
   const { initData } = useDataStore()
