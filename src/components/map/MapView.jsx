@@ -184,7 +184,7 @@ export default function MapView({ showUserBusLink = true }) {
   const parsedLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG)
   const defaultLat = !Number.isNaN(parsedLat) && Number.isFinite(parsedLat) ? parsedLat : 15.3647
   const defaultLng = !Number.isNaN(parsedLng) && Number.isFinite(parsedLng) ? parsedLng : 75.1240
-  const tileUrl = getTileUrl()
+  const tileUrl = getTileUrl(resolvedTheme)
   const attribution = TILE_ATTRIBUTION
 
   const casingColor = isDarkOrBlue ? (isDark ? '#0A0B10' : '#050B2E') : '#FFFFFF'
@@ -235,8 +235,21 @@ export default function MapView({ showUserBusLink = true }) {
         zoom={13}
         zoomControl={false}
         className="w-full h-full"
+        zoomAnimation={true}
+        markerZoomAnimation={true}
+        fadeAnimation={true}
       >
-        <TileLayer key={tileUrl} url={tileUrl} attribution={attribution} maxZoom={19} />
+        <TileLayer
+          key={tileUrl}
+          url={tileUrl}
+          attribution={attribution}
+          subdomains={['a', 'b', 'c', 'd']}
+          maxZoom={19}
+          keepBuffer={12}
+          updateWhenZooming={false}
+          updateWhenIdle={true}
+          crossOrigin="anonymous"
+        />
         <MapController />
 
         {/* 1. Single Route Polyline (Route detail / selected route) */}

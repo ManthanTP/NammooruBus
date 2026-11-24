@@ -466,7 +466,13 @@ export default function AdminStopsPage() {
                     className="w-full h-full"
                     attributionControl={false}
                   >
-                    <TileLayer url={TILE_URL} />
+                    <TileLayer
+                      url={TILE_URL}
+                      subdomains={['a', 'b', 'c', 'd']}
+                      keepBuffer={12}
+                      updateWhenZooming={false}
+                      updateWhenIdle={true}
+                    />
                     <MapClickHandler onLocationChange={handleLocationChange} />
                     <MapUpdater center={[formData.lat, formData.lng]} />
                     <Marker
