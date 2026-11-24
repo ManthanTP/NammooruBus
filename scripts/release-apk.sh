@@ -33,6 +33,7 @@ npm run build
 
 echo "[2/4] Syncing native Android assets with Capacitor..."
 npx cap sync android
+rm -rf "$ANDROID_DIR/app/src/main/assets/public/downloads"
 
 echo "[3/4] Running Gradle assembleRelease..."
 cd "$ANDROID_DIR"

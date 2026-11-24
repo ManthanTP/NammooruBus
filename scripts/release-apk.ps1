@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Builds, signs, and packages the production release APK for Nammooru Bus.
 #>
@@ -42,6 +42,13 @@ npm run build
 
 Write-Host "`n[2/4] Syncing native Android assets with Capacitor..." -ForegroundColor Yellow
 npx cap sync android
+
+# Remove any downloads directory from android assets so the APK is NEVER packaged inside itself
+$AndroidDownloads = Join-Path $AndroidDir "app\src\main\assets\public\downloads"
+if (Test-Path $AndroidDownloads) {
+    Write-Host "Excluding downloads folder from native assets to keep APK small..." -ForegroundColor Yellow
+    Remove-Item -Recurse -Force $AndroidDownloads
+}
 
 # 3. Assemble Release APK
 Write-Host "`n[3/4] Running Gradle assembleRelease..." -ForegroundColor Yellow
