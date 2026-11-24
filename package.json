@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "test": "npm run lint && vitest run && npm run test:smoke",
     "test:smoke": "node ./scripts/test_smoke.js",
+    "release": "node ./scripts/release.mjs",
+    "verify:release": "node ./scripts/verify_release.mjs",
     "lint": "eslint src",
     "i18n:check": "node ./scripts/check_i18n.js",
     "icons": "node ./scripts/generate_icons.js",

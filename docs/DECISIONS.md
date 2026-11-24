@@ -94,4 +94,25 @@ Screenshots captured for cutout and no-cutout devices:
 ---
 
 ## 4. Item 6: Build Versioning Single Source of Truth (Locked)
-*(To be recorded in Item 6)*
+
+### Decisions & Architecture:
+1. **Single Source of Truth**:
+   - `android/app/build.gradle` (`versionCode`, `versionName`) is the only primary source of truth for version numbers and codes across the entire project.
+   - Version numbers must NEVER be manually updated in individual files in isolation.
+2. **Synchronization Targets (5 Files)**:
+   - `android/app/build.gradle` (Primary source: `versionCode`, `versionName`)
+   - `package.json` (`version`)
+   - `src/config/links.js` (`APK_VERSION`, `APK_BUILD`, `APK_SIZE`)
+   - `public/version.json` (`latest.versionName`, `latest.versionCode`, `latest.apkSize`, `releaseNotes`)
+   - `public/releases.json` (`[0].versionName`, `[0].versionCode`, `[0].apkSize`, `[0].notes`)
+3. **Unified Release Pipeline (`scripts/release.mjs`, `npm run release`)**:
+   - Automatically increments `versionCode` by 1 and sets the target `versionName`.
+   - Atomically updates and synchronizes all 5 files in a single pass.
+   - Enforces pre-flight quality gates: `npm run lint`, `npm run test` (including all unit tests and 78 route Playwright smoke tests), and `npm run build`.
+   - Executes Android Gradle release build (`gradlew.bat assembleRelease` / `./gradlew assembleRelease`).
+   - Cleans native web assets before build to prevent recursive nesting of prior `.apk` files.
+   - Copies signed APK to `public/downloads/nammooru-bus.apk`.
+   - Automatically computes exact SHA-256 and binary file size, recording them across metadata files.
+4. **Automated Verification Gate (`scripts/verify_release.mjs`, `npm run verify:release`)**:
+   - Validates that `versionName` and `versionCode` are 100% identical across all 5 files.
+   - Exits with non-zero failure code if any discrepancy or drift is detected.
