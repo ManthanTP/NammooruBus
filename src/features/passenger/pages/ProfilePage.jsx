@@ -15,6 +15,7 @@ import { hapticTick, isNative } from '@/lib/platform'
 import { checkAppUpdate } from '@/lib/versionCheck'
 import UpdateModal from '@/components/ui/UpdateModal'
 import { APK_VERSION } from '@/config/links'
+import { App } from '@capacitor/app'
 
 export default function ProfilePage() {
   const { t } = useTranslation()
@@ -40,16 +41,18 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (isNative()) {
-      App.getInfo?.()
-        .then((info) => {
-          if (info) {
-            setAppInfo({
-              version: info.version || APK_VERSION || '1.0.1',
-              build: info.build || '2',
-            })
-          }
-        })
-        .catch(() => { })
+      try {
+        App.getInfo()
+          .then((info) => {
+            if (info) {
+              setAppInfo({
+                version: info.version || APK_VERSION || '1.0.1',
+                build: info.build || '2',
+              })
+            }
+          })
+          .catch(() => { })
+      } catch (_) { }
     }
   }, [])
 
