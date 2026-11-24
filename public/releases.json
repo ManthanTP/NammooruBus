@@ -1,5 +1,32 @@
 [
   {
+    "versionName": "1.0.3",
+    "versionCode": 4,
+    "releasedAt": "2026-11-24",
+    "apkUrl": "/downloads/nammooru-bus.apk",
+    "apkSize": "7.3 MB",
+    "downloadPage": "/#app",
+    "whatsNewPage": "/whats-new",
+    "title": {
+      "en": "Release v1.0.3",
+      "kn": "ಆವೃತ್ತಿ v1.0.3"
+    },
+    "notes": {
+      "en": [
+        "Official OpenStreetMap Fastly CDN tiles: 100% free with no API key or watermark",
+        "Edge-to-edge transparent status bar blending with header (Instagram style)",
+        "Two-phase geolocation with instant Wi-Fi/IP indoor fallback",
+        "Redesigned What's New page with single top APK download button"
+      ],
+      "kn": [
+        "ಯಾವುದೇ API ಕೀ ಅಥವಾ ವಾಟರ್‌ಮಾರ್ಕ್ ಇಲ್ಲದ ಅಧಿಕೃತ ಓಪನ್‌ಸ್ಟ್ರೀಟ್‌ಮ್ಯಾಪ್ ಟೈಲ್ಸ್‌ಗಳು",
+        "ಇನ್‌ಸ್ಟಾಗ್ರಾಮ್ ಮಾದರಿಯ ಪಾರದರ್ಶಕ ಸ್ಟೇಟಸ್ ಬಾರ್ ವಿನ್ಯಾಸ",
+        "ಮನೆ ಹಾಗೂ ಒಳಾಂಗಣದಲ್ಲೂ ತ್ವರಿತವಾಗಿ ಸ್ಥಳ ಗುರುತಿಸುವ ತಂತ್ರಜ್ಞಾನ",
+        "ಹೊಸ ನವೀಕರಣ ಪುಟದಲ್ಲಿ ಸರಳೀಕೃತ ಡೌನ್‌ಲೋಡ್ ವ್ಯವಸ್ಥೆ"
+      ]
+    }
+  },
+  {
     "versionName": "1.0.2",
     "versionCode": 3,
     "releasedAt": "2026-11-24",

@@ -5,7 +5,7 @@ import { ArrowLeft, Download, Sparkles, Calendar, CheckCircle2, ShieldCheck } fr
 import Button from '@/components/ui/Button'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import ThemeToggle from '@/components/ui/ThemeToggle'
-import { APK_URL } from '@/config/links'
+import { APK_URL, APK_SIZE } from '@/config/links'
 import { openExternalUrl } from '@/lib/platform'
 
 export default function WhatsNewPage() {
@@ -96,7 +96,9 @@ export default function WhatsNewPage() {
               style={{ color: '#0040FF' }}
             >
               <Download className="w-4 h-4 shrink-0" style={{ color: '#0040FF', stroke: '#0040FF' }} />
-              <span style={{ color: '#0040FF' }}>{lang === 'kn' ? 'APK ಡೌನ್‌ಲೋಡ್' : 'Download APK'}</span>
+              <span style={{ color: '#0040FF' }}>
+                {lang === 'kn' ? `ಇತ್ತೀಚಿನ APK ಡೌನ್‌ಲೋಡ್ (${APK_SIZE})` : `Download Latest APK (${APK_SIZE})`}
+              </span>
             </button>
           </div>
         </div>
@@ -137,7 +139,6 @@ export default function WhatsNewPage() {
                     <div className="flex items-center gap-1.5 text-xs text-muted">
                       <Calendar className="w-3.5 h-3.5" />
                       <span>{rel.releasedAt}</span>
-                      {rel.apkSize && <span>• {rel.apkSize}</span>}
                     </div>
                   </div>
 
@@ -155,20 +156,6 @@ export default function WhatsNewPage() {
                       </li>
                     ))}
                   </ul>
-
-                  {/* Action Link */}
-                  {rel.apkUrl && (
-                    <div className="pt-2">
-                      <a
-                        href={rel.apkUrl}
-                        download="nammooru-bus.apk"
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-brand hover:underline"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>Download this build ({rel.apkSize || 'APK'})</span>
-                      </a>
-                    </div>
-                  )}
                 </article>
               )
             })}

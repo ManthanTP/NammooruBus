@@ -1,11 +1,13 @@
-// High-performance Cloudflare CDN-backed Map Tiles with edge locations across India (~230ms vs 6,400ms on OSM France)
-export const CARTO_VOYAGER_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-export const CARTO_DARK_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+// Official OpenStreetMap Fastly Anycast CDN tiles (100% free, NO API key required, NO watermark)
+export const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 
-export function getTileUrl(theme = 'light') {
-  const isDark = theme === 'dark' || theme === 'blue'
-  return isDark ? CARTO_DARK_URL : CARTO_VOYAGER_URL
+export function getTileUrl() {
+  const envUrl = import.meta.env.VITE_TILE_URL
+  if (envUrl && !envUrl.includes('cartocdn')) {
+    return envUrl
+  }
+  return OSM_TILE_URL
 }
 
 export const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

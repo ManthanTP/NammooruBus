@@ -468,7 +468,7 @@ export default function AdminStopsPage() {
                   >
                     <TileLayer
                       url={TILE_URL}
-                      subdomains={['a', 'b', 'c', 'd']}
+                      subdomains={['a', 'b', 'c']}
                       keepBuffer={12}
                       updateWhenZooming={false}
                       updateWhenIdle={true}

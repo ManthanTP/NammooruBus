@@ -184,7 +184,7 @@ export default function MapView({ showUserBusLink = true }) {
   const parsedLng = parseFloat(import.meta.env.VITE_DEFAULT_LNG)
   const defaultLat = !Number.isNaN(parsedLat) && Number.isFinite(parsedLat) ? parsedLat : 15.3647
   const defaultLng = !Number.isNaN(parsedLng) && Number.isFinite(parsedLng) ? parsedLng : 75.1240
-  const tileUrl = getTileUrl(resolvedTheme)
+  const tileUrl = getTileUrl()
   const attribution = TILE_ATTRIBUTION
 
   const casingColor = isDarkOrBlue ? (isDark ? '#0A0B10' : '#050B2E') : '#FFFFFF'
@@ -243,7 +243,7 @@ export default function MapView({ showUserBusLink = true }) {
           key={tileUrl}
           url={tileUrl}
           attribution={attribution}
-          subdomains={['a', 'b', 'c', 'd']}
+          subdomains={['a', 'b', 'c']}
           maxZoom={19}
           keepBuffer={12}
           updateWhenZooming={false}
