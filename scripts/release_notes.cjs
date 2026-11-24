@@ -132,6 +132,18 @@ if (fs.existsSync(gradlePath)) {
   console.log('✓ Updated android/app/build.gradle')
 }
 
+// 6b. Update src/config/links.js
+const linksPath = path.join(rootDir, 'src', 'config', 'links.js')
+if (fs.existsSync(linksPath)) {
+  let linksContent = fs.readFileSync(linksPath, 'utf8')
+  linksContent = linksContent.replace(/APK_VERSION\s*=\s*"[^"]+"/, `APK_VERSION = "${targetVersion}"`)
+  if (args.size) {
+    linksContent = linksContent.replace(/APK_SIZE\s*=\s*"[^"]+"/, `APK_SIZE = "${args.size}"`)
+  }
+  fs.writeFileSync(linksPath, linksContent, 'utf8')
+  console.log('✓ Updated src/config/links.js')
+}
+
 // 7. Update docs/CHANGELOG.md if needed
 const changelogPath = path.join(rootDir, 'docs', 'CHANGELOG.md')
 if (fs.existsSync(changelogPath)) {

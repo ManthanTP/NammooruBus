@@ -83,15 +83,15 @@ export default function WhatsNewPage() {
               </p>
             </div>
 
-            <Button
-              variant="outline"
-              size="sm"
+            <button
+              type="button"
               onClick={() => openExternalUrl(APK_URL)}
-              className="bg-white text-navy-900 border-none font-extrabold text-xs shrink-0 shadow-xs hover:bg-sky-50"
+              className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-full font-heading font-extrabold text-xs shrink-0 shadow-md transition-all active:scale-95 cursor-pointer bg-white hover:bg-sky-50 border-0"
+              style={{ color: '#0040FF' }}
             >
-              <Download className="w-4 h-4 mr-1.5" />
-              <span>Download APK</span>
-            </Button>
+              <Download className="w-4 h-4 shrink-0" style={{ color: '#0040FF', stroke: '#0040FF' }} />
+              <span style={{ color: '#0040FF' }}>{lang === 'kn' ? 'APK ಡೌನ್‌ಲೋಡ್' : 'Download APK'}</span>
+            </button>
           </div>
         </div>
 

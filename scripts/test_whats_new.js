@@ -57,7 +57,7 @@ async function run() {
     // 2. Check latest release card
     console.log('\n--- 2. Testing Release Cards and Version Tag ---')
     const versionBadge = await page.textContent('article span.font-mono')
-    assert(versionBadge && versionBadge.includes('v1.0.0'), `First release badge displays "v1.0.0" (found: "${versionBadge}")`)
+    assert(versionBadge && versionBadge.startsWith('v1.'), `First release badge displays valid version (found: "${versionBadge}")`)
 
     const releaseNotes = await page.$$('article ul li')
     assert(releaseNotes.length > 0, `Release notes bullet points are rendered (count: ${releaseNotes.length})`)

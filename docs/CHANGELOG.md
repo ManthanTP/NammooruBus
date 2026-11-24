@@ -4,6 +4,17 @@ All notable releases and updates to Nammooru Bus are documented in this file.
 
 ---
 
+## [v1.0.1] - 2026-11-23
+
+### Release v1.0.1
+
+- Screen insets fixed for punch-hole camera and status bar visibility
+- Polished first-launch flow: Language selection, 3 walkthrough slides, Theme setup
+- In-app update notifications for new releases
+- Dedicated What's New changelog page
+
+---
+
 ## [v1.0.0] - 2026-11-23
 
 ### Initial Production Release & Android App Launch (Phase 6 & 7)

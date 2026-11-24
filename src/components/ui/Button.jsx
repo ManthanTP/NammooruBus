@@ -26,6 +26,7 @@ export default function Button({
   const variants = {
     primary: 'on-brand shadow-soft hover:opacity-95',
     secondary: 'bg-surface border-2 border-brand text-brand hover:bg-surface-2',
+    outline: 'bg-surface border border-line text-text hover:bg-surface-2',
     ghost: 'bg-transparent text-brand hover:bg-surface-2',
     danger: 'text-white hover:opacity-90',
     'icon-only': 'bg-transparent text-brand hover:bg-surface-2 p-2',
