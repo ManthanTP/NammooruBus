@@ -14,7 +14,7 @@ import { appStorage } from '@/lib/storage'
 import { hapticTick, isNative } from '@/lib/platform'
 import { checkAppUpdate } from '@/lib/versionCheck'
 import UpdateModal from '@/components/ui/UpdateModal'
-import { APK_VERSION } from '@/config/links'
+import { APK_VERSION, APK_BUILD } from '@/config/links'
 import { App } from '@capacitor/app'
 
 export default function ProfilePage() {
@@ -38,7 +38,7 @@ export default function ProfilePage() {
   const [updateChecking, setUpdateChecking] = useState(false)
   const [updateInfo, setUpdateInfo] = useState(null)
   const [showUpdateModal, setShowUpdateModal] = useState(false)
-  const [appInfo, setAppInfo] = useState({ version: APK_VERSION || '1.0.1', build: '2' })
+  const [appInfo, setAppInfo] = useState({ version: APK_VERSION || '1.0.4', build: APK_BUILD || '5' })
 
   useEffect(() => {
     if (isNative()) {
@@ -47,13 +47,25 @@ export default function ProfilePage() {
           .then((info) => {
             if (info) {
               setAppInfo({
-                version: info.version || APK_VERSION || '1.0.1',
-                build: info.build || '2',
+                version: info.version || APK_VERSION || '1.0.4',
+                build: info.build || APK_BUILD || '5',
               })
             }
           })
           .catch(() => { })
       } catch (_) { }
+    } else {
+      fetch('/version.json?t=' + Date.now())
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.latest) {
+            setAppInfo({
+              version: data.latest.versionName || APK_VERSION || '1.0.4',
+              build: String(data.latest.versionCode || APK_BUILD || '5'),
+            })
+          }
+        })
+        .catch(() => { })
     }
   }, [])
 
