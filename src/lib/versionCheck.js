@@ -44,13 +44,10 @@ export async function checkAppUpdate({ force = false } = {}) {
 
   try {
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000)
+    const timeoutId = setTimeout(() => controller.abort(), 8000)
 
-    // On native, always fetch from the live production domain so we query the actual released version
-    const remoteOrigin = 'https://nammoorubus.vercel.app'
-    const url = isNative()
-      ? `${remoteOrigin}/version.json?t=${Date.now()}`
-      : `/version.json?t=${Date.now()}`
+    // Query live production version with cache buster
+    const url = `https://nammoorubus.vercel.app/version.json?t=${Date.now()}`
 
     const response = await fetch(url, {
       signal: controller.signal,
@@ -60,17 +57,35 @@ export async function checkAppUpdate({ force = false } = {}) {
     clearTimeout(timeoutId)
 
     if (!response.ok) {
-      return { hasUpdate: false, isRequired: false, latest: null, installed: { versionCode: installedVersionCode, versionName: installedVersionName }, releaseNotes: null, error: true }
+      return {
+        hasUpdate: false,
+        isRequired: false,
+        latest: null,
+        installed: { versionCode: installedVersionCode, versionName: installedVersionName },
+        releaseNotes: null,
+        error: true,
+      }
     }
 
     const data = await response.json()
     if (!data?.latest?.versionCode) {
-      return { hasUpdate: false, isRequired: false, latest: null, installed: { versionCode: installedVersionCode, versionName: installedVersionName }, releaseNotes: null, error: true }
+      return {
+        hasUpdate: false,
+        isRequired: false,
+        latest: null,
+        installed: { versionCode: installedVersionCode, versionName: installedVersionName },
+        releaseNotes: null,
+        error: true,
+      }
     }
 
     const latestCode = Number(data.latest.versionCode)
+    const latestName = (data.latest.versionName || '').trim()
+    const installedName = (installedVersionName || '').trim()
     const minCode = Number(data.minSupportedVersionCode || 1)
-    const hasUpdate = installedVersionCode < latestCode
+
+    // An update is available if the version code is lower OR version name doesn't match
+    const hasUpdate = (installedVersionCode < latestCode) || (installedName && latestName && installedName !== latestName)
     const isRequired = installedVersionCode < minCode
 
     return {
@@ -85,7 +100,7 @@ export async function checkAppUpdate({ force = false } = {}) {
       error: false,
     }
   } catch (err) {
-    // Offline, network failure, or invalid JSON: fail silently
+    // Offline, network failure, or invalid JSON
     return {
       hasUpdate: false,
       isRequired: false,

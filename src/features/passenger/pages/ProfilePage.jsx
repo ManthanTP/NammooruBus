@@ -23,6 +23,7 @@ export default function ProfilePage() {
   const location = useLocation()
   const isDriverRoute = location.pathname.startsWith('/driver')
   const { user, profile, signOut, claimDriverRole } = useAuthStore()
+  const isDriver = isDriverRoute || profile?.role === 'driver'
   const { routes, initData } = useDataStore()
   const { theme, setTheme } = useThemeStore()
   const { addToast } = useToastStore()
@@ -108,7 +109,9 @@ export default function ProfilePage() {
     try {
       const result = await checkAppUpdate({ force: true })
       setUpdateChecking(false)
-      if (result.hasUpdate && result.latest) {
+      if (result.error) {
+        toast.info('Unable to reach update server. Please check connection.')
+      } else if (result.hasUpdate && result.latest) {
         setUpdateInfo(result)
         setShowUpdateModal(true)
       } else {

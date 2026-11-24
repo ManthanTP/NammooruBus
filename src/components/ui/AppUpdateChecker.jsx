@@ -4,13 +4,6 @@ import { checkAppUpdate, isDismissedThisRun } from '@/lib/versionCheck'
 import UpdateModal from './UpdateModal'
 
 const EXCLUDED_PATHS = [
-  '/',
-  '/welcome',
-  '/get-started',
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
   '/driver/trip',
 ]
 
@@ -26,7 +19,7 @@ export default function AppUpdateChecker({ currentPath = '', showSplash = false 
     // Do not check or show during splash
     if (showSplash) return
 
-    // Do not check or show on excluded screens
+    // Do not check on driver active trip screen
     if (EXCLUDED_PATHS.includes(currentPath)) return
 
     // Do not check again if already checked this run or dismissed in-memory
@@ -34,19 +27,21 @@ export default function AppUpdateChecker({ currentPath = '', showSplash = false 
 
     let isMounted = true
 
-    // Check for updates with a short delay after landing on a real screen
+    // Check for updates with a short delay after landing on screen
     const timer = setTimeout(async () => {
       try {
         const result = await checkAppUpdate()
-        if (isMounted && result.hasUpdate && result.latest) {
-          setUpdateInfo(result)
-          setShowModal(true)
+        if (isMounted) {
+          setChecked(true)
+          if (result.hasUpdate && result.latest) {
+            setUpdateInfo(result)
+            setShowModal(true)
+          }
         }
-        setChecked(true)
       } catch (_) {
         // Skip silently on error / offline
       }
-    }, 1200)
+    }, 1500)
 
     return () => {
       isMounted = false
