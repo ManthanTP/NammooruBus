@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useDataStore } from '@/store/dataStore'
+import { useThemeStore } from '@/store/themeStore'
 import { hideNativeSplash, hapticTick, setStatusBarTheme } from '@/lib/platform'
 
 /**
@@ -21,6 +22,10 @@ export default function SplashScreen({ onFinish }) {
   useEffect(() => {
     setStatusBarTheme('light', true)
     hideNativeSplash()
+    return () => {
+      const currentTheme = useThemeStore.getState().resolvedTheme || 'dark'
+      setStatusBarTheme(currentTheme)
+    }
   }, [])
 
   // Check fonts ready
@@ -80,6 +85,8 @@ export default function SplashScreen({ onFinish }) {
     if (finishedRef.current) return
     finishedRef.current = true
     setVisible(false)
+    const currentTheme = useThemeStore.getState().resolvedTheme || 'dark'
+    setStatusBarTheme(currentTheme)
     setTimeout(() => {
       onFinish?.()
     }, 350)

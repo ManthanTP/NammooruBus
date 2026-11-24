@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { appStorage } from '@/lib/storage'
 import { initNativeBackButton } from '@/lib/backHandler'
-import { isNative, initScreenInsets } from '@/lib/platform'
+import { isNative, initScreenInsets, setStatusBarTheme } from '@/lib/platform'
 import OfflineBanner from '@/components/ui/OfflineBanner'
 import SplashScreen from '@/components/splash/SplashScreen'
 import AppUpdateChecker from '@/components/ui/AppUpdateChecker'
@@ -52,6 +52,8 @@ export default function App() {
   const handleSplashFinish = () => {
     sessionStorage.setItem('nb_splash_shown', 'true')
     setShowSplash(false)
+    const currentTheme = useThemeStore.getState().resolvedTheme || 'dark'
+    setStatusBarTheme(currentTheme)
   }
 
   return (

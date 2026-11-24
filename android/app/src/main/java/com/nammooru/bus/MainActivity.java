@@ -22,6 +22,12 @@ public class MainActivity extends BridgeActivity {
         window.setStatusBarColor(Color.TRANSPARENT);
         window.setNavigationBarColor(Color.TRANSPARENT);
 
+        // Disable OEM/system contrast scrims on Android 10+ so status bar remains truly transparent
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            window.setStatusBarContrastEnforced(false);
+            window.setNavigationBarContrastEnforced(false);
+        }
+
         final View decorView = window.getDecorView();
 
         // 2. Measure status bar + punch-hole cutout and dynamically inject into WebView CSS (--safe-top)
