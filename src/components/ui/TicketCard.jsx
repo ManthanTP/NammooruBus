@@ -69,8 +69,14 @@ export default function TicketCard({
         {/* Right: Fare */}
         <div className="text-right shrink-0">
           <div className="font-heading font-extrabold text-base text-ink-950 flex items-center justify-end">
-            <span className="text-xs mr-0.5 text-muted">₹</span>
-            <span>{fare ?? '--'}</span>
+            {fare != null ? (
+              <>
+                <span className="text-xs mr-0.5 text-muted">₹</span>
+                <span>{fare}</span>
+              </>
+            ) : (
+              <span className="text-xs text-muted">Fare unavailable</span>
+            )}
           </div>
           <span className="text-[10px] font-semibold text-muted block">Direct</span>
         </div>

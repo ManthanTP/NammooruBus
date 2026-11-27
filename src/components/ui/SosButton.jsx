@@ -183,7 +183,7 @@ export default function SosButton({
         onTouchCancel={cancelHolding}
         onContextMenu={(e) => e.preventDefault()}
         title="Press and hold 1 second for SOS Emergency Share"
-        className={`relative px-3.5 py-2.5 rounded-input font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-[0.97] ${holding
+        className={`relative h-11 px-3.5 rounded-full font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-[0.97] ${holding
           ? 'bg-danger text-white ring-2 ring-danger/40'
           : triggered
             ? 'bg-success text-white'

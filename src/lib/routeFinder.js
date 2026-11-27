@@ -7,16 +7,18 @@
  * - Deduplication & cap at 8 results
  */
 
-import { calculateLegFare, calculateJourneyFare } from './fare'
+import { calculateFare } from './fare'
 import { calculateNextDeparture, getDayType } from './schedule'
+import { haversine } from './geo'
 
 const DEFAULT_WALK_MIN = 3
 const TRANSFER_BUFFER_MIN = 6
 
 /**
  * Normalizes route stops for a route into an ordered list with cumulative km and minutes.
+ * Uses sum of route_stops dist_km between them; falls back to Haversine x 1.3 if dist_km is missing.
  */
-function getRouteLegMetrics(routeStops, fromIdx, toIdx) {
+function getRouteLegMetrics(routeStops, fromIdx, toIdx, stopsById = {}) {
   let distanceKm = 0
   let durationMin = 0
 
@@ -24,8 +26,31 @@ function getRouteLegMetrics(routeStops, fromIdx, toIdx) {
   const end = Math.max(fromIdx, toIdx)
 
   for (let i = start + 1; i <= end; i++) {
-    distanceKm += Number(routeStops[i].dist_km || 0)
-    durationMin += Number(routeStops[i].min_from_prev || 0)
+    const rs = routeStops[i]
+    let legDist = Number(rs?.dist_km)
+
+    if (isNaN(legDist) || legDist <= 0) {
+      const prevStop = stopsById[routeStops[i - 1]?.stop_id]
+      const currStop = stopsById[rs?.stop_id]
+      if (prevStop && currStop && !isNaN(Number(prevStop.lat)) && !isNaN(Number(currStop.lat))) {
+        legDist = haversine(
+          Number(prevStop.lat),
+          Number(prevStop.lng),
+          Number(currStop.lat),
+          Number(currStop.lng)
+        ) * 1.3
+      } else {
+        legDist = 0
+      }
+    }
+
+    let legMin = Number(rs?.min_from_prev)
+    if (isNaN(legMin) || legMin <= 0) {
+      legMin = Math.max(1, Math.round((legDist / 17) * 60) + 1)
+    }
+
+    distanceKm += legDist
+    durationMin += legMin
   }
 
   return {
@@ -116,8 +141,8 @@ export function findRoutes({
 
     // Forward direction: fromIdx < toIdx
     if (fromIdx < toIdx) {
-      const { distanceKm, durationMin } = getRouteLegMetrics(rsList, fromIdx, toIdx)
-      const legFare = calculateLegFare(distanceKm, fareConfig)
+      const { distanceKm, durationMin } = getRouteLegMetrics(rsList, fromIdx, toIdx, stopsById)
+      const fareResult = calculateFare({ distanceKm, fareConfig })
       const waitMin = getWaitMin(route.id, fromIdx * 3)
       const totalMinutes = DEFAULT_WALK_MIN + waitMin + durationMin
 
@@ -128,7 +153,12 @@ export function findRoutes({
         totalDistanceKm: distanceKm,
         totalRideMinutes: durationMin,
         totalMinutes,
-        totalFare: legFare,
+        totalFare: fareResult.amount,
+        fare: fareResult.amount,
+        fareTotal: fareResult.amount,
+        fareFormatted: fareResult.formatted,
+        fareBreakdown: fareResult.breakdown,
+        fareDistanceText: fareResult.distanceText,
         nextBusMin: waitMin,
         summary: 'Direct',
         legs: [
@@ -139,7 +169,7 @@ export function findRoutes({
             toStop: stopsById[toStopId] || { id: toStopId },
             distanceKm,
             durationMin,
-            fare: legFare,
+            fare: fareResult.amount,
             waitMin,
             stopsCount: toIdx - fromIdx,
           },
@@ -149,8 +179,8 @@ export function findRoutes({
 
     // Reverse direction on two_way routes: fromIdx > toIdx
     if (route.two_way !== false && fromIdx > toIdx) {
-      const { distanceKm, durationMin } = getRouteLegMetrics(rsList, toIdx, fromIdx)
-      const legFare = calculateLegFare(distanceKm, fareConfig)
+      const { distanceKm, durationMin } = getRouteLegMetrics(rsList, toIdx, fromIdx, stopsById)
+      const fareResult = calculateFare({ distanceKm, fareConfig })
       const waitMin = getWaitMin(route.id, (rsList.length - 1 - fromIdx) * 3)
       const totalMinutes = DEFAULT_WALK_MIN + waitMin + durationMin
 
@@ -161,7 +191,12 @@ export function findRoutes({
         totalDistanceKm: distanceKm,
         totalRideMinutes: durationMin,
         totalMinutes,
-        totalFare: legFare,
+        totalFare: fareResult.amount,
+        fare: fareResult.amount,
+        fareTotal: fareResult.amount,
+        fareFormatted: fareResult.formatted,
+        fareBreakdown: fareResult.breakdown,
+        fareDistanceText: fareResult.distanceText,
         nextBusMin: waitMin,
         summary: 'Direct',
         legs: [
@@ -172,7 +207,7 @@ export function findRoutes({
             toStop: stopsById[toStopId] || { id: toStopId },
             distanceKm,
             durationMin,
-            fare: legFare,
+            fare: fareResult.amount,
             waitMin,
             stopsCount: fromIdx - toIdx,
           },
@@ -225,19 +260,21 @@ export function findRoutes({
 
           for (const dir2 of r2Directions) {
             // Metrics for Leg 1
-            const m1 = getRouteLegMetrics(rs1, fromIdx1, tCand.idx)
-            const fare1 = calculateLegFare(m1.distanceKm, fareConfig)
+            const m1 = getRouteLegMetrics(rs1, fromIdx1, tCand.idx, stopsById)
             const wait1 = getWaitMin(r1.id, fromIdx1 * 3)
 
             // Metrics for Leg 2
-            const m2 = getRouteLegMetrics(rs2, transferIdx2, toIdx2)
-            const fare2 = calculateLegFare(m2.distanceKm, fareConfig)
+            const m2 = getRouteLegMetrics(rs2, transferIdx2, toIdx2, stopsById)
             const wait2 = Math.min(getWaitMin(r2.id, transferIdx2 * 3), 10)
 
             const totalDist = Math.round((m1.distanceKm + m2.distanceKm) * 100) / 100
             const totalRideMin = m1.durationMin + m2.durationMin
             const totalMinutes = DEFAULT_WALK_MIN + wait1 + m1.durationMin + TRANSFER_BUFFER_MIN + wait2 + m2.durationMin
-            const totalFare = fare1 + fare2
+
+            const fareResult = calculateFare({
+              legs: [{ distanceKm: m1.distanceKm }, { distanceKm: m2.distanceKm }],
+              fareConfig,
+            })
 
             const transferStopObj = stopsById[transferStopId] || { id: transferStopId, name_en: 'Transfer Stop' }
 
@@ -249,7 +286,12 @@ export function findRoutes({
               totalDistanceKm: totalDist,
               totalRideMinutes: totalRideMin,
               totalMinutes,
-              totalFare,
+              totalFare: fareResult.amount,
+              fare: fareResult.amount,
+              fareTotal: fareResult.amount,
+              fareFormatted: fareResult.formatted,
+              fareBreakdown: fareResult.breakdown,
+              fareDistanceText: fareResult.distanceText,
               nextBusMin: wait1,
               summary: `1 change at ${transferStopObj.name_en || 'transfer stop'}`,
               legs: [
@@ -260,7 +302,7 @@ export function findRoutes({
                   toStop: transferStopObj,
                   distanceKm: m1.distanceKm,
                   durationMin: m1.durationMin,
-                  fare: fare1,
+                  fare: fareResult.legFares[0] ?? null,
                   waitMin: wait1,
                   stopsCount: Math.abs(tCand.idx - fromIdx1),
                 },
@@ -271,7 +313,7 @@ export function findRoutes({
                   toStop: stopsById[toStopId] || { id: toStopId },
                   distanceKm: m2.distanceKm,
                   durationMin: m2.durationMin,
-                  fare: fare2,
+                  fare: fareResult.legFares[1] ?? null,
                   waitMin: wait2,
                   stopsCount: Math.abs(toIdx2 - transferIdx2),
                 },

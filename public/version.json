@@ -1,29 +1,25 @@
 {
   "latest": {
-    "versionName": "1.0.5",
-    "versionCode": 6,
-    "releasedAt": "2026-11-24",
+    "versionName": "1.0.6",
+    "versionCode": 7,
+    "releasedAt": "2026-11-27",
     "apkUrl": "/downloads/nammooru-bus.apk",
     "apkSize": "7.3 MB",
     "downloadPage": "/#app",
     "whatsNewPage": "/whats-new",
-    "sha256": "7a8dd06734139510d0db525b6d47f3ea25b67eb25205ad6488cb1a22c01155f4"
+    "sha256": "404d7b8345915c205ec3012b77812cd6618d535e42a060a278263bd028822f6c"
   },
   "minSupportedVersionCode": 1,
   "releaseNotes": {
     "en": [
-      "Status bar: Unified edge-to-edge architecture with adaptive icon contrast across Android 8 through 15+",
-      "Map tiles: Fast, reliable OpenStreetMap standard tiles (19.5ms median) with automatic silent fallback",
-      "Search: Indestructible layout with always-visible 'Where to?' header, FROM/TO cards, scrollable stops, and pinned 'Find buses' button",
-      "Updates: Native-only integer version engine, bypassed on web, with on-device live diagnostics drawer",
-      "Crash prevention: ESLint zero-undef enforcement and 78-route Playwright smoke testing"
+      "Fare now calculated from the actual distance",
+      "Journey details spacing fixed",
+      "Save/Share/Track/SOS bar pinned at the bottom"
     ],
     "kn": [
-      "ಸ್ಟೇಟಸ್ ಬಾರ್: ಆಂಡ್ರಾಯ್ಡ್ 8 ರಿಂದ 15+ ವರೆಗೆ ಹೊಂದಿಕೊಳ್ಳುವ ಏಕೀಕೃತ ಎಡ್ಜ್-ಟು-ಎಡ್ಜ್ ವಿನ್ಯಾಸ ಮತ್ತು ಐಕಾನ್ ಕಾಂಟ್ರಾಸ್ಟ್",
-      "ನಕ್ಷೆ: ವೇಗವಾದ ಅಧಿಕೃತ ಓಪನ್‌ಸ್ಟ್ರೀಟ್‌ಮ್ಯಾಪ್ ಟೈಲ್ಸ್ (19.5ms ಮಧ್ಯಸ್ಥಿಕೆ) ಮತ್ತು ತಡೆರಹಿತ ಸ್ವಯಂಚಾಲಿತ ಫಾಲ್‌ಬ್ಯಾಕ್",
-      "ಹುಡುಕಾಟ: 'ಎಲ್ಲಿಗೆ?' ಶೀರ್ಷಿಕೆ ಮತ್ತು ನಿಲ್ದಾಣಗಳ ನಿಖರ ವಿನ್ಯಾಸ, ಸ್ಕ್ರೋಲ್ ಮಾಡಬಹುದಾದ ಪಟ್ಟಿ ಹಾಗೂ ಪಿನ್ ಮಾಡಿದ 'ಬಸ್‌ಗಳನ್ನು ಹುಡುಕಿ' ಬಟನ್",
-      "ಆ್ಯಪ್ ನವೀಕರಣ: ಕೇವಲ ಮೊಬೈಲ್ ಆ್ಯಪ್‌ಗೆ ಮಾತ್ರ ಅನ್ವಯವಾಗುವ ನಿಖರ ಆವೃತ್ತಿ ತಪಾಸಣೆ ಮತ್ತು ಆನ್-ಡಿವೈಸ್ ಡಯಾಗ್ನೋಸ್ಟಿಕ್ಸ್",
-      "ದೋಷ ತಡೆಗಟ್ಟುವಿಕೆ: ಕೋಡ್ ಸುರಕ್ಷತೆ ಮತ್ತು 78 ಮಾರ್ಗಗಳ ಸಮಗ್ರ ಪರೀಕ್ಷೆ"
+      "ನಿಜವಾದ ದೂರದ ಆಧಾರದ ಮೇಲೆ ದರ ಲೆಕ್ಕಾಚಾರ",
+      "ಪ್ರಯಾಣ ವಿವರಗಳ ಖಾಲಿ ಜಾಗ ಸರಿಪಡಿಸಲಾಗಿದೆ",
+      "ಉಳಿಸಿ/ಹಂಚಿಕೊಳ್ಳಿ/ಟ್ರ್ಯಾಕ್/SOS ಬಾರ್ ಕೆಳಭಾಗದಲ್ಲಿ ಸ್ಥಿರಗೊಳಿಸಲಾಗಿದೆ"
     ]
   }
 }

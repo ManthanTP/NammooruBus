@@ -38,6 +38,7 @@ export default function PassengerLayout() {
 
   const liveCount = getActiveCount()
   const isSearchPage = location.pathname === '/search'
+  const isJourneyPage = location.pathname === '/journey'
   const isHomePage = location.pathname === '/'
 
   const [unreadAlertsCount, setUnreadAlertsCount] = useState(0)
@@ -241,7 +242,7 @@ export default function PassengerLayout() {
               : 'min-h-screen pb-24 md:pb-8 px-4 md:px-5 overflow-y-auto md:border-r md:border-line md:bg-surface md:m-3 md:rounded-[28px] md:shadow-soft'
           }`}
           style={
-            isSearchPage
+            isSearchPage || isJourneyPage
               ? { paddingBottom: 0 }
               : { paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }
           }

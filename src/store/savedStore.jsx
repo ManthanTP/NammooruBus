@@ -110,6 +110,12 @@ export const useSavedStore = create((set, get) => ({
       to_stop,
       route_key,
       summary: trip.legsSummary || trip.summary || route_key,
+      totalFare: trip.totalFare ?? trip.fare ?? null,
+      fare: trip.totalFare ?? trip.fare ?? null,
+      fareFormatted: trip.fareFormatted || (trip.totalFare != null ? `₹${trip.totalFare}` : null),
+      fareDistanceText: trip.fareDistanceText || '',
+      totalDistanceKm: trip.totalDistanceKm || null,
+      totalMinutes: trip.totalMinutes || null,
       created_at: new Date().toISOString(),
     }
 

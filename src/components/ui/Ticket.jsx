@@ -65,14 +65,33 @@ export default function Ticket({ result, onClick, index = 0 }) {
         </div>
 
         {/* Right: Fare */}
-        <div className="text-right shrink-0 pr-1">
-          <div className="font-heading font-extrabold text-lg text-ink-950 leading-tight flex items-center justify-end">
-            <span className="text-xs text-muted mr-0.5">₹</span>
-            <span>{result.fareTotal ?? result.fare ?? 15}</span>
-          </div>
-          <span className="text-[10px] font-semibold text-muted block">
-            {isTransfer ? '1 transfer' : 'Direct'}
-          </span>
+        <div className="text-right shrink-0 pr-1 max-w-[130px]">
+          {result.totalFare != null ? (
+            <div>
+              <div className="font-heading font-extrabold text-base sm:text-lg text-ink-950 leading-tight flex items-center justify-end">
+                <span className="text-xs text-muted mr-0.5">₹</span>
+                <span>{result.totalFare}</span>
+              </div>
+              {isTransfer && result.fareBreakdown ? (
+                <span className="text-[10px] font-semibold text-muted block truncate">
+                  ({result.fareBreakdown})
+                </span>
+              ) : (
+                <span className="text-[10px] font-semibold text-muted block">
+                  Direct
+                </span>
+              )}
+            </div>
+          ) : (
+            <div>
+              <span className="text-[11px] font-bold text-muted block leading-tight">
+                Fare unavailable
+              </span>
+              <span className="text-[10px] font-semibold text-muted block">
+                {isTransfer ? '1 transfer' : 'Direct'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

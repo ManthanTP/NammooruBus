@@ -387,7 +387,8 @@ export default function JourneyPage() {
 
   const handleShare = async () => {
     hapticTick()
-    const text = `Bus journey: ${localName(fromStop, i18n.language)} to ${localName(toStop, i18n.language)} on Nammooru Bus. Fare: ₹${journey?.totalFare}, Time: ${journey?.totalMinutes} min.`
+    const fareStr = journey?.fareFormatted || (journey?.totalFare != null ? `₹${journey.totalFare}` : 'Fare unavailable')
+    const text = `Bus journey: ${localName(fromStop, i18n.language)} to ${localName(toStop, i18n.language)} on Nammooru Bus. Fare: ${fareStr}, Time: ${journey?.totalMinutes} min.`
     try {
       await nativeShare({
         title: 'Nammooru Bus Journey',
@@ -446,7 +447,12 @@ export default function JourneyPage() {
   const currentRedirect = encodeURIComponent(location.pathname + location.search)
 
   return (
-    <div className="space-y-3.5 pt-1 pb-40">
+    <div
+      className="space-y-3.5 pt-1 md:!pb-28"
+      style={{
+        paddingBottom: 'calc(69px + 64px + max(12px, var(--safe-bottom, 0px)) + 16px)',
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between pb-2 border-b border-line">
         <button
@@ -516,8 +522,26 @@ export default function JourneyPage() {
           <span className="text-[10px] uppercase font-bold block" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
             {t('passenger.fare') || 'Fare'}
           </span>
-          <span className="text-lg font-extrabold font-heading mt-1" style={{ color: 'var(--on-brand)' }}>
-            ₹{journey.totalFare}
+          <div className="my-auto py-0.5">
+            {journey.totalFare != null ? (
+              <>
+                <span className="text-lg font-extrabold font-heading block" style={{ color: 'var(--on-brand)' }}>
+                  ₹{journey.totalFare}
+                </span>
+                {journey.fareBreakdown && (
+                  <span className="text-xs font-semibold block mt-0.5" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                    ({journey.fareBreakdown})
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="text-xs font-bold block" style={{ color: 'var(--on-brand)' }}>
+                Fare unavailable
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] font-medium block truncate text-white/85">
+            {journey.fareDistanceText || (journey.totalDistanceKm ? `Fare for ${journey.totalDistanceKm} km` : '')}
           </span>
         </div>
 
@@ -620,7 +644,7 @@ export default function JourneyPage() {
                     Board Route {leg.route?.code} ({localName(leg.route, i18n.language)})
                   </p>
                   <p className="text-xs text-muted">
-                    Ride {leg.stopsCount} stops &bull; {leg.durationMin} min &bull; ₹{leg.fare}
+                    Ride {leg.stopsCount} stops &bull; {leg.durationMin} min &bull; {leg.fare != null ? `₹${leg.fare}` : 'Fare unavailable'}
                   </p>
                 </div>
               </div>
@@ -645,17 +669,19 @@ export default function JourneyPage() {
             <p className="text-xs text-muted">Arrive at destination</p>
           </div>
         </div>
-
-        {/* Bottom spacer so Destination card is completely clear of floating action bar */}
-        <div className="h-28" aria-hidden="true" />
       </div>
 
-      {/* Sticky Bottom Action Bar above tab bar: Save, Share, Track Live, compact SOS */}
-      <div className="fixed bottom-16 md:bottom-4 left-0 right-0 p-3 bg-surface/95 backdrop-blur-md border-t border-line z-30 flex items-center justify-center gap-2 max-w-lg mx-auto md:max-w-none shadow-float">
+      {/* Pinned Bottom Action Bar above tab bar: Save, Share, Track Live, compact SOS */}
+      <div
+        className="fixed md:!bottom-4 left-0 right-0 p-3 bg-surface border-t border-line z-30 flex items-center justify-center gap-2 max-w-lg mx-auto md:max-w-none shadow-float"
+        style={{
+          bottom: 'calc(64px + max(12px, var(--safe-bottom, 0px)))',
+        }}
+      >
         <button
           type="button"
           onClick={handleToggleSave}
-          className={`h-11 px-3.5 rounded-full border flex items-center gap-1.5 text-xs font-bold transition active:scale-95 ${currentlySaved
+          className={`h-11 px-3.5 rounded-full border flex items-center gap-1.5 text-xs font-bold shrink-0 transition active:scale-95 ${currentlySaved
             ? 'bg-amber border-amber text-navy-900'
             : 'bg-surface border-line text-muted hover:text-text'
             }`}
@@ -668,7 +694,7 @@ export default function JourneyPage() {
         <button
           type="button"
           onClick={handleShare}
-          className="h-11 px-3.5 rounded-full bg-surface border border-line text-muted hover:text-text flex items-center gap-1.5 text-xs font-bold transition active:scale-95"
+          className="h-11 px-3.5 rounded-full bg-surface border border-line text-muted hover:text-text flex items-center gap-1.5 text-xs font-bold shrink-0 transition active:scale-95"
           title="Share"
         >
           <Share2 className="w-4 h-4" />
@@ -677,11 +703,11 @@ export default function JourneyPage() {
 
         <Link
           to={`/live?route=${journey.legs[0]?.route?.code}`}
-          className="flex-1 h-11 on-brand text-xs font-bold rounded-full shadow-soft flex items-center justify-center gap-2 active:scale-98 transition font-heading"
+          className="flex-1 h-11 min-w-0 on-brand text-xs font-bold rounded-full shadow-soft flex items-center justify-center gap-2 active:scale-98 transition font-heading px-3"
           style={{ background: 'var(--gradient-brand)', color: 'var(--on-brand)' }}
         >
-          <Radio className="w-4 h-4 text-amber-500" style={{ color: 'var(--amber)' }} />
-          <span style={{ color: 'var(--on-brand)' }}>{t('passenger.track_live') || 'Track live'}</span>
+          <Radio className="w-4 h-4 text-amber-500 shrink-0" style={{ color: 'var(--amber)' }} />
+          <span className="truncate" style={{ color: 'var(--on-brand)' }}>{t('passenger.track_live') || 'Track live'}</span>
         </Link>
 
         <SosButton
@@ -689,6 +715,7 @@ export default function JourneyPage() {
           busRegNo={liveTripForLeg?.bus?.reg_no}
           tripId={liveTripForLeg?.id}
           variant="compact"
+          className="h-11 shrink-0"
         />
       </div>
 

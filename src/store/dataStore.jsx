@@ -118,7 +118,7 @@ export const useDataStore = create((set, get) => ({
       const routes = routesRes.data || []
       const routeStops = routeStopsRes.data || []
       const schedules = schedulesRes.data || []
-      const fareConfig = fareRes.data || { min_fare: 5, per_stage: 5, stage_km: 2.0 }
+      const fareConfig = fareRes.data || cachedFare || null
 
       // Update localStorage
       localStorage.setItem('nb_version', serverVersion.toString())

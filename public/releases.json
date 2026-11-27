@@ -1,5 +1,31 @@
 [
   {
+    "versionName": "1.0.6",
+    "versionCode": 7,
+    "releasedAt": "2026-11-27",
+    "apkUrl": "/downloads/nammooru-bus.apk",
+    "apkSize": "7.3 MB",
+    "downloadPage": "/#app",
+    "whatsNewPage": "/whats-new",
+    "title": {
+      "en": "Release v1.0.6 - Stabilize",
+      "kn": "ಆವೃತ್ತಿ v1.0.6 - ಸ್ಥಿರ ಆವೃತ್ತಿ"
+    },
+    "notes": {
+      "en": [
+        "Fare now calculated from the actual distance",
+        "Journey details spacing fixed",
+        "Save/Share/Track/SOS bar pinned at the bottom"
+      ],
+      "kn": [
+        "ನಿಜವಾದ ದೂರದ ಆಧಾರದ ಮೇಲೆ ದರ ಲೆಕ್ಕಾಚಾರ",
+        "ಪ್ರಯಾಣ ವಿವರಗಳ ಖಾಲಿ ಜಾಗ ಸರಿಪಡಿಸಲಾಗಿದೆ",
+        "ಉಳಿಸಿ/ಹಂಚಿಕೊಳ್ಳಿ/ಟ್ರ್ಯಾಕ್/SOS ಬಾರ್ ಕೆಳಭಾಗದಲ್ಲಿ ಸ್ಥಿರಗೊಳಿಸಲಾಗಿದೆ"
+      ]
+    },
+    "sha256": "404d7b8345915c205ec3012b77812cd6618d535e42a060a278263bd028822f6c"
+  },
+  {
     "versionName": "1.0.5",
     "versionCode": 6,
     "releasedAt": "2026-11-24",

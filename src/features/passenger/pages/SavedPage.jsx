@@ -120,7 +120,14 @@ export default function SavedPage() {
                       </div>
                     </div>
 
-                    <Bookmark className="w-5 h-5 text-amber fill-amber shrink-0" />
+                    <div className="flex items-center gap-2 shrink-0">
+                      {(trip.totalFare != null || trip.fare != null) && (
+                        <span className="font-heading font-extrabold text-sm text-ink-950">
+                          ₹{trip.totalFare ?? trip.fare}
+                        </span>
+                      )}
+                      <Bookmark className="w-5 h-5 text-amber fill-amber shrink-0" />
+                    </div>
                   </div>
 
                   {/* Perforated dashed divider */}

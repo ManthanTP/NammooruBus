@@ -33,9 +33,12 @@ async function main() {
 
   // Find explicit version argument (e.g. "1.0.5" or "--version=1.0.5")
   let targetVersion = null
+  let customNotes = null
   for (const arg of args) {
     if (arg.startsWith('--version=')) {
       targetVersion = arg.split('=')[1].trim()
+    } else if (arg.startsWith('--notes=')) {
+      customNotes = arg.slice(8).split('|').map((s) => s.trim()).filter(Boolean)
     } else if (/^\d+\.\d+\.\d+$/.test(arg)) {
       targetVersion = arg.trim()
     }
@@ -106,6 +109,16 @@ async function main() {
   versionJson.latest.versionName = targetVersion
   versionJson.latest.versionCode = newCode
   versionJson.latest.releasedAt = todayStr
+  if (customNotes && customNotes.length > 0) {
+    versionJson.releaseNotes = {
+      en: customNotes,
+      kn: [
+        'ನಿಜವಾದ ದೂರದ ಆಧಾರದ ಮೇಲೆ ದರ ಲೆಕ್ಕಾಚಾರ',
+        'ಪ್ರಯಾಣ ವಿವರಗಳ ಖಾಲಿ ಜಾಗ ಸರಿಪಡಿಸಲಾಗಿದೆ',
+        'ಉಳಿಸಿ/ಹಂಚಿಕೊಳ್ಳಿ/ಟ್ರ್ಯಾಕ್/SOS ಬಾರ್ ಕೆಳಭಾಗದಲ್ಲಿ ಸ್ಥಿರಗೊಳಿಸಲಾಗಿದೆ',
+      ],
+    }
+  }
   fs.writeFileSync(versionJsonPath, JSON.stringify(versionJson, null, 2) + '\n', 'utf8')
 
   // 5. Update public/releases.json
@@ -120,7 +133,7 @@ async function main() {
     versionCode: newCode,
     releasedAt: todayStr,
     apkUrl: '/downloads/nammooru-bus.apk',
-    apkSize: versionJson.latest.apkSize || '7.8 MB',
+    apkSize: versionJson.latest.apkSize || '7.3 MB',
     downloadPage: '/#app',
     whatsNewPage: '/whats-new',
     title: {
